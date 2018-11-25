@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java, 多线程, 并发,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="并发程序“编写正确的程序很难，而编写正确的并发程序则难上加难。”这句话是《Java并发编程实践》里的第一句话。我很喜欢。 线程是Java语言的重要功能。它将复杂的异步代码变的更容易。 并发的好处 资源利用率, 在IO等待时去做其他的任务来提高资源利用率。 公平。时间片，让不同的用户和程序公平的使用计算资源，而不是一个程序从头跑到尾。 便利性。在同时完成多个任务时，编写多线程能相比于写一个单一线程的">
+<meta name="keywords" content="Java, 多线程, 并发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java并发編程实践读书笔记1">
+<meta property="og:url" content="http://yoursite.com/2017/12/28/Java并发編程基础知识/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="并发程序“编写正确的程序很难，而编写正确的并发程序则难上加难。”这句话是《Java并发编程实践》里的第一句话。我很喜欢。 线程是Java语言的重要功能。它将复杂的异步代码变的更容易。 并发的好处 资源利用率, 在IO等待时去做其他的任务来提高资源利用率。 公平。时间片，让不同的用户和程序公平的使用计算资源，而不是一个程序从头跑到尾。 便利性。在同时完成多个任务时，编写多线程能相比于写一个单一线程的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2017/12/28/Java并发編程基础知识/3-1.gif">
+<meta property="og:updated_time" content="2018-11-17T03:09:43.612Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java并发編程实践读书笔记1">
+<meta name="twitter:description" content="并发程序“编写正确的程序很难，而编写正确的并发程序则难上加难。”这句话是《Java并发编程实践》里的第一句话。我很喜欢。 线程是Java语言的重要功能。它将复杂的异步代码变的更容易。 并发的好处 资源利用率, 在IO等待时去做其他的任务来提高资源利用率。 公平。时间片，让不同的用户和程序公平的使用计算资源，而不是一个程序从头跑到尾。 便利性。在同时完成多个任务时，编写多线程能相比于写一个单一线程的">
+<meta name="twitter:image" content="http://yoursite.com/2017/12/28/Java并发編程基础知识/3-1.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/28/Java并发編程基础知识/">
+
+
+
+
+
+  <title>Java并发編程实践读书笔记1 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/28/Java并发編程基础知识/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java并发編程实践读书笔记1</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T22:07:43+08:00">
+                2017-12-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="并发程序"><a href="#并发程序" class="headerlink" title="并发程序"></a>并发程序</h2><p>“编写正确的程序很难，而编写正确的并发程序则难上加难。”这句话是《Java并发编程实践》里的第一句话。我很喜欢。</p>
+<p>线程是Java语言的重要功能。它将复杂的异步代码变的更容易。</p>
+<h3 id="并发的好处"><a href="#并发的好处" class="headerlink" title="并发的好处"></a>并发的好处</h3><ol>
+<li>资源利用率, 在IO等待时去做其他的任务来提高资源利用率。</li>
+<li>公平。时间片，让不同的用户和程序公平的使用计算资源，而不是一个程序从头跑到尾。</li>
+<li>便利性。在同时完成多个任务时，编写多线程能相比于写一个单一线程的程序要简单。</li>
+</ol>
+<h3 id="线程带来的问题"><a href="#线程带来的问题" class="headerlink" title="线程带来的问题"></a>线程带来的问题</h3><ol>
+<li>安全性。 不正确的结果。</li>
+<li>活跃性。死锁与饥饿，活锁</li>
+<li>性能。响应不及时，频繁的上下文切换开销</li>
+</ol>
+<h3 id="多线程的应用广泛"><a href="#多线程的应用广泛" class="headerlink" title="多线程的应用广泛"></a>多线程的应用广泛</h3><ul>
+<li>JVM本身就是多线程的，主线程main，后台线程垃圾回收，终结操作等。</li>
+<li>Servlet， RMI</li>
+<li>Swing，AWT</li>
+</ul>
+<h2 id="线程的安全性"><a href="#线程的安全性" class="headerlink" title="线程的安全性"></a>线程的安全性</h2><h3 id="线程安全性的定义。核心就是正确性。"><a href="#线程安全性的定义。核心就是正确性。" class="headerlink" title="线程安全性的定义。核心就是正确性。"></a>线程安全性的定义。核心就是正确性。</h3><ul>
+<li>核心是正确性</li>
+<li></li>
+<li>线程安全类</li>
+</ul>
+<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><pre><code>读取 修改 写入的序列。依赖于之前的状态。
+</code></pre><ul>
+<li>Race condition</li>
+<li>延迟初始化的例子<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Don't do this</span></span><br><span class="line"><span class="meta">@NotThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyInitRace</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> ExpensiveObject instance = <span class="keyword">null</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> ExpensiveObject <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">if</span>( instance == <span class="keyword">null</span>)</span><br><span class="line">             instance = <span class="keyword">new</span> ExpensiveObject();</span><br><span class="line">         <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>复合操作/原子类<h3 id="加锁机制"><a href="#加锁机制" class="headerlink" title="加锁机制"></a>加锁机制</h3>在单个原子操作中更新所有相关变量</li>
+<li>内置锁(Intrisic Lock)。Synchronized</li>
+<li>重入。获取锁的操作粒度是线程而不是调用</li>
+<li>用锁来保护状态<h3 id="活跃性与性能"><a href="#活跃性与性能" class="headerlink" title="活跃性与性能"></a>活跃性与性能</h3></li>
+<li>同步块的代码大小分割。分得过细，可能带来开销问题。</li>
+<li>分的过大 锁持有时间长。活跃性不好。</li>
+</ul>
+<h2 id="对象的共享"><a href="#对象的共享" class="headerlink" title="对象的共享"></a>对象的共享</h2><p>编写正确的并发程序，关键在于访问共享的可变状态时，要进行正确的管理。Synchronized关键字除了实现原子性，还有内存可见性。</p>
+<h3 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h3><p>   没有同步的情况下 编译器 处理器 运行时 都可能<strong>重排序</strong>。</p>
+<ul>
+<li>失效数据</li>
+<li>非原子的64位操作</li>
+<li>加锁与可见性<br><img src="./3-1.gif" alt="Image of visibilty and lock"><br>加锁的含义不仅仅局限于护持行为，还包括内存可见性。</li>
+<li>volatile变量<br>volatile变量对可见性的影响比volatile变量本身更为重要。</li>
+</ul>
+<h3 id="发布、逸出（Escape）"><a href="#发布、逸出（Escape）" class="headerlink" title="发布、逸出（Escape）"></a>发布、逸出（Escape）</h3><p>   发布是指对象能在当前作用于之外的代码中访问使用。<br>   <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Don't do this</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UnsafeStates</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String[] states = <span class="keyword">new</span> String[] &#123;</span><br><span class="line">        <span class="string">"AK"</span>, <span class="string">"AL"</span>, ...</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">public</span> String[] getStates() &#123; <span class="keyword">return</span> states; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>   如果按照上边的代码发布states，就会出现问题，因为任何调用者都可以修改这个数组的内容。</p>
+<ul>
+<li>定义。某个不该发布的对象被发布。</li>
+<li>对象逸出后必须假定外部会误用该对象。</li>
+<li>封装能够简化程序的正确性分析。</li>
+<li>this隐式逸出，引用一个未构造完的对象。 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Don't do this</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThisEscape</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThisEscape</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        source.registerLisenter(</span><br><span class="line">            <span class="keyword">new</span> EventListener() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">                    doSomething(e); <span class="comment">// source may use 'this' before constructor finished.</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>用私有构造函数+工厂方法来避免逸出。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeListender</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> EventListener listerner;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">SafeListener</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        listener = <span class="keyword">new</span> EventListener() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">                doSomething(e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> SafeListener <span class="title">newInstance</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        SafeListener safe = <span class="keyword">new</span> SafeListener();</span><br><span class="line">        source.registerListener(safe.listener);</span><br><span class="line">        <span class="keyword">return</span> safe;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="线程封闭"><a href="#线程封闭" class="headerlink" title="线程封闭"></a>线程封闭</h3><ul>
+<li>adhoc线程封闭。维护线程的封闭性完全由程序去实现。非常脆弱。</li>
+<li>栈封闭。有点functional的感觉 线程之间独立。</li>
+<li>ThreadLocal类。为每个使用该变量的线程都存储一个独立的副本。</li>
+</ul>
+<h3 id="不变性（Immutable）"><a href="#不变性（Immutable）" class="headerlink" title="不变性（Immutable）"></a>不变性（Immutable）</h3><p>   不变性的条件</p>
+<ul>
+<li>对象创建后其状态就不能修改</li>
+<li>对象所有的域都是final类型</li>
+<li>对象是正确创建的。this没有在构造期间逸出</li>
+<li>final域</li>
+<li>用volatile类型来发布不可变对象</li>
+</ul>
+<h3 id="安全发布，针对可变对象"><a href="#安全发布，针对可变对象" class="headerlink" title="安全发布，针对可变对象"></a>安全发布，针对可变对象</h3><ul>
+<li>不正确的发布，会使正确的对象被破坏。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Holder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Holder</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123; <span class="keyword">this</span>.n = n; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">assertSanity</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(n != n)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(<span class="string">"This statement is false."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+如果上边的Holder类没有被正确发布，那么另一个线程调用assertSanity就可能会抛出AssertionError。问题不在Holder本身，而在于Holder没有被正确的发布。如果n是final类型，那么没有问题。<br>Object的构造函数会在Holder构造函数运行前先将默认值写入n，也就是0.因此默认值可能被视为失效的。</li>
+<li>任何线程都可以在不需要额外同步的情况下安全的访问不可变对象。</li>
+<li>安全发布的常用模式。<br>（首先对象构造要正确，也就是this没有逸出。）<br>在静态出书画函数中初始化对象的引用<br>将对象引用保存到volatile类型的域<br>将对象引用保存到某个正确构造对象的final域<br>将对象引用保存到一个由锁保护的域中</li>
+<li>事实不可变对象</li>
+<li>可变对象 需要同步或者线程安全的方式来发布以及修改可变对象</li>
+<li>安全的共享对象</li>
+</ul>
+<h2 id="对象组合"><a href="#对象组合" class="headerlink" title="对象组合"></a>对象组合</h2><h3 id="如何设计线程安全的类？如何判断一个类是否是线程安全的？"><a href="#如何设计线程安全的类？如何判断一个类是否是线程安全的？" class="headerlink" title="如何设计线程安全的类？如何判断一个类是否是线程安全的？"></a>如何设计线程安全的类？如何判断一个类是否是线程安全的？</h3><ol>
+<li>分析构成对象的状态的所有变量；分为基本类型和引用类型，被引用对象的域。例如LinkedList的状态就包括该链表中所有节点的对象的状态。</li>
+<li>约束状态的不变条件；例如最大值最小值等独立限制。</li>
+<li>可变状态的并发访问管理策略。也就是同步策略，对其状态的访问操作进行协同。</li>
+</ol>
+<h3 id="设计线程安全类的步骤"><a href="#设计线程安全类的步骤" class="headerlink" title="设计线程安全类的步骤"></a>设计线程安全类的步骤</h3><ol>
+<li>收集同步需求<br>final类型的域使用的越多，就能简化对象可能状态的分析过程。<ul>
+<li>首先确保不可变条件不会破坏。例如一个计数器一定是正数。</li>
+<li>后验条件。例如Counter的当前状态是17，那么下一个有效状态只能是18。</li>
+<li>状态转换的约束，需要复合操作。只适用于下一个状态需要依赖当前状态的情况。</li>
+</ul>
+</li>
+<li>依赖状态的操作<ul>
+<li>某个操作中包含有基于状态的先验条件。例如删除元素前，队列必须是非空。</li>
+<li>简单的方法是使用现有的类库，例如阻塞队列，信号量等。</li>
+</ul>
+</li>
+<li>状态的所有权<ul>
+<li>所有权和封装性相关联。对象封装他拥有的状态，即对他封装的状态有所有权。封装的好，则分析起来简单。</li>
+<li>如果发布了某个可变状态的引用，则不再拥有独占的控制权。</li>
+<li>容器类通常表现出所有权分离的形式。</li>
+</ul>
+</li>
+</ol>
+<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>针对非线程安全的对象，要使用别的招数来让它安全。</p>
+<ol>
+<li>当一个对象被封装在一个类里，那么能够访问这个对象的所有代码都是已知的。更易于分析。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonSet</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GuardedBy</span>(<span class="string">"this"</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;Person&gt; mySet = <span class="keyword">new</span> HashSet&lt;Person&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(Person p)</span></span>&#123;</span><br><span class="line">        mySet.add(p);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">boolean</span> <span class="title">containsPerson</span><span class="params">(Person p)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mySet.contains(p);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>实例封闭是构建线程安全类的一个最简单方式。</li>
+<li>Java类库中线程封闭实例。Collections.synchronizedList。</li>
+</ol>
+<h3 id="线程安全性的委托"><a href="#线程安全性的委托" class="headerlink" title="线程安全性的委托"></a>线程安全性的委托</h3><p>大多数对象都是组合对象。如果类中的各个组件都已经是线程安全的，是否需要再额外的加一个线程安全层要视情况而定。<br>不可变类一定时线程安全的。<br>CopyOnWriteArrayList是一个线程安全的链表。</p>
+<h3 id="在现有的线程安全类中添加功能"><a href="#在现有的线程安全类中添加功能" class="headerlink" title="在现有的线程安全类中添加功能"></a>在现有的线程安全类中添加功能</h3><p>通过继承扩展方法比直接将代码添加到类中更脆弱，因为现在的同步策略实现被分不到多个单独维护的源代码文件中。</p>
+<h4 id="客户端加锁"><a href="#客户端加锁" class="headerlink" title="客户端加锁"></a>客户端加锁</h4><h4 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h4><h3 id="将同步策略文档化"><a href="#将同步策略文档化" class="headerlink" title="将同步策略文档化"></a>将同步策略文档化</h3><p>客户以及维护人员可以了解线程安全方面的策略。</p>
+<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><h4 id="同步容器类的问题"><a href="#同步容器类的问题" class="headerlink" title="同步容器类的问题"></a>同步容器类的问题</h4><p>同步容器类包括Vector和Hashtable… 这些类实现线程安全的方法是将它的状态封装起来，并且对public方法同步，所以每次都只有一个线程能访问。</p>
+<p>问题在于复合操作，包括迭代，跳转，条件计算（如putIfAbsent）。我们在自定义符合操作时，要知道要在哪个对象上加锁。</p>
+<h4 id="迭代器与ConcurrentModificationException"><a href="#迭代器与ConcurrentModificationException" class="headerlink" title="迭代器与ConcurrentModificationException"></a>迭代器与ConcurrentModificationException</h4><p>要想避免出现ConcurrentModificationException，就必须在迭代过程持有容器的锁</p>
+<h4 id="隐藏迭代器"><a href="#隐藏迭代器" class="headerlink" title="隐藏迭代器"></a>隐藏迭代器</h4><p>例子：隐式调用集合类Set的toString方法会出发调用迭代器</p>
+<h3 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h3><p>通过并发容器来代替同步容器，可以极大地提高伸缩性并降低风险。</p>
+<h4 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h4><p>粒度更细的加锁机制，称为分段锁（Lock Striping）。可以在并发环境下实现更高的吞吐量。</p>
+<p>ConcurrentHashMap返回的迭代器如有弱一致性，意思就是容忍并发的修改。size返回的结果是一个估计值。</p>
+<p>size与isEmpty的弱一致性换得了其他更重要操作的性能。</p>
+<h5 id="额外的原子Map操作"><a href="#额外的原子Map操作" class="headerlink" title="额外的原子Map操作"></a>额外的原子Map操作</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ConcurrentHashMap</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">Map</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">V <span class="title">putIfAbsent</span><span class="params">(K key, V value)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(K key, V value)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">replace</span><span class="params">(K key, V oldValue, V newValue)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">V <span class="title">replace</span><span class="params">(K key, V newValue)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h4><p>每次修改时都会创建并重新发布一个新的容器的副本。</p>
+<p>仅当迭代操作远远多于修改操作时，才应该使用CopyOnWrite容器。适用于事件通知系统，因为多数情况下，注册和撤销注册listener的操作要远远少于接受事件通知的操作。</p>
+<h3 id="阻塞队列和生产者-消费者模式"><a href="#阻塞队列和生产者-消费者模式" class="headerlink" title="阻塞队列和生产者-消费者模式"></a>阻塞队列和生产者-消费者模式</h3><p>生产者消费者·模式能简化开发过程，因为它消除了生产者和消费者类之间的代码依赖性。</p>
+<p>BlockingQueue简化了生产者消费者设计的实现过程，它支持任意数量的生产者消费者。一种常见的例子就是线程池和工作队列的组合，Executor任务执行框架中就体现了这种模式。阻塞特点，让编码更为简单。</p>
+<p>在构建高可靠的应用程序时，有界队列是一种强大的资源管理工具，他们能抑制并防止产生过多的工作项，使应用程序在负荷过载的情况下更加健壮。</p>
+<p>BlockingQueue的实现包括LinkedBlockingQueue, ArrayBlockingQueue, PriorityBlockingQueue.</p>
+<p>SynchronousQueue是一个特殊的实现，实际上它不是一个真正的队列，因为它不会为队列中的元素维护空间。它维护一组线程，这些线程在等待着把元素加入或移除队列。由于是线程直接交付数据，put和take会一直阻塞。</p>
+<h3 id="阻塞方法与中断方法"><a href="#阻塞方法与中断方法" class="headerlink" title="阻塞方法与中断方法"></a>阻塞方法与中断方法</h3><p>阻塞方法的执行线程在被阻塞后，必须等待某个不受他控制的事件发生后才能继续执行。<br>BlockingQueue的put和take方法会抛出Checked Exception，InterruptedException，这与类库中其他的一些方法做法相同，例如Thread.sleep。当某个方法抛出InterruptedException时，表示该方法是一个阻塞方法，如果这个方法被中断，那么他将努力提前结束阻塞状态。</p>
+<p>当一个方法调用了阻塞方法时，他本身也变成了阻塞方法，并且必须要处理中断响应。一般有两种处理方式，一是传递，二是恢复中断。</p>
+<h3 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h3><h4 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h4><p>CountDownLatch</p>
+<h4 id="FutureTask"><a href="#FutureTask" class="headerlink" title="FutureTask"></a>FutureTask</h4><h4 id="信号量-Semaphore"><a href="#信号量-Semaphore" class="headerlink" title="信号量 Semaphore"></a>信号量 Semaphore</h4><h4 id="栅栏-CyclicBarrier"><a href="#栅栏-CyclicBarrier" class="headerlink" title="栅栏 CyclicBarrier"></a>栅栏 CyclicBarrier</h4><h3 id="构建高效且伸缩的结果缓存"><a href="#构建高效且伸缩的结果缓存" class="headerlink" title="构建高效且伸缩的结果缓存"></a>构建高效且伸缩的结果缓存</h3>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java-多线程-并发/" rel="tag"># Java, 多线程, 并发</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/03/Javascript异步编程2/" rel="next" title="Javascript异步编程2">
+                <i class="fa fa-chevron-left"></i> Javascript异步编程2
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/07/Java并发编程-结构化并发应用程序/" rel="prev" title="Java并发编程-结构化并发应用程序">
+                Java并发编程-结构化并发应用程序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#并发程序"><span class="nav-number">1.</span> <span class="nav-text">并发程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#并发的好处"><span class="nav-number">1.1.</span> <span class="nav-text">并发的好处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程带来的问题"><span class="nav-number">1.2.</span> <span class="nav-text">线程带来的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多线程的应用广泛"><span class="nav-number">1.3.</span> <span class="nav-text">多线程的应用广泛</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程的安全性"><span class="nav-number">2.</span> <span class="nav-text">线程的安全性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#线程安全性的定义。核心就是正确性。"><span class="nav-number">2.1.</span> <span class="nav-text">线程安全性的定义。核心就是正确性。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#原子性"><span class="nav-number">2.2.</span> <span class="nav-text">原子性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加锁机制"><span class="nav-number">2.3.</span> <span class="nav-text">加锁机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#活跃性与性能"><span class="nav-number">2.4.</span> <span class="nav-text">活跃性与性能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象的共享"><span class="nav-number">3.</span> <span class="nav-text">对象的共享</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#可见性"><span class="nav-number">3.1.</span> <span class="nav-text">可见性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布、逸出（Escape）"><span class="nav-number">3.2.</span> <span class="nav-text">发布、逸出（Escape）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程封闭"><span class="nav-number">3.3.</span> <span class="nav-text">线程封闭</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不变性（Immutable）"><span class="nav-number">3.4.</span> <span class="nav-text">不变性（Immutable）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全发布，针对可变对象"><span class="nav-number">3.5.</span> <span class="nav-text">安全发布，针对可变对象</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象组合"><span class="nav-number">4.</span> <span class="nav-text">对象组合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何设计线程安全的类？如何判断一个类是否是线程安全的？"><span class="nav-number">4.1.</span> <span class="nav-text">如何设计线程安全的类？如何判断一个类是否是线程安全的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计线程安全类的步骤"><span class="nav-number">4.2.</span> <span class="nav-text">设计线程安全类的步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例封闭"><span class="nav-number">4.3.</span> <span class="nav-text">实例封闭</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程安全性的委托"><span class="nav-number">4.4.</span> <span class="nav-text">线程安全性的委托</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在现有的线程安全类中添加功能"><span class="nav-number">4.5.</span> <span class="nav-text">在现有的线程安全类中添加功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#客户端加锁"><span class="nav-number">4.5.1.</span> <span class="nav-text">客户端加锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合"><span class="nav-number">4.5.2.</span> <span class="nav-text">组合</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将同步策略文档化"><span class="nav-number">4.6.</span> <span class="nav-text">将同步策略文档化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础构建模块"><span class="nav-number">5.</span> <span class="nav-text">基础构建模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#同步容器类"><span class="nav-number">5.1.</span> <span class="nav-text">同步容器类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#同步容器类的问题"><span class="nav-number">5.1.1.</span> <span class="nav-text">同步容器类的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#迭代器与ConcurrentModificationException"><span class="nav-number">5.1.2.</span> <span class="nav-text">迭代器与ConcurrentModificationException</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#隐藏迭代器"><span class="nav-number">5.1.3.</span> <span class="nav-text">隐藏迭代器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#并发容器"><span class="nav-number">5.2.</span> <span class="nav-text">并发容器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ConcurrentHashMap"><span class="nav-number">5.2.1.</span> <span class="nav-text">ConcurrentHashMap</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#额外的原子Map操作"><span class="nav-number">5.2.1.1.</span> <span class="nav-text">额外的原子Map操作</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CopyOnWriteArrayList"><span class="nav-number">5.2.2.</span> <span class="nav-text">CopyOnWriteArrayList</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阻塞队列和生产者-消费者模式"><span class="nav-number">5.3.</span> <span class="nav-text">阻塞队列和生产者-消费者模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阻塞方法与中断方法"><span class="nav-number">5.4.</span> <span class="nav-text">阻塞方法与中断方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#同步工具类"><span class="nav-number">5.5.</span> <span class="nav-text">同步工具类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#闭锁"><span class="nav-number">5.5.1.</span> <span class="nav-text">闭锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FutureTask"><span class="nav-number">5.5.2.</span> <span class="nav-text">FutureTask</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#信号量-Semaphore"><span class="nav-number">5.5.3.</span> <span class="nav-text">信号量 Semaphore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#栅栏-CyclicBarrier"><span class="nav-number">5.5.4.</span> <span class="nav-text">栅栏 CyclicBarrier</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建高效且伸缩的结果缓存"><span class="nav-number">5.6.</span> <span class="nav-text">构建高效且伸缩的结果缓存</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

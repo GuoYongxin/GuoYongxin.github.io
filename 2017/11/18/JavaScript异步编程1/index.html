@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="JavaScript,Async Programming,Callback,Thunk,Promise,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="写在前面最近看了Lynda上的一个课程叫做Rethinking Asynchronous Javascript。 在此写一写整理一下自己的心得。 异步与并发其实谈到异步编程我们基本上会讲到并发（Parallel）和异步(Async)。从很高的角度来看，他们说的是同一个事情。然而他们在实际工作中一般各有所指。 从理念上看，并发指的是优化，资源同时的得到执行，加快了时间。比如玩过山车，如果每次只让一个">
+<meta name="keywords" content="JavaScript,Async Programming,Callback,Thunk,Promise">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript异步编程1">
+<meta property="og:url" content="http://yoursite.com/2017/11/18/JavaScript异步编程1/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="写在前面最近看了Lynda上的一个课程叫做Rethinking Asynchronous Javascript。 在此写一写整理一下自己的心得。 异步与并发其实谈到异步编程我们基本上会讲到并发（Parallel）和异步(Async)。从很高的角度来看，他们说的是同一个事情。然而他们在实际工作中一般各有所指。 从理念上看，并发指的是优化，资源同时的得到执行，加快了时间。比如玩过山车，如果每次只让一个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-17T03:09:43.611Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript异步编程1">
+<meta name="twitter:description" content="写在前面最近看了Lynda上的一个课程叫做Rethinking Asynchronous Javascript。 在此写一写整理一下自己的心得。 异步与并发其实谈到异步编程我们基本上会讲到并发（Parallel）和异步(Async)。从很高的角度来看，他们说的是同一个事情。然而他们在实际工作中一般各有所指。 从理念上看，并发指的是优化，资源同时的得到执行，加快了时间。比如玩过山车，如果每次只让一个">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/11/18/JavaScript异步编程1/">
+
+
+
+
+
+  <title>JavaScript异步编程1 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/18/JavaScript异步编程1/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JavaScript异步编程1</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-18T12:13:35+08:00">
+                2017-11-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>最近看了Lynda上的一个课程叫做Rethinking Asynchronous Javascript。 在此写一写整理一下自己的心得。</p>
+<h2 id="异步与并发"><a href="#异步与并发" class="headerlink" title="异步与并发"></a>异步与并发</h2><p>其实谈到异步编程我们基本上会讲到并发（Parallel）和异步(Async)。从很高的角度来看，他们说的是同一个事情。然而他们在实际工作中一般各有所指。</p>
+<p>从理念上看，并发指的是优化，资源同时的得到执行，加快了时间。比如玩过山车，如果每次只让一个人上车，那么其他人都要等待。如果一次上去30个人，那么这30个人就是同时享受到了服务。从计算机的角度看，那就是线程和多核，内核最终支持多少个线程并发，就是类似于过山车一次可以装多少个人上去。所以说一般谈到并发，讲的是资源的最大利用率和效率的问题，最终让请求或者任务得到快速的响应。</p>
+<p>谈到异步，则是从编程的角度来看，其实也就是说的非阻塞。如果说到Javascript中我们最最基本的应该就是Callback了。通常我们会在一段代码中有一些需要XHR或者SetTimeout类似的工作，然后我们可以注册一个Callback，然后在等这个注册的函数在任务完成后执行。然而注册这个Callback并不会影响他之后代码的执行。</p>
+<p>传统的Web服务器，例如Apache，是多线程的。每一个用户的请求都会编程一个线程，在服务器端执行，只有在服务器完成了用户请求后才可以返回。这样，如果访问的人越来越多，那么线程也会越来越多。所以并发和多线程在这种设计情景下，就是要最大限度的利用服务器的资源。</p>
+<p>有关Javascript，我们都知道JS是单线程的执行的,因为它一开始设计得时候就是为了操作浏览器中的DOM元素，单线程也是最简单的设计。我们也都知道Android和iOS程序所有修改UI的操作都需要在主线程也就是UI线程进行。所以JS一定是顺序执行的。而所有的阻塞操作，都是通过回调的方式进行的。还有一个话题就是JS的Event Loop。这个放一放。<br>Nodejs的服务器是单线程的，因为用了Chrome V8的JS Engine。也是因为js的单线程特性，所以js的代码必须是异步的，也就是说是非阻塞的。如果包含例如文件读写，网络请求等，那么这些操作<br>程都会被这个线程接收，然后转到<em>后台</em>的MicroTask任务执行。线程只负责转发这个任务而不是真正执行。只有当任务完成后，这个线程又会得到消息，再把这个结果返回给用户。这样，这个线程所做的工作就比较简单。</p>
+<h2 id="Callback"><a href="#Callback" class="headerlink" title="Callback"></a>Callback</h2><p>Callback，不用多说，js最最原始的异步调用方式。每注册一次Callback会产生两片代码区域。他们的执行是异步的。看下边的code中的setTimeout注册了一个回调，一段代码在callback函数外边，包括了doSomething，setTimeout的调用和doOtherThing，另一段代码是setTimeout里的回调函数，console.log。第一段代码不知道第二段代码是否已经执行，何时执行。第二段代码也不会知道第一段代码执行到了哪里。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">doSomething();</span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"callback!"</span>);</span><br><span class="line">&#125;, <span class="number">1000</span>);</span><br><span class="line">doOtherThings();</span><br></pre></td></tr></table></figure></p>
+<h3 id="Callback-Hell"><a href="#Callback-Hell" class="headerlink" title="Callback Hell"></a>Callback Hell</h3><p>下边的代码就是所谓的Callback Hell。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"One"</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"Two"</span>);</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"Three"</span>);</span><br><span class="line">        &#125;, <span class="number">1000</span>);</span><br><span class="line">    &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;, <span class="number">1000</span>);</span><br></pre></td></tr></table></figure><br>Callback Hell，大家都知道的一点叫Indentation Nesting。就是层数越多，缩进越多，代码越难看，越难以维护。<br>其实这个只是表象，我们甚至可以改写上边的代码，如下<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">one</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"one"</span>)；</span><br><span class="line">    setTimeout(cb, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">two</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"two"</span>)；</span><br><span class="line">    setTimeout(cb, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">three</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"three"</span>)；</span><br><span class="line">&#125;</span><br><span class="line">one(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    two(three);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这样我们没有之前代码那样的缩进，但是这个代码还是看着很别扭。</p>
+<h3 id="一个模拟的实际问题"><a href="#一个模拟的实际问题" class="headerlink" title="一个模拟的实际问题"></a>一个模拟的实际问题</h3><p>再看下边一个稍实际一点例子（之后会继续用这个例子）。<br>需求有三点：</p>
+<ol>
+<li><em>并行</em>的请求3个文件 </li>
+<li>尽快的输出文件内容，但是不要等所有请求都完成再去输出</li>
+<li>输出是有顺序的，file1内容先输出，之后file2,最后输出file3</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"><span class="comment">// The old-n-busted callback way</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	fakeAjax(file,<span class="function"><span class="keyword">function</span>(<span class="params">text</span>)</span>&#123;</span><br><span class="line">		<span class="comment">// what do we do here?</span></span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// request all files at once in "parallel"</span></span><br><span class="line">getFile(<span class="string">"file1"</span>);</span><br><span class="line">getFile(<span class="string">"file2"</span>);</span><br><span class="line">getFile(<span class="string">"file3"</span>);</span><br></pre></td></tr></table></figure>
+<p>我们该怎么办？因为要满足并发，在代码最后三行我们同时调用了getFile。那么如何让结果及时输出并有序呢？那么一定是在fakeAjax里的回调函数中处理。而我们并不知道每一个请求到底要花多少时间才能返回，所以我们需要在回调函数中通过一些变量或者状态，知道目前这三个请求的状态，才能顺序输出。例如,如果我们file3最先返回了结果，但是file1或者file2还没有返回，那么我们并不能立即输出file3的内容，而要等到file1和file2的内容都已经输出了再输出。所以我们的回调函数中，需要知道几乎所有的事情。那么我们看看我们该怎么做：</p>
+<ol>
+<li>我们需要定义输出顺序，也就是file1 &gt; file2 &gt; file3。</li>
+<li>我们需要知道每一个文件请求结果，以及这个内容是否已经输出过</li>
+</ol>
+<p>实现参考以下代码<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"><span class="comment">// The old-n-busted callback way</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	fakeAjax(file,<span class="function"><span class="keyword">function</span>(<span class="params">text</span>)</span>&#123;</span><br><span class="line">		fileReceived(file,text);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fileReceived</span>(<span class="params">file,text</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// haven't received this text yet?</span></span><br><span class="line">	<span class="keyword">if</span> (!responses[file]) &#123;</span><br><span class="line">		responses[file] = text;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> files = [<span class="string">"file1"</span>,<span class="string">"file2"</span>,<span class="string">"file3"</span>];</span><br><span class="line"></span><br><span class="line">	<span class="comment">// loop through responses in order for rendering</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">var</span> i=<span class="number">0</span>; i&lt;files.length; i++) &#123;</span><br><span class="line">		<span class="comment">// response received?</span></span><br><span class="line">		<span class="keyword">if</span> (files[i] <span class="keyword">in</span> responses) &#123;</span><br><span class="line">			<span class="comment">// response needs to be rendered?</span></span><br><span class="line">			<span class="keyword">if</span> (responses[files[i]] !== <span class="literal">true</span>) &#123;</span><br><span class="line">				output(responses[files[i]]);</span><br><span class="line">				responses[files[i]] = <span class="literal">true</span>;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// can't render yet</span></span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// not complete!</span></span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	output(<span class="string">"Complete!"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// hold responses in whatever order they come back</span></span><br><span class="line"><span class="keyword">var</span> responses = &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// request all files at once in "parallel"</span></span><br><span class="line">getFile(<span class="string">"file1"</span>);</span><br><span class="line">getFile(<span class="string">"file2"</span>);</span><br><span class="line">getFile(<span class="string">"file3"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>可以看到我们的回调函数中的逻辑还是比较复杂的。 我们遍历了输出文件顺序的files数组，然后依次查看responses有没有返回信息，以及目前正在遍历到的file有没有被输出过。如果结果还没有返回，那么就退出，把这个输出的调用留到下一个回调函数触发的时候。如果返回了，那么还要看输出过了没，如果输出过了，那就过掉。<br>我们的回调函数中有了不少代码，跟这个回调本身该做的事情没有关系。这些代码，都是跟时间或者说状态有关的。输出的顺序，输出过的状态。而我们人脑的思维方式是习惯于顺序思考的。比如上面这个例子如果不考虑阻塞什么的，写伪代码的话我们大概会这么写<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fetch( file1 );</span><br><span class="line">fetch( file2 );</span><br><span class="line">fetch( file3 );</span><br><span class="line">var file1Result = getFileContent (&quot;file1&quot;);</span><br><span class="line">var file2Result = getFileContent (&quot;file2&quot;);</span><br><span class="line">var file3Result = getFileContent (&quot;file3&quot;);</span><br><span class="line">output(file1Result);</span><br><span class="line">output(file2Result);</span><br><span class="line">output(file3Result);</span><br></pre></td></tr></table></figure></p>
+<p>上面的伪代码，是我们一般喜欢的思考方式，代码读起来也很容易。<br>反观Callback Hell，我们把本该做纯粹输出的Callback函数加了很多他本不应该具备的功能，比如，把程序运行的控制逻辑放入了Callback函数中。造成了Non-Local， Non-Sequential的代码。课程中，把这个叫做Inversion Of Control。这里的IOC只是指这种我们刚才描述现象，而跟其他我们一般说起的IOC不想关，比如Java的一些设计模式，以及流行的框架Spring。</p>
+<h2 id="Thunk"><a href="#Thunk" class="headerlink" title="Thunk"></a>Thunk</h2><p>我们再看一个叫做Thunk的模式。Thunk出现的非常早，比JavaScript语言出现要早很多。<br><a href="http://www.ruanyifeng.com/blog/2015/05/thunk.html" target="_blank" rel="noopener">阮一峰的博客里讲到了thunk</a><br>从同步的角度来看Thunk是一种不需要你传入任何参数的函数，不用传入任何状态，任何时候你调用他，你可以得到相同的结果。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">add</span>(<span class="params">x, y</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> x + y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> thunk = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> add(<span class="number">11</span>, <span class="number">31</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">thunk();<span class="comment">//42</span></span><br></pre></td></tr></table></figure><br>Thunk从上面的例子看出，我们创建了一个Thunk，在里边Hard Code了调用add函数的参数。只要调用这个Thunk，他都会返回相同的值42。在这个Thunk中，我们用它包裹了一个状态的集合，之后我们不管把这个thunk传到哪里，只要调用他就能得到一个确定的值。我并不需要传递任何状态的值，我只需要这个Wrapper，并且调用他就可以得到我需要的值。这其实也是Promise设计的重要基础之一。而Promise要更为的高级，复杂。<br>我们可以把thunk从同步的模式，转换到异步的模式。那么什么是一个异步的thunk？其实这也没有标准答案。按照之前我们同步版thunk的特点，我们的thunk是一个状态和值的wrapper。那么，比较直接的想法，一个异步的thunk，是我们不传入任何跟值或者状态有关的东西，而只需要把回调的函数传入。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addAsync</span>(<span class="params">x, y, cb</span>)</span>&#123;</span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(x + y);</span><br><span class="line">	&#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> thunk = <span class="function"><span class="keyword">function</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">	addSync(<span class="number">11</span>, <span class="number">31</span>, cb);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">thunk(<span class="function"><span class="keyword">function</span>(<span class="params">sum</span>)</span>&#123;</span><br><span class="line">	sum;<span class="comment">//42</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>每一次调用thunk，把Callback传入，我们知道我们会得到相应的结果。外部的代码并不知道，也不需要关心thunk里的参数或者计算倒地是什么细节。从thunk内部来说，他里边可能有复杂的计算，或者ajax call；他甚至可以记录计算后的结果，当你第二次调用他的时候立即返回这个结果。但是外部的代码并不需要关心这些，只要你调用thunk，就可以期待一个值在Callback中返回。<br>创建一个异步thunk，就是创建了一个返回值的wrapper，而且这个值是多少，与调用的时间无关。而时间，是程序代码中最复杂的状态因子。管理好程序执行的时机，是最难的工作之一。<br>Thunk就是一个value的wrapper，我不管把他传到哪里，我想知道这个value是，传入Callback，都会得到结果。<br>这其实跟promise的概念很相似。理解了这一点也就很容易理解promise。promise更为的复杂。</p>
+<h3 id="Lazy-Thunk-Active-Thunk"><a href="#Lazy-Thunk-Active-Thunk" class="headerlink" title="Lazy Thunk, Active Thunk"></a>Lazy Thunk, Active Thunk</h3><p>我们之前的例子<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addAsync</span>(<span class="params">x, y, cb</span>)</span>&#123;</span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(x + y);</span><br><span class="line">	&#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> thunk = <span class="function"><span class="keyword">function</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">	addSync(<span class="number">11</span>, <span class="number">31</span>, cb);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">thunk(<span class="function"><span class="keyword">function</span>(<span class="params">sum</span>)</span>&#123;</span><br><span class="line">	sum;<span class="comment">//42</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>只有在调用Thunk时，才回去请求addAsync函数。再联系到我们之前Callback最后那个题目的情景，如果我们要同时、并发去请求文件，这样的thunk是做不到的。我们起个名字，把这种叫Lazy Thunk。<br>那怎么实现我们的并发需求呢？Lazy Thunk似乎并不能满足我们的并发需求。我再把之前的例子贴过来<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// what do we do here?</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// request all files at once in "parallel"</span></span><br><span class="line"><span class="comment">// ???</span></span><br></pre></td></tr></table></figure><br>我们的getFile应该返回一个接受一个Callback参数的thunk，所以我们最后的代码应该有这样一段，前三个调用创建三个thunk，并且创建时就去请求，最后顺序输出结果。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> th1 = getFile(<span class="string">'file1'</span>);</span><br><span class="line"><span class="keyword">var</span> th2 = getFile(<span class="string">'file2'</span>);</span><br><span class="line"><span class="keyword">var</span> th3 = getFile(<span class="string">'file3'</span>);</span><br><span class="line">th1(<span class="function"><span class="keyword">function</span>(<span class="params">file1</span>)</span>&#123;</span><br><span class="line">	output(file1);</span><br><span class="line">	th2(<span class="function"><span class="keyword">function</span>(<span class="params">file2</span>)</span>&#123;</span><br><span class="line">		output(file2);</span><br><span class="line">		th3(<span class="function"><span class="keyword">function</span>(<span class="params">file3</span>)</span>&#123;</span><br><span class="line">			output(file3);</span><br><span class="line">			output(<span class="string">'Compeleted!'</span>);</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure><br>下面是重点getFile怎么实现。而要满足并发这个需求，我们必须要在getFile中，第一时间去调用fakeAjax。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	fakeAjax(file, <span class="function"><span class="keyword">function</span>(<span class="params">response</span>)</span>&#123;</span><br><span class="line">		<span class="comment">//Do something</span></span><br><span class="line">	&#125;);</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">		<span class="comment">//Do other thing</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>下面有一个时机问题，我们的fakeAjax的回调函数执行时间，与thunk里传入的回调函数，倒地哪个先执行？</p>
+<ol>
+<li>fakeAjax中的cb先执行。<br>那么我们需要把response存在一个local变量中，等thunk里的cb执行时，直接调用cb，传入这个变量存好的值就可以了</li>
+<li>thunk传入的cb先执行。<br>这个看上去不是很直接，我们的返回值还没有，怎么调用这个cb？其实我们要做的事情跟前边的一样，只需要把这个cb存到local的变量中，等fakeAjax返回，再去执行这个cb，把返回的response传入。<br>最后的参考代码<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> content, fn;</span><br><span class="line">	fakeAjax(file, <span class="function"><span class="keyword">function</span>(<span class="params">response</span>)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(fn)&#123;</span><br><span class="line">			fn(response);</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			content = response;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">cb</span>)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(content) cb(content)</span><br><span class="line">		<span class="keyword">else</span> fn = cb;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+可能看上去还不大习惯，但是这个代码风格还是很实用的。这个就是Active Thunk。<br>Thunk并不能解决我们之前在Callback中遇到的大部分缺陷，比如IOC，我们还是会有callback，callback hell的问题。但是这个模式比callback那个代码清晰许多，代码可读性，可维护性都增加了不少。<br>这个用纯js代码实现的异步工具，十分的实用，利用这样的代码可以构建很多有用的工具方法。理解了这个，也就更容易理解promise。</li>
+</ol>
+<h2 id="Promise"><a href="#Promise" class="headerlink" title="Promise"></a>Promise</h2><p>Promise，大家肯定都知道了。Promise也成了ES6的标准，主流浏览器的都支持。可以参考<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener">MDN，Promise</a>。<br>Promise中比较重要的一点是一个Promise只能Resolve一次。举个例子，你做了一个电商网站，专门卖电视。其中有下单，给用户信用卡扣款的流程。如果使用callback，可能的代码是这样的。其中trackCheckout返回一个listener，你注册一个时间监听comletion，之后完成扣款。但是这个方法，可能来自于一个别人写的Module，甚至有可能是一个第三方的lib。如果这个模块中有bug，同一个订单的completion在某些情况下被触发了两次，那么这样的代码下，会扣两次款。这样的callback形式的代码对这种bug特别敏感，要处理这样的情况也需要做很多的额外代码。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">functiion finish()&#123;</span><br><span class="line">	chargeCreditCard(purchaseInfo);</span><br><span class="line">	showThankYouPage();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">error</span>(<span class="params">err</span>)</span>&#123;</span><br><span class="line">	logStatsError(err);</span><br><span class="line">	finish();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> listener = trackCheckout(purchaseInfo);</span><br><span class="line">listener.on(<span class="string">'completion'</span>, finish);</span><br><span class="line">listener.on(<span class="string">'error'</span>, error);</span><br></pre></td></tr></table></figure><br>如果使用Promise，让trackCheckout返回一个promise，利用promise只能resolve一次的特点，就不会有个问题。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">trackCheckout</span>(<span class="params">purchaseInfo</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve, reject</span>)</span>&#123;</span><br><span class="line">		<span class="comment">//call resolve when task complete</span></span><br><span class="line">		<span class="comment">//call rejct when task encounter error</span></span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> prommise = trackCheckout(purchageInfo);</span><br><span class="line"></span><br><span class="line">promise.then(</span><br><span class="line">	finish,</span><br><span class="line">	error</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>不管你在trackCheckout中调用resolve多少次，then只会执行一次。<br>Promise保证</p>
+<ol>
+<li>only resolve once</li>
+<li>either success or error</li>
+<li>messages are kept/ passed</li>
+<li>exceptions treat as error</li>
+<li>immutable once resolved</li>
+</ol>
+<p>Promise可以理解成一个callback manager，让我们的callback调用更有保证，更清晰明白，</p>
+<h3 id="Flow-Control"><a href="#Flow-Control" class="headerlink" title="Flow Control"></a>Flow Control</h3><p>下面看看我们一般从外边资料学习到的promise是哪些内容<br>一般我们写的js代码做一些复杂的事情，比如同时发request，等得到结果了以后做什么事情。就跟我们之前做的callback，thunk的练习一样。这就是flow control。我们看看promise做我们的flow control</p>
+<h4 id="Chaining-Promise"><a href="#Chaining-Promise" class="headerlink" title="Chaining Promise"></a>Chaining Promise</h4><p>一个重要的特点，也是设计Promise API的最重要的点。就是Chaining。Promise A代表步骤A, Promise B代表步骤B，…<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">doFirstThing()</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> doSecondThing();</span><br><span class="line">&#125;)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> doThirdThing():</span><br><span class="line">&#125;)</span><br><span class="line">.then(</span><br><span class="line">	complete,</span><br><span class="line">	error</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>Promise不仅是flow control，也是data flow的体现。</p>
+<h3 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h3><p>跟之前的例子一样，我们看看如何用promise完成输出。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// what do we do here?</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们需要在getFile中立马发出ajax请求，并且返回一个promise。<br>我们需要按顺序输出，这里应该要用到chaining.如果用过promise这个代码应该很容易写出。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>)</span>&#123;</span><br><span class="line">		fakeAjax(file,resolve);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Request all files at once in</span></span><br><span class="line"><span class="comment">// "parallel" via `getFile(..)`.</span></span><br><span class="line"><span class="keyword">var</span> p1 = getFile(<span class="string">"file1"</span>);</span><br><span class="line"><span class="keyword">var</span> p2 = getFile(<span class="string">"file2"</span>);</span><br><span class="line"><span class="keyword">var</span> p3 = getFile(<span class="string">"file3"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Render as each one finishes,</span></span><br><span class="line"><span class="comment">// but only once previous rendering</span></span><br><span class="line"><span class="comment">// is done.</span></span><br><span class="line">p1</span><br><span class="line">.then(output)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> p2;</span><br><span class="line">&#125;)</span><br><span class="line">.then(output)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> p3;</span><br><span class="line">&#125;)</span><br><span class="line">.then(output)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	output(<span class="string">"Complete!"</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>有一些问题</p>
+<ol>
+<li>我们需要自己new 一个Promise吗？<br>一般的Library都会把异步操作封装好，直接返回一个promise。但是我们有时候还是需要和上面的代码一样，做一个异步操作的封装，封装的有可能是一个callback或者其他的调用。</li>
+<li>能不能把output写到function里面？<br>可以，但是function应该有一个单一的功能，能分开的功能尽量分开</li>
+<li>output的chain后面的promise.then的传入参数是什么？<br>传入一个新的promise，传入的参数是output的返回值。</li>
+<li>resolve是哪里来的？<br>来自Promise库函数。</li>
+<li>catch逻辑是怎么样的？</li>
+</ol>
+<h3 id="Promise-Hell"><a href="#Promise-Hell" class="headerlink" title="Promise Hell"></a>Promise Hell</h3><p>Promise一定要用对，不然很容易写成promise hell。如果你发现自己陷入了嵌套迭代很深的缩进时，说明你的promise代码很可能写错了。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">p1</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params">text</span>)</span>&#123;</span><br><span class="line">	output(text);</span><br><span class="line">	p2.then(<span class="function"><span class="keyword">function</span>(<span class="params">text</span>)</span>&#123;</span><br><span class="line">		output(text);</span><br><span class="line">		p3.then(<span class="function"><span class="keyword">function</span>(<span class="params">text</span>)</span>&#123;</span><br><span class="line">			output(text);</span><br><span class="line">			output(<span class="string">'completed!'</span>);</span><br><span class="line">		&#125; )</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)；</span><br></pre></td></tr></table></figure></p>
+<p>上边的练习里边我们有三个文件要去请求，那么如果我们的请求的文件数目增加我们是不是要写很多的.then呢？有没有更好的办法？<br>可以用<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" target="_blank" rel="noopener">map</a>和<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce" target="_blank" rel="noopener">reduce</a>方法来减少我们的重复代码。<br>我们可以把任意个file的list转换成promise的list，再用reduce函数一一处理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>)</span>&#123;</span><br><span class="line">		fakeAjax(file,resolve);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Request all files at once in</span></span><br><span class="line"><span class="comment">// "parallel" via `getFile(..)`.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Render as each one finishes,</span></span><br><span class="line"><span class="comment">// but only once previous rendering</span></span><br><span class="line"><span class="comment">// is done.</span></span><br><span class="line">[<span class="string">"file1"</span>,<span class="string">"file2"</span>,<span class="string">"file3"</span>]</span><br><span class="line">.map(getFile)</span><br><span class="line">.reduce(</span><br><span class="line">	<span class="function"><span class="keyword">function</span>(<span class="params">chain,filePromise</span>)</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> chain</span><br><span class="line">			.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">				<span class="keyword">return</span> filePromise;</span><br><span class="line">			&#125;)</span><br><span class="line">			.then(output);</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="built_in">Promise</span>.resolve() <span class="comment">// fulfilled promise to start chain</span></span><br><span class="line">)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	output(<span class="string">"Complete!"</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="Promise-其他的API"><a href="#Promise-其他的API" class="headerlink" title="Promise 其他的API"></a>Promise 其他的API</h3><h4 id="Promise-all"><a href="#Promise-all" class="headerlink" title="Promise.all"></a>Promise.all</h4><p>如果任何一个里面的promise reject，那么all立刻reject<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Promise</span>.all([</span><br><span class="line">	doTask1a(),</span><br><span class="line">	doTask1b(),</span><br><span class="line">	doTask1c()</span><br><span class="line">])</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">results</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> doTask2(</span><br><span class="line">		<span class="built_in">Math</span>.max(</span><br><span class="line">			results[<span class="number">0</span>],</span><br><span class="line">			results[<span class="number">1</span>],</span><br><span class="line">			results[<span class="number">2</span>],</span><br><span class="line">		);</span><br><span class="line">	);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="Promise-race"><a href="#Promise-race" class="headerlink" title="Promise.race"></a>Promise.race</h4><p>只要有一个promise完成，resolve或者reject<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p = trySomeAsyncThing();</span><br><span class="line"><span class="built_in">Promise</span>.race([</span><br><span class="line">	p,</span><br><span class="line">	<span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">_, reject</span>)</span>&#123;</span><br><span class="line">		setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">			reject(<span class="string">'timeout!'</span>);</span><br><span class="line">		&#125;, <span class="number">3000</span>)</span><br><span class="line">	&#125;)</span><br><span class="line">])</span><br><span class="line">.then(</span><br><span class="line">	success,</span><br><span class="line">	error</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+            <a href="/tags/Async-Programming/" rel="tag"># Async Programming</a>
+          
+            <a href="/tags/Callback/" rel="tag"># Callback</a>
+          
+            <a href="/tags/Thunk/" rel="tag"># Thunk</a>
+          
+            <a href="/tags/Promise/" rel="tag"># Promise</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/03/Javascript异步编程2/" rel="prev" title="Javascript异步编程2">
+                Javascript异步编程2 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#写在前面"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异步与并发"><span class="nav-number">2.</span> <span class="nav-text">异步与并发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Callback"><span class="nav-number">3.</span> <span class="nav-text">Callback</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Callback-Hell"><span class="nav-number">3.1.</span> <span class="nav-text">Callback Hell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个模拟的实际问题"><span class="nav-number">3.2.</span> <span class="nav-text">一个模拟的实际问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thunk"><span class="nav-number">4.</span> <span class="nav-text">Thunk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lazy-Thunk-Active-Thunk"><span class="nav-number">4.1.</span> <span class="nav-text">Lazy Thunk, Active Thunk</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Promise"><span class="nav-number">5.</span> <span class="nav-text">Promise</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flow-Control"><span class="nav-number">5.1.</span> <span class="nav-text">Flow Control</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Chaining-Promise"><span class="nav-number">5.1.1.</span> <span class="nav-text">Chaining Promise</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#练习"><span class="nav-number">5.2.</span> <span class="nav-text">练习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Promise-Hell"><span class="nav-number">5.3.</span> <span class="nav-text">Promise Hell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Promise-其他的API"><span class="nav-number">5.4.</span> <span class="nav-text">Promise 其他的API</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Promise-all"><span class="nav-number">5.4.1.</span> <span class="nav-text">Promise.all</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Promise-race"><span class="nav-number">5.4.2.</span> <span class="nav-text">Promise.race</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

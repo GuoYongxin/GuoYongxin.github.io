@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Async Programming,Javascript,Observable,Generator,CSP,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="GeneratorsGenerator 介绍我们可能都不自觉的有一个认识，那就是JavaScript的函数有一个特点，run to completion。意思是说在一个时间点，只会有一个函数在运行。当这个函数运行结束前，没有任何一个外部函数可以从外部抢占执行的权利。 Generator是在ES6引入的。Generator函数可以在执行的过程中让出执行的机会，自己暂停下来。在需要的时候，外部主动调用">
+<meta name="keywords" content="Async Programming,Javascript,Observable,Generator,CSP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Javascript异步编程2">
+<meta property="og:url" content="http://yoursite.com/2017/12/03/Javascript异步编程2/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="GeneratorsGenerator 介绍我们可能都不自觉的有一个认识，那就是JavaScript的函数有一个特点，run to completion。意思是说在一个时间点，只会有一个函数在运行。当这个函数运行结束前，没有任何一个外部函数可以从外部抢占执行的权利。 Generator是在ES6引入的。Generator函数可以在执行的过程中让出执行的机会，自己暂停下来。在需要的时候，外部主动调用">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-17T03:09:43.612Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Javascript异步编程2">
+<meta name="twitter:description" content="GeneratorsGenerator 介绍我们可能都不自觉的有一个认识，那就是JavaScript的函数有一个特点，run to completion。意思是说在一个时间点，只会有一个函数在运行。当这个函数运行结束前，没有任何一个外部函数可以从外部抢占执行的权利。 Generator是在ES6引入的。Generator函数可以在执行的过程中让出执行的机会，自己暂停下来。在需要的时候，外部主动调用">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/03/Javascript异步编程2/">
+
+
+
+
+
+  <title>Javascript异步编程2 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/03/Javascript异步编程2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Javascript异步编程2</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-03T12:39:37+08:00">
+                2017-12-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Generators"><a href="#Generators" class="headerlink" title="Generators"></a>Generators</h2><h3 id="Generator-介绍"><a href="#Generator-介绍" class="headerlink" title="Generator 介绍"></a>Generator 介绍</h3><p>我们可能都不自觉的有一个认识，那就是JavaScript的函数有一个特点，run to completion。意思是说在一个时间点，只会有一个函数在运行。当这个函数运行结束前，没有任何一个外部函数可以从外部抢占执行的权利。</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*" target="_blank" rel="noopener">Generator</a>是在ES6引入的。Generator函数可以在执行的过程中让出执行的机会，自己暂停下来。在需要的时候，外部主动调用Generator的next方法继续执行剩下的部分。<br>可以参考<a href="http://www.ruanyifeng.com/blog/2015/04/generator.html" target="_blank" rel="noopener">阮一峰博客</a>。这里先给一个简单的代码示例。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">gen</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"hello"</span>);</span><br><span class="line">    <span class="keyword">yield</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"world"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> it = gen();</span><br><span class="line">it.next(); <span class="comment">// hello</span></span><br><span class="line">it.next(); <span class="comment">// world</span></span><br></pre></td></tr></table></figure><br>创建一个Generator需要用<strong>function*</strong> 的关键字，以区别于普通的function定义。还有一个新的关键字是<strong>yield</strong>。它的功能就像我们的播放器上的暂停按钮一样，暂停了Generator函数的执行。注意，Generator函数暂停的点是由函数定义的时候制定好的。外部无法主动地去设置Generator停在哪一行。我们把这个叫Coorperate concurrency，而不是Preemptive concurrency。Preemptive意思就是抢占式的。在调用gen()时，只是创建一个generator对象，函数并没有开始执行。调用Generator产生一个iterator，iterator就是用来遍历数据的。我们在第8行调用next函数，这个Generator由暂停状态变为执行状态，等到运行到yield的时候，这个Generator再次变为暂停状态。第9行再次调用next，函数继续执行。</p>
+<h3 id="Generator-消息"><a href="#Generator-消息" class="headerlink" title="Generator 消息"></a>Generator 消息</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">main</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> it = main();</span><br><span class="line"></span><br><span class="line">it.next(); <span class="comment">// &#123; value: 1, done: false&#125;</span></span><br><span class="line">it.next(); <span class="comment">// &#123; value: 2, done: false&#125;</span></span><br><span class="line">it.next(); <span class="comment">// &#123; value: 3, done: false&#125;</span></span><br><span class="line"></span><br><span class="line">it.next(); <span class="comment">// &#123; value: undifined, done: true&#125;</span></span><br></pre></td></tr></table></figure>
+<p>我们之前的例子yield没有返回任何值，那么他返回的就是undifined。上边这个例子中我们yield反回了1,2,3，可以看出，<br>yield 1时，也就是我们的第9行执行的时候，返回了value为1，done为false的object。yield 2时，执行第10行，返回了value为2，done为false的object。<br>yield 3时，执行第11行，返回了value为2，看起来我们的Generator没有其他可以再执行的了，但是这个Generator还没有还行完毕，所以我们的done还是false。<br>当执行最后一次next时，我们才得到done为true，value是undefined。那么undefined是哪里来的呢？这是因为所以得JavaScript函数如果没有return语句的话，那么返回值就是undefined。如果我们的Generator最后return返回了一个值，例如42，那么这里的值就是value:42, done: true。<br>ES6引入了for of循环，来遍历任何一个iterator。所以我们可以用一个循环来执行Generator，直到到结束。</p>
+<p>以下内容可能产生不适。。因为如果从来没有用过generator的话会很不习惯。我们先定义一个generator的执行器。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">coroutine</span>(<span class="params">g</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> it = g();</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> it.next.apply(it, <span class="built_in">arguments</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>coroutine函数其实就是一个generator的wrapper，第2行我们把传入的generator直接初始化，每当我们的调用由coroutine返回的函数时，其实就是调用generator的next函数。</p>
+<p>下面看这个代码<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> run =  coroutine(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> x = <span class="number">1</span> + (<span class="keyword">yield</span>);</span><br><span class="line">    <span class="keyword">var</span> y = <span class="number">1</span> + (<span class="keyword">yield</span>);</span><br><span class="line">    <span class="keyword">yield</span> (x + y);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">run();</span><br><span class="line">run(<span class="number">10</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"Meaning of life: "</span> + run(<span class="number">30</span>).value);</span><br></pre></td></tr></table></figure><br>我们调用coroutine来包装起来我们的generator函数，返回一个run方法，初始化这个generator。每一次调用run都是在调用next方法。</p>
+<p>第7行调用run，开始执行generator，运行第2行，执行语句var x = 1 +, 然后我们遇到了yield。generator要暂停，把执行权返回到第8行。generator只有等待外部的输入值时才可以继续计算完这个表达式。第7行，我们继续调用run，也就是next，传入10，完成第一个表达式的计算的到x=11;generator继续执行var y = 1 +,我们遇到yield，让出执行权到第8行。run(30), 将30传入generator，完成y的计算y=31,generator继续执行，yield（x+y），generator暂停，把42作为value传出去。</p>
+<p>从generator外部看，也就是第7行开始，我们每运行一次next，就会暂停下来，把值传入到generator，让generator继续运行到下一个yield的地方。<br>从generator内部看，每一次yield，其实是generator缺少一个依赖的值，不能继续计算，而暂停下来。只有等待外部的传入的值和继续执行的信号，才能继续。<br>每一个yield，可以理解为，我这个地方需要一个value，我会一直等待，直到有人在外边给我传入一个值。 </p>
+<h3 id="异步Generator"><a href="#异步Generator" class="headerlink" title="异步Generator"></a>异步Generator</h3><p>我们改造一下上边的例子，做一个异步的Generator<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getData</span>(<span class="params">d</span>)</span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123; run(d); &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> run = coroutine(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> x = <span class="number">1</span> + (<span class="keyword">yield</span> getData(<span class="number">10</span>));</span><br><span class="line">    <span class="keyword">var</span> y = <span class="number">1</span> + (<span class="keyword">yield</span> getData(<span class="number">30</span>));</span><br><span class="line">    <span class="keyword">var</span> answer = (<span class="keyword">yield</span> getData(<span class="string">"Meaning of life: "</span> + (x + y)));</span><br><span class="line">    <span class="built_in">console</span>.log(answer);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">run();</span><br></pre></td></tr></table></figure></p>
+<p>先看getData方法，我们注册一个timeout，从而异步的在第2行调用run方法，让generator继续执行。<br>我们在generator里，yield了一个表达式，也就是getData。在执行var x = 1 + (yield getData(10))时，generator暂停，把执行权交给外部，同时getData开始运行。当getData中的回调函数运行，执行run，传入10，这样让generator继续完成表达式的计算，x=11。继续执行下一行var y = 1 + (yield getData(30)),遇到yield暂停，并且执行getData(30)。同样等timeout的回调执行时，把30传回generator，继续完成y的计算，y=41;同理下一行计算answer，yield暂停，等timeout回来再继续完成计算。最后console输出。</p>
+<p>在上边这个例子的generator中我们的代码看上去是同步的，背后的getData是异步的。这样的代码结构跟我们的思维方式是一样的，代码可读性增强了很多，比之前的promise还要好。</p>
+<h3 id="Promise-and-Generator"><a href="#Promise-and-Generator" class="headerlink" title="Promise and Generator"></a>Promise and Generator</h3><p>我们之前的代码中还是有一些缺点。就是我们的run方法被放在了callback中执行，这就是inversion of control。程序继续的调用的控制不够清晰。<br>而且我们之前的代码中yield都是undifined。所以我们考虑能不能yield一个promise，也就是让getData返回一个promise，等这个promise完成时，也就是getData完成时，调用Generator的next方法继续执行。等到下一个语句再yield另一个promise，等promise完成继续调用next，如此下去，等到next返回done为true时，也就是我们的generator执行完毕的时候。<br>后边的流程很像递归。也是一个跟业务逻辑无关的流程控制器。外边的lib有很多开源实现，就是一个返回promise的generator的执行器。下边的代码是我自己随意实现了的一个执行器，里边没有包含出错处理这方面的代码，只是为了给出一个大概的样子。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getData</span>(<span class="params">d</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve, reject</span>)</span>&#123;</span><br><span class="line">         setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123; resolve(d); &#125;, <span class="number">1000</span>);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">gen</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> x = <span class="number">1</span> + (<span class="keyword">yield</span> getData(<span class="number">10</span>));</span><br><span class="line">    <span class="keyword">var</span> y = <span class="number">1</span> + (<span class="keyword">yield</span> getData(<span class="number">30</span>));</span><br><span class="line">    <span class="keyword">var</span> answer = (<span class="keyword">yield</span> getData(<span class="string">"Meaning of life: "</span> + (x + y)));</span><br><span class="line">    <span class="built_in">console</span>.log(answer);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> it = gen();</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handleNext</span>(<span class="params">value</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> next = it.next(value);</span><br><span class="line">    <span class="keyword">if</span>( next.done )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(next.value);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> next.value.then(handleNext);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">handleNext();</span><br></pre></td></tr></table></figure><br>我们把这个通用的执行器<strong>runner</strong>方法提出来以后也可以用<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">runner</span>(<span class="params">gen</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> it = gen();</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">handleNext</span>(<span class="params">value</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> next = it.next(value);</span><br><span class="line">        <span class="keyword">if</span>( next.done )&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(next.value);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> next.value.then(handleNext);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    handleNext();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Generator练习"><a href="#Generator练习" class="headerlink" title="Generator练习"></a>Generator练习</h3><p>还是之前的情景，我们来思考一下用Generator是怎么解决的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fakeAjax</span>(<span class="params">url,cb</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> fake_responses = &#123;</span><br><span class="line">		<span class="string">"file1"</span>: <span class="string">"The first text"</span>,</span><br><span class="line">		<span class="string">"file2"</span>: <span class="string">"The middle text"</span>,</span><br><span class="line">		<span class="string">"file3"</span>: <span class="string">"The last text"</span></span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="keyword">var</span> randomDelay = (<span class="built_in">Math</span>.round(<span class="built_in">Math</span>.random() * <span class="number">1E4</span>) % <span class="number">8000</span>) + <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"Requesting: "</span> + url);</span><br><span class="line"></span><br><span class="line">	setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		cb(fake_responses[url]);</span><br><span class="line">	&#125;,randomDelay);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">output</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// **************************************</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFile</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>)</span>&#123;</span><br><span class="line">		fakeAjax(file,resolve);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Request all files at once in</span></span><br><span class="line"><span class="comment">// "parallel" via `getFile(..)`.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Render as each one finishes,</span></span><br><span class="line"><span class="comment">// but only once previous rendering</span></span><br><span class="line"><span class="comment">// is done.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ???</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">gen</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> p1 = getFile(<span class="string">"file1"</span>);</span><br><span class="line">    <span class="keyword">var</span> p2 = getFile(<span class="string">"file2"</span>);</span><br><span class="line">    <span class="keyword">var</span> p3 = getFile(<span class="string">"file3"</span>);</span><br><span class="line">    output(<span class="keyword">yield</span> p1);</span><br><span class="line">    output(<span class="keyword">yield</span> p2);</span><br><span class="line">    output(<span class="keyword">yield</span> p3);</span><br><span class="line">    output(<span class="string">'completed'</span>);</span><br><span class="line">&#125;</span><br><span class="line">runner(gen);</span><br><span class="line"></span><br><span class="line"><span class="comment">//use map</span></span><br><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">gen</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> promises = [<span class="string">"file1"</span>, <span class="string">"file2"</span>, <span class="string">"file3"</span>].map(<span class="function"><span class="keyword">function</span>(<span class="params">fname</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> getFile(fname);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">for</span>(p <span class="keyword">of</span> promises)&#123;</span><br><span class="line">        output((<span class="keyword">yield</span> p));</span><br><span class="line">    &#125;</span><br><span class="line">    output(<span class="string">'completed'</span>);</span><br><span class="line">&#125;</span><br><span class="line">runner(gen);</span><br></pre></td></tr></table></figure>
+<p>有了之前的例子，这里的的示例代码更容易写出来，其实就是利用Promise和Generator，我们的解也分为用普通的流程和用list的map和循环来写。<br>可以看出来这样的代码更为清晰易懂，比之前用promise解决可读性更胜一筹。</p>
+<h2 id="Observable"><a href="#Observable" class="headerlink" title="Observable"></a>Observable</h2><h3 id="Events-and-promises"><a href="#Events-and-promises" class="headerlink" title="Events and promises"></a>Events and promises</h3><p>前端的代码中的并发，异步，我们之前也说过，核心问题是流程控制的管理。比如之前说过的promise，处理的是单个请求和单个回复的情况。<br>如果我们要处理一个消息流，也就是连续不断地同类event，该如何？Promise还能胜任吗？<br>而且我们在编程中大部分要出里的异步问题，是面向event stream的。在UI中的，用户的操作，比如点击;服务器发来的数据处理，都是面向event的。在这种情况下我们把promise套如，可能会有些问题。<br>举个例子，我的页面上可能有一些处理用户点击的代码。我想记录一些btn点击的log。我知道promise怎么创建，套用到这个情景中应该是这样的，如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p1 = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve, rejct</span>)</span>&#123;</span><br><span class="line">    $(<span class="string">'#btn'</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params">evt</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> className = evt.target.className;</span><br><span class="line">        <span class="keyword">if</span>(<span class="regexp">/foobar/</span>.test(className))&#123;</span><br><span class="line">            resolve(className);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            reject();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">p1.then(<span class="function"><span class="keyword">function</span>(<span class="params">className</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(className);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>可是上面的代码有一个问题，就是promise只能resolve一次。我创建了一个promise，但是只能响应一次用户点击。我们之前介绍了那么多工具，promise，generator的高级工具，可是遇到这个最最常见的情景，好像不是很好使。我们该怎么办？</p>
+<p>可能你会这么想，我反一下，把promise的创建搬到event的listener里边，如下<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">"#btn"</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params">evt</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> className = evt.target.className;</span><br><span class="line">    <span class="keyword">var</span> p1 = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve,reject</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="regexp">/foobar/</span>.test(className))&#123;</span><br><span class="line">            resolve(className);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            reject();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    p1.then(<span class="function"><span class="keyword">function</span>(<span class="params">className</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(className);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure><br>我们每次在click的callback中都创建一个新的promise，这样就可以每次都resolve了。这样看起来挺不错，可是，我们为什么要这样做？这与我们一开始的callback hell不是一样了吗？我们立即resolve了一个promise，并且调用了then。我们之前的代码还可以在一个地方设置好我的消息源，而在我程序的另外一个地方处理这个消息。现在全部都回到了一起，我们把两个不同的任务混在了一个地方。</p>
+<p>其实问题在于我们的promise并不是特别适合于一个面向event的环境。我们需要更好地工具。我们需要把两个任务分开，也就是消息源的设置，以及消息的处理。</p>
+<h3 id="Observables"><a href="#Observables" class="headerlink" title="Observables"></a>Observables</h3><p>现在的Obserable还不是JavaScript原生支持的。也就是说ES6中没有这个东西，我们都需要用第三方的lib。但未来Observable很可能会成为JavaScript的一部分。现在外部有一个很好的Observable的lib，也就是Rxjs。</p>
+<h4 id="Concept"><a href="#Concept" class="headerlink" title="Concept"></a>Concept</h4><p>在Excel中，我们知道有计算单元格这个东西。就是说有些单元格的数据是通过计算其他源单元格的数据得到的。例如求和，求平均值，甚至更复杂的计算。当源数据发生改变的时候，这些计算单元数据也会相应的变化。假如我们的源数据被多个计算单元格依赖，那么就会触发所有这些计算单元格的更新。源数据单元的变化可能有好多次，变化的事件就像流一样。而依赖这个数据源的计算单元格都需要订阅这个<strong>变化</strong>，并且执行相应的步骤来更新自己的数据。</p>
+<p>Observable或者Reactive Programming（响应式编程）就是类似的概念。Observable是一个事件的转换器，它连接在事件的源上边，每一次有一个新的事件发生，它就产生一个新的promise。重点在于，我可以在一个地方设置好这个转换器，而在程序的另一个地方甚至多个不同的地方，再定义如何处理这个事件流。我们不用和之前举得反例一样把事件的订阅初始化代码和处理代码放在同一个地方。</p>
+<h4 id="Rxjs例子"><a href="#Rxjs例子" class="headerlink" title="Rxjs例子"></a>Rxjs例子</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> obsv = Rx.Observable.fromEvent(btn, <span class="string">"click"</span>);</span><br><span class="line"></span><br><span class="line">obsv</span><br><span class="line">    .map(<span class="function"><span class="keyword">function</span> <span class="title">mapper</span>(<span class="params">evt</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> evt.target.className;</span><br><span class="line">    &#125;)</span><br><span class="line">    .filter(<span class="function"><span class="keyword">function</span> <span class="title">filterer</span>(<span class="params">className</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="regexp">/foobar/</span>.test(className);</span><br><span class="line">    &#125;)</span><br><span class="line">    .distinctUntilChanged()</span><br><span class="line">    .subscribe(<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> className = data[<span class="number">1</span>];</span><br><span class="line">        <span class="built_in">console</span>.log(className);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>例子中的第一行我们创建了一个Observable，使用了Rx.Observable.fromEvent这个常用的工具。它可以把一个dom元素上的事件变成一个Observable。Rxjs还有很多强大的工具可以使用。<br>在程序的其他地方，我可以定义我想如何处理这个事件流。这里的map和filter等等，都是Observable的工具，用来对这个事件流进行一些转换和处理，也是十分易于理解使用。最后调用subscribe，来操作转换好的事件。我们就好像定义好了一系列的步骤来处理这个流过来的事件一样。我们把Observable甚至可以当做数组一样对待，数组其实也是一个数据流。</p>
+<p>这里比较有意思的一个工具是distinctUntilChanged，这个是说加入现在连续来了5个event，都是hello，那么只有第一个可以进入下一步，其他4个都被过滤，因为重复了。然后来了连续的5个world，那么只有第一个world可以流入下一步。这是distinct的意思。那么接着，又来了5个hello，那么还是只有第一个hello可以通过。这是untilchanged的意思。</p>
+<p><a href="http://rxmarbles.com/" target="_blank" rel="noopener">RxMarbles</a>有一个很好的这些工具的图示化介绍。</p>
+<h3 id="Rxjs常用工具"><a href="#Rxjs常用工具" class="headerlink" title="Rxjs常用工具"></a>Rxjs常用工具</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// From an event</span></span><br><span class="line">Rx.Observable.fromEvent(<span class="built_in">document</span>.querySelector(<span class="string">'button'</span>), <span class="string">'click'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// From array of values</span></span><br><span class="line">Rx.Observable.from([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line"><span class="comment">// From one or multiple values</span></span><br><span class="line">Rx.Observable.of(<span class="string">'foo'</span>, <span class="string">'bar'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Externally produce new events.</span></span><br><span class="line"><span class="keyword">var</span> myObservable = <span class="keyword">new</span> Rx.Subject();</span><br><span class="line">myObservable.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(value));</span><br><span class="line">myObservable.next(<span class="string">'foo'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Merge Observables</span></span><br><span class="line"><span class="comment">// Creates an output Observable which concurrently emits all values from every given input Observable.</span></span><br><span class="line"><span class="keyword">var</span> observable1 = Rx.Observable.interval(<span class="number">1000</span>);</span><br><span class="line"><span class="keyword">var</span> observable2 = Rx.Observable.interval(<span class="number">400</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> merged = Rx.Observable.merge(observable1, observable2)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Zip</span></span><br><span class="line"><span class="comment">// Combines multiple Observables to create an Observable whose values are calculated from the values, in order, of each of its input Observables.</span></span><br><span class="line"><span class="keyword">let</span> age$ = Observable.of(<span class="number">27</span>, <span class="number">25</span>, <span class="number">29</span>);</span><br><span class="line"><span class="keyword">let</span> name$ = Observable.of(<span class="string">'Foo'</span>, <span class="string">'Bar'</span>, <span class="string">'Beer'</span>);</span><br><span class="line"><span class="keyword">let</span> isDev$ = Observable.of(<span class="literal">true</span>, <span class="literal">true</span>, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">Observable</span><br><span class="line">    .zip(age$,</span><br><span class="line">         name$,</span><br><span class="line">         isDev$,</span><br><span class="line">         (age, name, isDev) =&gt; (&#123; age, name, isDev &#125;))</span><br><span class="line">    .subscribe(<span class="function"><span class="params">x</span> =&gt;</span> <span class="built_in">console</span>.log(x));</span><br></pre></td></tr></table></figure>
+<h3 id="Observable练习"><a href="#Observable练习" class="headerlink" title="Observable练习"></a>Observable练习</h3><p>这次是一个新的的练习。需求是对页面上的btn点击行为进行采样。注意不是debounce，同一个btn在短时间内点击多次，例如每一秒内，我只响应一次点击。<br>我在下面的codepen中，已经引用了jQeury和Rxjs。有兴趣的可以打开试着写一写。<br> <iframe id="cp_embed_eygMWK" src="//codepen.io/guoyongxin/embed/eygMWK?height=300&theme-id=theme&slug-hash=eygMWK&default-tab=result" scrolling="no" frameborder="no" height="300" allowtransparency="true" allowfullscreen="true" class="cp_embed_iframe" style="width: 100%; overflow: hidden;"></iframe></p>
+<p>有人可能会考虑用zip来解决这个问题，但是zip其实不能完成采样的任务。那样的话，我们的clicks的队列会不断地增长，而不是真正的采样。我在下边给出两份参考代码<br>Solution1：<br>  <iframe id="cp_embed_ZvLpNQ" src="//codepen.io/guoyongxin/embed/ZvLpNQ?height=300&theme-id=theme&slug-hash=ZvLpNQ&default-tab=result" scrolling="no" frameborder="no" height="300" allowtransparency="true" allowfullscreen="true" class="cp_embed_iframe" style="width: 100%; overflow: hidden;"></iframe></p>
+<p>Solution2:<br>  <iframe id="cp_embed_OzWvrm" src="//codepen.io/guoyongxin/embed/OzWvrm?height=300&theme-id=theme&slug-hash=OzWvrm&default-tab=result" scrolling="no" frameborder="no" height="300" allowtransparency="true" allowfullscreen="true" class="cp_embed_iframe" style="width: 100%; overflow: hidden;"></iframe></p>
+<p>可以看出来Rxjs中的工具还是非常的多和实用的。我这里是抛砖引玉，更多的内容都在官网上有。掌握或者了解Rxjs的各种工具的适用场景，我认为是成为一个合格的Reactive Programmer的基本。</p>
+<p>我在刚刚接触Observable的时候，也是理解了好几次，特别是event stream。看官方的文档，资料，也看了几次。看多了用多了也就有一些感觉，代码的质量也就能提升。</p>
+<p>我们的工具箱中又多了一个工具。没有任何一个工具是万金油。不同的场景有不同的合适的方法，对每个的特点都理解，不要用的太死板是我们的该做到的。</p>
+<h2 id="CSP-Communicating-Sequential-Processes-Channels"><a href="#CSP-Communicating-Sequential-Processes-Channels" class="headerlink" title="CSP (Communicating Sequential Processes)/ Channels"></a>CSP (Communicating Sequential Processes)/ Channels</h2><p>CSP的目的是用Channel来设计并发程序。和我们之前所介绍的各种方法一样。</p>
+<p>CSP的提出在<a href="http://www.usingcsp.com/cspbook.pdf" target="_blank" rel="noopener">这里</a>，说实话我也没怎么看过这篇文章，作者Hoare现在仍在更新CSP的理论。CSP的理念在Go语言和Clojure Script中使用的很多</p>
+<h3 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h3><p>那么Channel是什么？Channel有些像Stream，也类似于管道Pipe。如果了解Actor模型的话（<a href="https://doc.akka.io/docs/akka/2.5.5/scala/actors.html" target="_blank" rel="noopener">Scala中大量使用的并发模型</a>），Channel确实和Actor很类似。但Channel有一个重点在于，默认情况下他没有缓冲区，因此Channel自然有了这样一个特点就是，反向压力（Back Pressure）。举个生活中的例子，我拿着水管接在水龙头上边给外边的花草浇水，我打开洒水口的开关就行了;当我浇完了我直接把洒水口的开关关掉就行了，我并不需要告诉源头我要开还是要关，我只需要操作我手边的开关就可以了。这是反向的从消费者到生产者的一个交流，告诉上边的生产者说，我不需要水了。Channel的Back Presse，也就是说Channnel的send动作是阻塞的。只有当Channel在另一方，调用了取消息take后，才会解除阻塞，反之亦然。而Actor的send是异步的，也就是非阻塞的。</p>
+<p>在我们的程序中，我们有这样的代码，我们的生产者和消费者之间没有直接的联系，因为我们需要这么做，以达到职责清晰，代码的局部性更好。我们需要生产者和消费者之间有一个交流，但是如果我们不想引入一个类似于全局变量的东西，告诉生产者需不需要继续生产，别给我发了。（Rxjs Observable中有Hot Cold）。<br>另外一种设计方式就是用我们的Channel，利用Back Pressure，可以做到，你不能往Channel放更多地东西，直到我准备好了可以继续取;你不能继续取东西，直到我可以再往里边放东西。</p>
+<p>我们提到了阻塞，你可能会联想到JavaScript唯一有阻塞功能的工具，就是我们刚才讲过的Generator函数。确实如此，CSP的JavaScript版本需要用到Generator。</p>
+<p>看点代码吧：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ch = chan();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">process1</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">yield</span> put(ch, <span class="string">"hello"</span>); <span class="comment">// 1. put hello into ch and pause proc1 until someone take it from the ch</span></span><br><span class="line">    <span class="keyword">var</span> msg = <span class="keyword">yield</span> take(ch); <span class="comment">// 2. resume proc1 because someone take hello out, and wait for someone to put something into the ch</span></span><br><span class="line">    <span class="built_in">console</span>.log(msg); <span class="comment">// 3. someone put something into ch to let proc1 to resume.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">process2</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> greeting = <span class="keyword">yield</span> take(ch); <span class="comment">// 1. pause proc2 until someone put something into ch</span></span><br><span class="line">    <span class="keyword">yield</span> put(ch, greeting + <span class="string">" world"</span>); <span class="comment">// 2. resume proc2 because someone has put data in ch, and put data into ch, then pause proc2 again until someone have take that from ch </span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"done"</span>); <span class="comment">// 3. resume proc2 because someone take the data from ch</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// hello world</span></span><br><span class="line"><span class="comment">// done</span></span><br></pre></td></tr></table></figure></p>
+<p>chan, put, take我们先当做现有的函数来理解这段代码。我们用到了yield，因为我们需要阻塞或者说暂停我们的函数。 假设proc1和proc2在两个不同的线程运行，他们通过ch就可以协调消费者生产者的运行时交流与相互控制。</p>
+<h3 id="Blocking-Channel"><a href="#Blocking-Channel" class="headerlink" title="Blocking Channel"></a>Blocking Channel</h3><p>再看一个例子，我们用了一个csp的lib，里边用到了go函数，因为是模仿了Go语言的方式调用类似线程运行的功能。csp.timeout返回一个channel，而我们并不需要关心这个channel到底在哪，我们只需要知道过500ms他会在里边放一个消息，让我们的yield的地方继续执行。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ch = chan();</span><br><span class="line"></span><br><span class="line">csp.go(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">yield</span> csp.put(ch, <span class="built_in">Math</span>.random()); <span class="comment">// repeately put random number in ch, pause when blocking</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">csp.go(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="keyword">yield</span> csp.take( csp.timeout(<span class="number">500</span>) ); <span class="comment">// wait 500ms</span></span><br><span class="line">        <span class="keyword">var</span> num = <span class="keyword">yield</span> csp.take(ch); <span class="comment">// take data from ch</span></span><br><span class="line">        <span class="built_in">console</span>.log(num);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>下面的例子alts，功能比较像promise的race。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">csp.go(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="keyword">var</span> msg = <span class="keyword">yield</span> csp.alts(ch1, ch2, ch3);</span><br><span class="line">        <span class="built_in">console</span>.log(msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>再来一个<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">csp.go(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> table = csp.chan();</span><br><span class="line">    </span><br><span class="line">    csp.go(player, [<span class="string">"ping"</span>, table]); <span class="comment">// setup ping 'proc'</span></span><br><span class="line">    csp.go(player, [<span class="string">"pong"</span>, table]); <span class="comment">// setup pong 'proc'</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">yield</span> csp.put(table, &#123;<span class="attr">hits</span>: <span class="number">0</span>&#125;); <span class="comment">// start the game by put msg into channel table</span></span><br><span class="line">    <span class="keyword">yield</span> csp.timeout(<span class="number">1000</span>); <span class="comment">// wait for 1000ms to close the channel table</span></span><br><span class="line">    table.close();</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">player</span>(<span class="params">name, table</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> ball = <span class="keyword">yield</span> csp.take(table); <span class="comment">// try to get the ball from table</span></span><br><span class="line">        <span class="keyword">if</span>( ball === csp.CLOSED) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(name +  <span class="string">": table's gone"</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        ball.hits += <span class="number">1</span>;</span><br><span class="line">        <span class="built_in">console</span>.log(name + <span class="string">" "</span> + ball.hits);</span><br><span class="line">        <span class="keyword">yield</span> csp.timeout(<span class="number">100</span>);</span><br><span class="line">        <span class="keyword">yield</span> csp.put(table, ball); <span class="comment">// put updated ball back to ch</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Event-Channel"><a href="#Event-Channel" class="headerlink" title="Event Channel"></a>Event Channel</h3><p>我们在Observable有一个工具是fromEvent，我们这里用csp的方法设计一个自己的fromEvent。这里用了putAsync，我想从字面也能理解这个是非阻塞的put。我为什么用putAsnc呢，因为这个函数不是一个Generator，而是一个普通的JavaScript函数。putAyns会返回一个promise，当这个put成功是resolve。但是我这里并不关心她什么时候put成功。这里是不是很像我们在Observable中不停地调用next函数？csp与Observable的核心区别在于有Back Pressure。如果Channel数据没有被取走，生产者无法继续往队列里放数据。连续不停地调用putAsync，并不会覆盖Channel的数据，每一个putAsync都会返回promise，他们排着队等待往Channel里放数据。直到有人从Channel中开始取数据时，这个队列才会向前。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fromEvent</span>(<span class="params">el, eventType</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> ch = csp.chan();</span><br><span class="line">    $(el).bind(eventType, <span class="function"><span class="keyword">function</span>(<span class="params">evt</span>)</span>&#123;</span><br><span class="line">        csp.putAsync(ch, evt);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> ch;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">csp.go(<span class="function"><span class="keyword">function</span>*(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> ch = fromEvent(el, <span class="string">"mousemove"</span>);</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="keyword">var</span> evt = <span class="keyword">yield</span> csp.take(ch);</span><br><span class="line">        <span class="built_in">console</span>.log(evt.clientX + <span class="string">","</span> + evt.clientY);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="CSP练习"><a href="#CSP练习" class="headerlink" title="CSP练习"></a>CSP练习</h3><p>我认为下面这个练习的情景有些生硬，不是特别适合Channel的场景，没能完全体现出Channel的优势。而且我认为原来培训中的参考答案并不完全正确的。但是还是可以参考一下这个题目吧。需求跟Observable的btn采样是一样的。我给直接给出了我的代码。我们最后还是用到了shouldWrite变量来控制写，而且好像没有更好地办法。</p>
+<p>这里我引用了<a href="https://github.com/ubolonton/js-csp/blob/master/doc/basic.md" target="_blank" rel="noopener">js-csp</a>。对于看过Rethinking的，我一直没有使用Trainer的<a href="https://github.com/getify/asynquence" target="_blank" rel="noopener">ASQ</a>库是因为我觉得他的lib东西太多了，什么都可以做，而且使用什么都要在前面加ASQ，看上去有些奇怪。不过他确实很厉害，自己写了这么多工具的实现。</p>
+ <iframe id="cp_embed_Ozpbxq" src="//codepen.io/guoyongxin/embed/Ozpbxq?height=300&theme-id=theme&slug-hash=Ozpbxq&default-tab=result" scrolling="no" frameborder="no" height="300" allowtransparency="true" allowfullscreen="true" class="cp_embed_iframe" style="width: 100%; overflow: hidden;"></iframe>
+<h3 id="大练习-A-tale-of-three-lists"><a href="#大练习-A-tale-of-three-lists" class="headerlink" title="大练习 A tale of three lists"></a>大练习 A tale of three lists</h3><p>Trainer的这个练习还是很赞的，给出地址<a href="https://github.com/getify/A-Tale-Of-Three-Lists" target="_blank" rel="noopener">git</a>，有兴趣的可以clone下来，用我们讲过的各种工具（Callback, thunk, promise, generator, obserable, csp）都实现以下这个练习。还是很有挑战的。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>两篇文章介绍了各种JavaScript异步编程的工具。我的理解是，没有一个万金油可以解决所有的问题。如果你听身边有人说Observable可以解决一切异步编程的问题，或者说CSP可以搞定所有的异步编程设计，那么他一定是过分沉浸在自己的世界了，所谓生搬硬套。我们需要做的就是掌握这个工具箱里的所有工具，在适合的时候拿出来，写出漂亮的代码，解决这个问题。</p>
+<p>最后推荐一些我写第二篇时看到的一些有关的好文章的连接</p>
+<p><a href="https://juejin.im/entry/56f480ccc4c9710051bffd2b" target="_blank" rel="noopener">https://juejin.im/entry/56f480ccc4c9710051bffd2b</a><br><a href="https://www.zhihu.com/question/26192499" target="_blank" rel="noopener">https://www.zhihu.com/question/26192499</a><br><a href="http://lucasmreis.github.io/blog/quick-introduction-to-csp-in-javascript/" target="_blank" rel="noopener">http://lucasmreis.github.io/blog/quick-introduction-to-csp-in-javascript/</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Async-Programming/" rel="tag"># Async Programming</a>
+          
+            <a href="/tags/Javascript/" rel="tag"># Javascript</a>
+          
+            <a href="/tags/Observable/" rel="tag"># Observable</a>
+          
+            <a href="/tags/Generator/" rel="tag"># Generator</a>
+          
+            <a href="/tags/CSP/" rel="tag"># CSP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/18/JavaScript异步编程1/" rel="next" title="JavaScript异步编程1">
+                <i class="fa fa-chevron-left"></i> JavaScript异步编程1
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/28/Java并发編程基础知识/" rel="prev" title="Java并发編程实践读书笔记1">
+                Java并发編程实践读书笔记1 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Generators"><span class="nav-number">1.</span> <span class="nav-text">Generators</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Generator-介绍"><span class="nav-number">1.1.</span> <span class="nav-text">Generator 介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generator-消息"><span class="nav-number">1.2.</span> <span class="nav-text">Generator 消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步Generator"><span class="nav-number">1.3.</span> <span class="nav-text">异步Generator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Promise-and-Generator"><span class="nav-number">1.4.</span> <span class="nav-text">Promise and Generator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generator练习"><span class="nav-number">1.5.</span> <span class="nav-text">Generator练习</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Observable"><span class="nav-number">2.</span> <span class="nav-text">Observable</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Events-and-promises"><span class="nav-number">2.1.</span> <span class="nav-text">Events and promises</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Observables"><span class="nav-number">2.2.</span> <span class="nav-text">Observables</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Concept"><span class="nav-number">2.2.1.</span> <span class="nav-text">Concept</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Rxjs例子"><span class="nav-number">2.2.2.</span> <span class="nav-text">Rxjs例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rxjs常用工具"><span class="nav-number">2.3.</span> <span class="nav-text">Rxjs常用工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Observable练习"><span class="nav-number">2.4.</span> <span class="nav-text">Observable练习</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSP-Communicating-Sequential-Processes-Channels"><span class="nav-number">3.</span> <span class="nav-text">CSP (Communicating Sequential Processes)/ Channels</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Channel"><span class="nav-number">3.1.</span> <span class="nav-text">Channel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Blocking-Channel"><span class="nav-number">3.2.</span> <span class="nav-text">Blocking Channel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Event-Channel"><span class="nav-number">3.3.</span> <span class="nav-text">Event Channel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSP练习"><span class="nav-number">3.4.</span> <span class="nav-text">CSP练习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#大练习-A-tale-of-three-lists"><span class="nav-number">3.5.</span> <span class="nav-text">大练习 A tale of three lists</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">3.6.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

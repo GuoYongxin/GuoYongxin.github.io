@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="DDIA,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="数据密集型应用的模块当今许多应用大多是数据数据密集（data-intensive）而不是计算密集型（compute-intensive）的。所以CPU的处理能力往往不是应用程序的瓶颈。关键在于数据的量、数据的复杂度以及数据的快速多变性。 应用往往包含以下模块：  数据库：用于存储数据 高速缓存：缓存复杂或者操作代价昂贵的结果，加快下一次访问 索引：用户可以按照关键字搜索数据并支持各种过滤 流式处理">
+<meta name="keywords" content="DDIA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDIA-1-可靠可扩展可维护的应用系统">
+<meta property="og:url" content="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="数据密集型应用的模块当今许多应用大多是数据数据密集（data-intensive）而不是计算密集型（compute-intensive）的。所以CPU的处理能力往往不是应用程序的瓶颈。关键在于数据的量、数据的复杂度以及数据的快速多变性。 应用往往包含以下模块：  数据库：用于存储数据 高速缓存：缓存复杂或者操作代价昂贵的结果，加快下一次访问 索引：用户可以按照关键字搜索数据并支持各种过滤 流式处理">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/一个可能的组合使用多个组件的数据系统架构.png">
+<meta property="og:image" content="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/响应时间.png">
+<meta property="og:updated_time" content="2019-04-21T05:10:42.908Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDIA-1-可靠可扩展可维护的应用系统">
+<meta name="twitter:description" content="数据密集型应用的模块当今许多应用大多是数据数据密集（data-intensive）而不是计算密集型（compute-intensive）的。所以CPU的处理能力往往不是应用程序的瓶颈。关键在于数据的量、数据的复杂度以及数据的快速多变性。 应用往往包含以下模块：  数据库：用于存储数据 高速缓存：缓存复杂或者操作代价昂贵的结果，加快下一次访问 索引：用户可以按照关键字搜索数据并支持各种过滤 流式处理">
+<meta name="twitter:image" content="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/一个可能的组合使用多个组件的数据系统架构.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/">
+
+
+
+
+
+  <title>DDIA-1-可靠可扩展可维护的应用系统 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DDIA-1-可靠可扩展可维护的应用系统</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-20T19:35:16+08:00">
+                2019-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="数据密集型应用的模块"><a href="#数据密集型应用的模块" class="headerlink" title="数据密集型应用的模块"></a>数据密集型应用的模块</h1><p>当今许多应用大多是数据数据密集（data-intensive）而不是计算密集型（compute-intensive）的。所以CPU的处理能力往往不是应用程序的瓶颈。关键在于数据的量、数据的复杂度以及数据的快速多变性。</p>
+<p>应用往往包含以下模块：</p>
+<ol>
+<li>数据库：用于存储数据</li>
+<li>高速缓存：缓存复杂或者操作代价昂贵的结果，加快下一次访问</li>
+<li>索引：用户可以按照关键字搜索数据并支持各种过滤</li>
+<li>流式处理：持续发送消息到另一个进程，处理采用异步方式</li>
+<li>批处理：定期处理大量积累的数据</li>
+</ol>
+<h2 id="数据系统的架构"><a href="#数据系统的架构" class="headerlink" title="数据系统的架构"></a>数据系统的架构</h2><img src="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/一个可能的组合使用多个组件的数据系统架构.png" title="一个数据架构系统，包含了不同的组件">
+<h1 id="核心设计目标"><a href="#核心设计目标" class="headerlink" title="核心设计目标"></a>核心设计目标</h1><h2 id="可靠性"><a href="#可靠性" class="headerlink" title="可靠性"></a>可靠性</h2><p>出现意外情况，比如硬件、软件故障、人为失误等，系统可以继续正常运转，至少确保功能正确。</p>
+<h3 id="硬件故障"><a href="#硬件故障" class="headerlink" title="硬件故障"></a>硬件故障</h3><p>比较容易出现的，硬盘崩溃，内存故障，电网停电。</p>
+<p>第一反应是为硬件冗余来减少系统故障率。例如磁盘RAID，服务器双电源，甚至热插拔CPU，数据中心添加备用电源、发电机。</p>
+<p>这样当一个组件发生故障时，冗余组件可以快速接管，之后运维人员可以修复或者更换坏掉的组件。</p>
+<p>直到最近，采用硬件冗余方案对于大多数应用场景还是足够的，它让单机完全失效的概率降到最低。只要可以把备份迅速恢复到新的机器上，故障的停机时间在大多数应用中并不是灾难性的。</p>
+<p>现在，通过软件容错的方式来容易多机失效成为新的手段，或者成为硬件容错方案的有力补充。例如滚动升级。</p>
+<h3 id="软件错误"><a href="#软件错误" class="headerlink" title="软件错误"></a>软件错误</h3><p>这类故障更难预料。各个节点直接是由软件关联的，可能会导致更多的系统故障。</p>
+<p>例如，</p>
+<ol>
+<li>由于软件错误，导致特定的输入引发应用的崩溃。例如Linux内核bug，在2012年6月30的闰秒时候触发，导致很多应用程序被挂掉。</li>
+<li>失控的进程把系统的资源耗尽，导致这些共享资源不能被释放。</li>
+<li>系统的Dependency出了问题，返回值异常。</li>
+<li>组件中的小故障触发另一个组件中的故障，进而触发更多的故障。</li>
+</ol>
+<p>没有快速的解决方法。只能仔细考虑很多细节。</p>
+<ol>
+<li>检查系统的假设条件和系统之间的交互</li>
+<li>进行全面的测试</li>
+<li>进程隔离，</li>
+<li>允许进程崩溃后自动重启</li>
+<li>反复评估、监控并分析生产环境中的行为表现。</li>
+</ol>
+<p>例如消息队列中，输出消息的数量应等于输入消息的数量。如果发现不一致，则立即告警。</p>
+<h3 id="人为失误"><a href="#人为失误" class="headerlink" title="人为失误"></a>人为失误</h3><p>人无法做到万无一失。运维人员的配置错误可能是系统下线的第一大原因。</p>
+<p>要保证系统可靠，如何减少人为错误对它的影响？</p>
+<ol>
+<li>用最小出错的方式来设计系统。让做错事更难。</li>
+<li>想办法分离最容易出错的地方，容易引发故障的接口。使用Sandbox隔离真正的生产和测试环境。</li>
+<li>充分的测试。单元测试，集成测试，手动测试。边界条件的考虑。</li>
+<li>当出现人为失误时，有快速回滚或者回复的机制。滚动发布新代码。</li>
+<li>监控子系统需要详细和清晰。</li>
+<li>推行管理流程和相关培训。</li>
+</ol>
+<h2 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h2><p>随着规模的增长，例如数据量、流量和复杂性，系统应该可以用合理的方式进行应对，满足这种增长。</p>
+<p>当应用负载增加的时候，比如用户从1w到100w，从100w到1000w，应用程序如何应对增长的负载。</p>
+<p>相关参数：Web服务的QPS，数据库的写入比例，DAU，缓存命中率。有时候平均值很重要，有时候短时间内的峰值会成为系统瓶颈。</p>
+<p>Twitter的Fan-out结构，对数据量提出了挑战。当一个人发Tweet时候，怎么处理Timeline这个请求。根据粉丝的数量，区别处理。</p>
+<h3 id="如何描述性能"><a href="#如何描述性能" class="headerlink" title="如何描述性能"></a>如何描述性能</h3><p>系统负载增加后，会发生什么，两种思考方式</p>
+<ol>
+<li>系统资源不变（CPU，内存，带宽），系统的性能会发生什么变化？</li>
+<li>如果要保持性能不变，需要增加多少资源？</li>
+</ol>
+<p>不同类型的系统关心的性能指标不同</p>
+<ol>
+<li>批处理系统通常关心<strong>吞吐量（throughput）</strong>，例如Hadoop，每秒可以处理多少条数据或者完成一个作业总共需要多少时间。</li>
+<li>Online系统中，更看重服务的<strong>响应时间（response time）</strong>，即客户端从发出请求到得到回复的总时间。</li>
+</ol>
+<img src="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/响应时间.png" title="展示了一个服务100次请求响应时间的均值与百分位数、中位数">
+<p>对于响应时间，如下图，有一些很长的，算异常请求，可能是由于数据大很多。但也有可能是其他因素造成的，例如上下文切换、进程调度、网络丢包、TCP重传、垃圾回收STW，缺页中断、磁盘IO。</p>
+<p>最好使用百分位数，中位数（50%）来评估系统的响应时间。</p>
+<p>采用较高的响应时间百分位数很重要，因为直接影响用户的总体服务体验。例如亚马逊采用99.9百分位来定义服务响应时间。优化99.9%的目标可能成本很高。能不能带来收益很关键。</p>
+<p>​排队延迟（queueing delay）通常占了高百分位点处响应时间的很大一部分。由于服务器只能并行处理少量的事务（如受其CPU核数的限制），所以只要有少量缓慢的请求就能阻碍后续请求的处理，这种效应有时被称为头部阻塞（head-of-line blocking）</p>
+<h3 id="应对负载增加"><a href="#应对负载增加" class="headerlink" title="应对负载增加"></a>应对负载增加</h3><p>垂直扩展和水平扩展。</p>
+<p>好的系统有弹性特征，可以自动检测负载的变化，来自动添加更多的计算资源。</p>
+<p>可扩展架构通常都是从通用模块逐步构建出来的。</p>
+<h2 id="可维护性"><a href="#可维护性" class="headerlink" title="可维护性"></a>可维护性</h2><p>项目会随着时间的推移，项目会需要新的人员参与到开发和运维工作中，来满足系统的稳定和新场景的适应。系统应该高效的变化。</p>
+<p>​软件的大部分开销并不在最初的开发阶段，而是在持续的维护阶段，包括修复漏洞、保持系统正常运行、调查失效、适配新的平台、为新的场景进行修改、偿还技术债、添加新的功能等等。</p>
+<p>为此，我们将特别关注软件系统的三个设计原则：</p>
+<h3 id="可操作性（Operability）"><a href="#可操作性（Operability）" class="headerlink" title="可操作性（Operability）"></a>可操作性（Operability）</h3><p>​    便于运维团队保持系统平稳运行。<br>良好的可操作性意味着更轻松的日常工作，进而运维团队能专注于高价值的事情。数据系统可以通过各种方式使日常任务更轻松：</p>
+<h3 id="简单性（Simplicity）"><a href="#简单性（Simplicity）" class="headerlink" title="简单性（Simplicity）"></a>简单性（Simplicity）</h3><p>​    从系统中消除尽可能多的复杂度（complexity），使新工程师也能轻松理解系统。（注意这和用户接口的简单性不一样。）<br>   <strong>复杂度（complexity）</strong>有各种可能的症状，例如：状态空间激增、模块间紧密耦合、纠结的依赖关系、不一致的命名和术语、解决性能问题的Hack、需要绕开的特例等等，</p>
+<h3 id="可演化性（evolability）"><a href="#可演化性（evolability）" class="headerlink" title="可演化性（evolability）"></a>可演化性（evolability）</h3><p>​    使工程师在未来能轻松地对系统进行更改，当需求变化时为新应用场景做适配。也称为可扩展性（extensibility），可修改性（modifiability）或可塑性（plasticity）。<br>    组织流程方面，敏捷开发，TDD，重构。<br>    修改数据系统并使其适应不断变化需求的容易程度，是与简单性和抽象性密切相关的：简单易懂的系统通常比复杂系统更容易修改</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/DDIA/" rel="tag"># DDIA</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/13/文明之光-近代音乐发展/" rel="next" title="文明之光-近代音乐发展">
+                <i class="fa fa-chevron-left"></i> 文明之光-近代音乐发展
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据密集型应用的模块"><span class="nav-number">1.</span> <span class="nav-text">数据密集型应用的模块</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据系统的架构"><span class="nav-number">1.1.</span> <span class="nav-text">数据系统的架构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心设计目标"><span class="nav-number">2.</span> <span class="nav-text">核心设计目标</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#可靠性"><span class="nav-number">2.1.</span> <span class="nav-text">可靠性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#硬件故障"><span class="nav-number">2.1.1.</span> <span class="nav-text">硬件故障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#软件错误"><span class="nav-number">2.1.2.</span> <span class="nav-text">软件错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#人为失误"><span class="nav-number">2.1.3.</span> <span class="nav-text">人为失误</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可扩展性"><span class="nav-number">2.2.</span> <span class="nav-text">可扩展性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何描述性能"><span class="nav-number">2.2.1.</span> <span class="nav-text">如何描述性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应对负载增加"><span class="nav-number">2.2.2.</span> <span class="nav-text">应对负载增加</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可维护性"><span class="nav-number">2.3.</span> <span class="nav-text">可维护性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#可操作性（Operability）"><span class="nav-number">2.3.1.</span> <span class="nav-text">可操作性（Operability）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单性（Simplicity）"><span class="nav-number">2.3.2.</span> <span class="nav-text">简单性（Simplicity）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可演化性（evolability）"><span class="nav-number">2.3.3.</span> <span class="nav-text">可演化性（evolability）</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

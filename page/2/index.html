@@ -239,6 +239,392 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/Java并发编程-内存模型/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/01/Java并发编程-内存模型/" itemprop="url">Java并发编程-内存模型</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-01T21:36:43+08:00">
+                2018-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h1><p>并发程序中，多个线程之间可见性的问题。如果线程和处理器之间过度协调，同步数据，那么开销太大。需要一个最低标准来保证可见性，这引入了JMM。</p>
+<p>JMM规定了JVM必须遵循一组最小的保证，这组保证规定了对变量的写入操作在任何时候将对与其他线程可见。内存栅栏指令也数据JMM定义范围内的东西。JMM保证了在不同平台上也可以获得同样的并发执行结果。</p>
+<h2 id="重排序"><a href="#重排序" class="headerlink" title="重排序"></a>重排序</h2><p>重排序会发生在，编译器，运行时，硬件对内存的操作重排序。同步操作，保证在重排序之后，JMM的可见性保证不变。</p>
+<h2 id="JMM"><a href="#JMM" class="headerlink" title="JMM"></a>JMM</h2><h3 id="Happens-Before-规则"><a href="#Happens-Before-规则" class="headerlink" title="Happens-Before 规则"></a>Happens-Before 规则</h3><p>程序顺序规则<br>监视器锁规则<br>volatile规则<br>线程启动规则<br>线程结束规则<br>中断规则<br>终结器规则<br>传递性</p>
+<h2 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h2><p>不正确的发布的真正原因，就是在发布一个共享对象和另一个线程对这个对象的访问操作之间，没有Happens-Before关系。</p>
+<h3 id="延迟初始化的例子"><a href="#延迟初始化的例子" class="headerlink" title="延迟初始化的例子"></a>延迟初始化的例子</h3><h3 id="安全发布"><a href="#安全发布" class="headerlink" title="安全发布"></a>安全发布</h3><p>用Syncrhonized</p>
+<p>提前初始化</p>
+<p>用Holder内部类的方式，static</p>
+<h3 id="双重检查加锁，很容易出错。要用volatile"><a href="#双重检查加锁，很容易出错。要用volatile" class="headerlink" title="双重检查加锁，很容易出错。要用volatile"></a>双重检查加锁，很容易出错。要用volatile</h3>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/Java并发编程-原子变量与非阻塞同步/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/01/Java并发编程-原子变量与非阻塞同步/" itemprop="url">Java并发编程-原子变量与非阻塞同步</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-01T20:40:22+08:00">
+                2018-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="原子变量与非阻塞同步"><a href="#原子变量与非阻塞同步" class="headerlink" title="原子变量与非阻塞同步"></a>原子变量与非阻塞同步</h1><p>近年来的非阻塞并发算法很火热。这种算法底层使用原子机器指令代替锁，来保证一致性。</p>
+<p>非阻塞算法应用在操作系统和JVM中，实现线程/进程调度机制、垃圾回收机制等其他并发数据结构。</p>
+<h2 id="锁的劣势"><a href="#锁的劣势" class="headerlink" title="锁的劣势"></a>锁的劣势</h2><p>线程挂起，恢复的开销。线程挂起后不能做任何事情。<br>Volatile提供了可见性的保证，但是不能构建复合操作。</p>
+<h2 id="硬件对并发的支持"><a href="#硬件对并发的支持" class="headerlink" title="硬件对并发的支持"></a>硬件对并发的支持</h2><p>早期处理器中的Test-and-Set，Fetch-and-increment。<br>现代处理器的，Compare-and-Swap，Load-Linked/Store-Conditional</p>
+<p>CAS操作的使用场景。先读取，再计算，最后使用CAS修改。一般有while循环。</p>
+<p>CAS的性能比锁要高。</p>
+<p>JVM对CAS会有支持，在不持支的处理器上使用自旋锁。</p>
+<h2 id="原子变量类"><a href="#原子变量类" class="headerlink" title="原子变量类"></a>原子变量类</h2><p>AtomicInteger/Long/Boolean/Reference</p>
+<p>是一种更好的volatile。</p>
+<p>原子变量与锁的性能差异的测试。在竞争程度较高的情况下差不多。在竞争程度适中的情况下原子变量表现更好。</p>
+<h2 id="非阻塞算法"><a href="#非阻塞算法" class="headerlink" title="非阻塞算法"></a>非阻塞算法</h2><p>使用原子变量可以构造非阻塞的数据结构，例如栈，链表。<br>非阻塞算法的设计和实现非常困难，但是通常会提供更好的可伸缩性，并有效地防止活跃性问题发生。</p>
+<h3 id="ABA问题"><a href="#ABA问题" class="headerlink" title="ABA问题"></a>ABA问题</h3><p>原子操作CAS，看到的A是之前的A还是ABA后的A？如果这个问题会影响系统的正确性，那么需要有额外的方式来保证正确性。例如加上版本号。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/Java并发编程-显示锁/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/01/Java并发编程-显示锁/" itemprop="url">Java并发编程-显示锁</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-01T17:55:23+08:00">
+                2018-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="显示锁"><a href="#显示锁" class="headerlink" title="显示锁"></a>显示锁</h1><p>Java 5.0增加的新的协调共享对象访问的机制：ReentrantLock。是一个可提供高级功能的工具。</p>
+<h2 id="Lock-and-ReentrantLock"><a href="#Lock-and-ReentrantLock" class="headerlink" title="Lock and ReentrantLock"></a>Lock and ReentrantLock</h2><p>Lock接口<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>内置锁Syncrhonized的局限。</p>
+<h3 id="可定时的与可轮询的锁"><a href="#可定时的与可轮询的锁" class="headerlink" title="可定时的与可轮询的锁"></a>可定时的与可轮询的锁</h3><p>死锁的处理可以有更多的选择。例如，同时试图获取两个锁，失败时可以在随机时间再重试。</p>
+<p>transferMoney的代码例子。两层trylock</p>
+<p>trylock带超时参数，可以在超时后发送一条消息给外部。</p>
+<h3 id="LockInterruptily"><a href="#LockInterruptily" class="headerlink" title="LockInterruptily"></a>LockInterruptily</h3><h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><p>Java 6 之后内置锁和ReentrantLock的性能上差距不大。</p>
+<h2 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h2><p>RenetrantLock可以提供非公平的选择。非公平锁可以再某种程度上提高系统吞吐率，但是也有可能会造成优先级低的线程一直被插队饥饿。</p>
+<h2 id="在Syncrhonized无法提供需要的高级特性时再去选择ReentrantLock"><a href="#在Syncrhonized无法提供需要的高级特性时再去选择ReentrantLock" class="headerlink" title="在Syncrhonized无法提供需要的高级特性时再去选择ReentrantLock"></a>在Syncrhonized无法提供需要的高级特性时再去选择ReentrantLock</h2><h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p>复杂性比独占锁高，所以在被频繁读取的时候有性能优势，其他情况下要稍差。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ReadWriteLock</span> </span>&#123;</span><br><span class="line">    <span class="function">Lock <span class="title">readLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Lock <span class="title">writeLock</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/11/Java并发编程-性能与活跃性以及并发程序测试/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1229,7 +1615,7 @@ Executor提供了一种标准的方法把任务提交与任务执行解耦开来
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

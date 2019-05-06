@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="语言的边界就是世界的边界 数据模型可能是软件开发中最重要的部分了，因为它们的影响如此深远：不仅仅影响着软件的编写方式，而且影响着我们的解题思路。 关系模型与文档模型关系型 RDBMS关系模型致力于将数据库本身的实现细节隐藏在更简洁的接口之后。数据被组织成表，每个关系都是Tuple的无序集合。 应用场景你今天在网上看到的大部分内容依旧是由关系数据库来提供支持，无论是在线发布，讨论，社交网络，电子商务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDIA-2-数据模型与查询语言">
+<meta property="og:url" content="http://yoursite.com/2019/04/21/DDIA-2-数据模型与查询语言/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="语言的边界就是世界的边界 数据模型可能是软件开发中最重要的部分了，因为它们的影响如此深远：不仅仅影响着软件的编写方式，而且影响着我们的解题思路。 关系模型与文档模型关系型 RDBMS关系模型致力于将数据库本身的实现细节隐藏在更简洁的接口之后。数据被组织成表，每个关系都是Tuple的无序集合。 应用场景你今天在网上看到的大部分内容依旧是由关系数据库来提供支持，无论是在线发布，讨论，社交网络，电子商务">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/04/21/DDIA-2-数据模型与查询语言/LinkedIn建立使用关系模型表示.png">
+<meta property="og:image" content="http://yoursite.com/2019/04/21/DDIA-2-数据模型与查询语言/树状结构的简历.png">
+<meta property="og:updated_time" content="2019-05-05T06:02:30.923Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDIA-2-数据模型与查询语言">
+<meta name="twitter:description" content="语言的边界就是世界的边界 数据模型可能是软件开发中最重要的部分了，因为它们的影响如此深远：不仅仅影响着软件的编写方式，而且影响着我们的解题思路。 关系模型与文档模型关系型 RDBMS关系模型致力于将数据库本身的实现细节隐藏在更简洁的接口之后。数据被组织成表，每个关系都是Tuple的无序集合。 应用场景你今天在网上看到的大部分内容依旧是由关系数据库来提供支持，无论是在线发布，讨论，社交网络，电子商务">
+<meta name="twitter:image" content="http://yoursite.com/2019/04/21/DDIA-2-数据模型与查询语言/LinkedIn建立使用关系模型表示.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/21/DDIA-2-数据模型与查询语言/">
+
+
+
+
+
+  <title>DDIA-2-数据模型与查询语言 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/21/DDIA-2-数据模型与查询语言/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DDIA-2-数据模型与查询语言</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-21T13:13:46+08:00">
+                2019-04-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>语言的边界就是世界的边界</p>
+<p>数据模型可能是软件开发中最重要的部分了，因为它们的影响如此深远：不仅仅影响着软件的编写方式，而且影响着我们的解题思路。</p>
+<h1 id="关系模型与文档模型"><a href="#关系模型与文档模型" class="headerlink" title="关系模型与文档模型"></a>关系模型与文档模型</h1><h2 id="关系型-RDBMS"><a href="#关系型-RDBMS" class="headerlink" title="关系型 RDBMS"></a>关系型 RDBMS</h2><p>关系模型致力于将数据库本身的实现细节隐藏在更简洁的接口之后。数据被组织成表，每个关系都是Tuple的无序集合。</p>
+<p>应用场景<br>你今天在网上看到的大部分内容依旧是由关系数据库来提供支持，无论是在线发布，讨论，社交网络，电子商务，游戏，软件即服务生产力应用程序等等内容。</p>
+<p>需求Transaction</p>
+<h2 id="文档型-NoSQL"><a href="#文档型-NoSQL" class="headerlink" title="文档型 NoSQL"></a>文档型 NoSQL</h2><p>NoSQL数据库出现，有以下几个原因：</p>
+<ol>
+<li>关系型数据库的扩展性不够，包括对非常大的数据集或者非常高的写入吞吐量。</li>
+<li>开源免费。</li>
+<li>关系模型不能很好的支持特殊性的查询操作。</li>
+<li>渴望一种更具多动态性与表现力的数据模型</li>
+</ol>
+<h2 id="对象关系不匹配"><a href="#对象关系不匹配" class="headerlink" title="对象关系不匹配"></a>对象关系不匹配</h2><p>如果数据存储在关系表中，那么需要一个<strong>笨拙的转换层</strong>，处于应用程序代码中的对象和表，行，列的数据库模型之间。模型之间的不连贯有时被称为阻抗不匹配（impedance mismatch)<br>像ActiveRecord和Hibernate这样的<strong>对象关系映射（object-relational mapping, ORM）</strong>框架可以减少这个转换层所需的样板代码的数量，但是它们不能完全隐藏这两个模型之间的差异</p>
+<h3 id="LinkedIn简历的例子，一对多"><a href="#LinkedIn简历的例子，一对多" class="headerlink" title="LinkedIn简历的例子，一对多"></a>LinkedIn简历的例子，一对多</h3><img src="/2019/04/21/DDIA-2-数据模型与查询语言/LinkedIn建立使用关系模型表示.png">
+<p>一个User和他相关的项目有一对多的关系。除了使用在其他表中加入UserID作为外键；使用有些SQL数据库支持的列的数据格式为JSON/XML，<br>它更适合用JSON来表示。因为，<strong>简单</strong>，它主要是一个自包含的文档。文档模型优势在于如果要读区一份简历，<strong>局部性</strong>更好。一次查询就可以了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;user_id&quot;: 251,</span><br><span class="line">  &quot;first_name&quot;: &quot;Bill&quot;,</span><br><span class="line">  &quot;last_name&quot;: &quot;Gates&quot;,</span><br><span class="line">  &quot;summary&quot;: &quot;Co-chair of the Bill &amp; Melinda Gates... Active blogger.&quot;,</span><br><span class="line">  &quot;region_id&quot;: &quot;us:91&quot;,</span><br><span class="line">  &quot;industry_id&quot;: 131,</span><br><span class="line">  &quot;photo_url&quot;: &quot;/p/7/000/253/05b/308dd6e.jpg&quot;,</span><br><span class="line">  &quot;positions&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;job_title&quot;: &quot;Co-chair&quot;,</span><br><span class="line">      &quot;organization&quot;: &quot;Bill &amp; Melinda Gates Foundation&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;job_title&quot;: &quot;Co-founder, Chairman&quot;,</span><br><span class="line">      &quot;organization&quot;: &quot;Microsoft&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  &quot;education&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;school_name&quot;: &quot;Harvard University&quot;,</span><br><span class="line">      &quot;start&quot;: 1973,</span><br><span class="line">      &quot;end&quot;: 1975</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;school_name&quot;: &quot;Lakeside School, Seattle&quot;,</span><br><span class="line">      &quot;start&quot;: null,</span><br><span class="line">      &quot;end&quot;: null</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  &quot;contact_info&quot;: &#123;</span><br><span class="line">    &quot;blog&quot;: &quot;http://thegatesnotes.com&quot;,</span><br><span class="line">    &quot;twitter&quot;: &quot;http://twitter.com/BillGates&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样的结构意味着数据存在一对多的关系，也就是<strong>树状结构</strong></p>
+<img src="/2019/04/21/DDIA-2-数据模型与查询语言/树状结构的简历.png">
+<h3 id="多对一，多对多"><a href="#多对一，多对多" class="headerlink" title="多对一，多对多"></a>多对一，多对多</h3><p>建立例子中的region_id, industry_id,主要解决了重复问题。可以避免歧义，做本地化支持，更好的搜索，等等。消除重复，就是数据库范式化的核心思想。</p>
+<h4 id="IMS的层次模型"><a href="#IMS的层次模型" class="headerlink" title="IMS的层次模型"></a>IMS的层次模型</h4><p>支持多对多的关系有些困难，而且不支持联结。</p>
+<h4 id="网络模型（network-model）-已经淘汰"><a href="#网络模型（network-model）-已经淘汰" class="headerlink" title="网络模型（network model） 已经淘汰"></a>网络模型（network model） 已经淘汰</h4><p>存指针，而不是外键。是一条开始于根（root）的路径。更改变得很困难。</p>
+<h4 id="关系模型（relational-model）"><a href="#关系模型（relational-model）" class="headerlink" title="关系模型（relational model）"></a>关系模型（relational model）</h4><p>关系模型使用外键访问，也类似一选择了一条访问路径，区别在于，这个是由查询优化器自动生产的，一般不必过多的考虑。</p>
+<h4 id="文档数据库的比较"><a href="#文档数据库的比较" class="headerlink" title="文档数据库的比较"></a>文档数据库的比较</h4><p>在表示多对多关系时候，关系模型与文档模型并没有不同，都是有相关的一项唯一标示符引用。关系模型中叫<strong>外键</strong>，文档模型中叫<strong>文档引用</strong>。可以使用链接操作或者后续的操作来解析这个引用。</p>
+<h2 id="选哪个"><a href="#选哪个" class="headerlink" title="选哪个"></a>选哪个</h2><p>要考虑多方面的差异，包括容错性，并发处理。</p>
+<p>关于模型中的差异，以下，</p>
+<h3 id="哪个更简单"><a href="#哪个更简单" class="headerlink" title="哪个更简单"></a>哪个更简单</h3><p>如果应用本身有着类似文档的结构（树状结构，一对多），那么使用NoSQL。</p>
+<p>关系型模型，倾向于模型中数据的分解。他把文档结构分解成多个表，有可能使得模式更为笨重，增加代码复杂度。</p>
+<p>文档模型的局限性有，不能直接读取文档中的嵌套项，而是要全部读取，例如读区用户id为251的用户中职位列表的第二个。</p>
+<p>对于连接的支持，是否是问题取决于应用本身，需不需要这种场景。</p>
+<p>对于高度关联的数据，文档模型可能不是很适合。</p>
+<h3 id="文档模式的灵活性"><a href="#文档模式的灵活性" class="headerlink" title="文档模式的灵活性"></a>文档模式的灵活性</h3><p>可以将任何key-value添加到文档数据库中，而且读取时，客户端也无法保证文档会包含那些字段。</p>
+<p>文档模型是schema on read，<br>关系模型是schema on write。</p>
+<p>读时模式类似于编程语言中的动态（运行时）类型检查，而写时模式类似于静态（编译时）类型检查。就像静态和动态类型检查的相对优点具有很大的争议性一样【22】，数据库中模式的强制性是一个具有争议的话题，一般来说没有正确或错误的答案。</p>
+<p>允许某些原因下，集合中数据是异构的。</p>
+<h3 id="查询数据的局部性"><a href="#查询数据的局部性" class="headerlink" title="查询数据的局部性"></a>查询数据的局部性</h3><p>局部性优势在于，需要同时访问文档中大部分内容时，加载一次文档即可。但如果每次只访问文档中的一小部分，有些浪费。</p>
+<p>更改文档时，会重写整个文档，因此通常建议，文档应该尽量的小，并且避免写入时候增加文档大小。</p>
+<p>NoSQL在为文档分配空间时候，会多分配一些，以防修改更新时候，空间不足，引起空间搬家的昂贵操作。</p>
+<h3 id="NoSQL与关系型数据库的结合"><a href="#NoSQL与关系型数据库的结合" class="headerlink" title="NoSQL与关系型数据库的结合"></a>NoSQL与关系型数据库的结合</h3><h1 id="数据查询语言"><a href="#数据查询语言" class="headerlink" title="数据查询语言"></a>数据查询语言</h1><p>SQL是一种声明式查询语言，与IMS和CODASYL命令式不同。</p>
+<p>声明式查询语言不需要关心实现。由数据库查询引擎来优化实现。可以在不改变查询语句的情况下提高性能。可以利用并行执行的优化。</p>
+<h2 id="Web中的声明式查询就是CSS，比Javascript的命令式查询要好。"><a href="#Web中的声明式查询就是CSS，比Javascript的命令式查询要好。" class="headerlink" title="Web中的声明式查询就是CSS，比Javascript的命令式查询要好。"></a><strong>Web中的声明</strong>式查询就是CSS，比Javascript的命令式查询要好。</h2><h2 id="MapReduce查询-介于声明式和命令式之间"><a href="#MapReduce查询-介于声明式和命令式之间" class="headerlink" title="MapReduce查询 介于声明式和命令式之间"></a><strong>MapReduce查询</strong> 介于声明式和命令式之间</h2><p>一些NoSQL数据存储（包括MongoDB和CouchDB）支持有限形式的MapReduce，作为在多个文档中执行只读查询的机制。</p>
+<p>查询的逻辑用代码片断来表示，这些代码片段会被处理框架重复性调用。它基于map（也称为collect）和reduce（也称为fold或inject）函数，两个函数存在于许多函数式编程语言中。</p>
+<p>map和reduce函数在功能上有所限制：它们必须是纯函数，这意味着它们只使用传递给它们的数据作为输入，它们不能执行额外的数据库查询，也不能有任何副作用。这些限制允许数据库以任何顺序运行任何功能，并在失败时重新运行它们。然而，map和reduce函数仍然是强大的：它们可以解析字符串，调用库函数，执行计算等等。</p>
+<p>MapReduce是一个相当底层的编程模型，用于计算机集群上的分布式执行。像SQL这样的更高级的查询语言可以用一系列的MapReduce操作来实现（见第10章），但是也有很多不使用MapReduce的分布式SQL实现。请注意，SQL中没有任何内容限制它在单个机器上运行，而MapReduce在分布式查询执行上没有垄断权。</p>
+<h1 id="图状数据模型"><a href="#图状数据模型" class="headerlink" title="图状数据模型"></a>图状数据模型</h1><p>解决复杂的多对多关系。</p>
+<p><strong>社交图谱</strong></p>
+<p>顶点是人，边指示哪些人彼此认识。</p>
+<p><strong>网络图谱</strong></p>
+<p>顶点是网页，边缘表示指向其他页面的HTML链接。</p>
+<p><strong>公路或铁路网络</strong></p>
+<p>顶点是交叉路口，边线代表它们之间的道路或铁路线。</p>
+<p>图的存储，就是存定点和边。</p>
+<ol>
+<li>任何顶点都可以有一条边连接到任何其他顶点。没有模式限制哪种事物可不可以关联。</li>
+<li>给定任何顶点，可以高效地找到它的入边和出边，从而遍历图，即沿着一系列顶点的路径前后移动。（这就是为什么例2-2在tail_vertex和head_vertex列上都有索引的原因。）</li>
+<li>通过对不同类型的关系使用不同的标签，可以在一个图中存储几种不同的信息，同时仍然保持一个清晰的数据模型。</li>
+</ol>
+<p>这些特性让建模很灵活。有利于演化：添加应用功能时，容易扩展用，更能应对变化，使用合适的的数据结构。</p>
+<h2 id="Cypher查询语言"><a href="#Cypher查询语言" class="headerlink" title="Cypher查询语言"></a>Cypher查询语言</h2><p>Neo4j图形数据库</p>
+<h2 id="SQL的图查询"><a href="#SQL的图查询" class="headerlink" title="SQL的图查询"></a>SQL的图查询</h2><p>与Cypher比显得笨拙</p>
+<h2 id="三元存储与SPARQL"><a href="#三元存储与SPARQL" class="headerlink" title="三元存储与SPARQL"></a>三元存储与SPARQL</h2><p>所有信息都是三个部分存储（主体，谓语，客体）。</p>
+<h3 id="RDF数据模型"><a href="#RDF数据模型" class="headerlink" title="RDF数据模型"></a>RDF数据模型</h3><p>类似XML，更冗长。 不区分属性和边。</p>
+<p>有工具支持生成RDF格式的数据模型。</p>
+<h3 id="SPARQL查询语言"><a href="#SPARQL查询语言" class="headerlink" title="SPARQL查询语言"></a>SPARQL查询语言</h3><p>采用RDF数据模型的三元存储查询语言。类似一次性SELECT操作完成。</p>
+<h3 id="Datalog基础"><a href="#Datalog基础" class="headerlink" title="Datalog基础"></a>Datalog基础</h3><p>比较老，适合处理复杂数据。每次实现一块。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/" rel="next" title="DDIA-1-可靠可扩展可维护的应用系统">
+                <i class="fa fa-chevron-left"></i> DDIA-1-可靠可扩展可维护的应用系统
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/05/DDIA-3-数据存储与检索/" rel="prev" title="DDIA-3-数据存储与检索">
+                DDIA-3-数据存储与检索 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#关系模型与文档模型"><span class="nav-number">1.</span> <span class="nav-text">关系模型与文档模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#关系型-RDBMS"><span class="nav-number">1.1.</span> <span class="nav-text">关系型 RDBMS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文档型-NoSQL"><span class="nav-number">1.2.</span> <span class="nav-text">文档型 NoSQL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象关系不匹配"><span class="nav-number">1.3.</span> <span class="nav-text">对象关系不匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LinkedIn简历的例子，一对多"><span class="nav-number">1.3.1.</span> <span class="nav-text">LinkedIn简历的例子，一对多</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多对一，多对多"><span class="nav-number">1.3.2.</span> <span class="nav-text">多对一，多对多</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IMS的层次模型"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">IMS的层次模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#网络模型（network-model）-已经淘汰"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">网络模型（network model） 已经淘汰</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#关系模型（relational-model）"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">关系模型（relational model）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文档数据库的比较"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">文档数据库的比较</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选哪个"><span class="nav-number">1.4.</span> <span class="nav-text">选哪个</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#哪个更简单"><span class="nav-number">1.4.1.</span> <span class="nav-text">哪个更简单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文档模式的灵活性"><span class="nav-number">1.4.2.</span> <span class="nav-text">文档模式的灵活性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询数据的局部性"><span class="nav-number">1.4.3.</span> <span class="nav-text">查询数据的局部性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NoSQL与关系型数据库的结合"><span class="nav-number">1.4.4.</span> <span class="nav-text">NoSQL与关系型数据库的结合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据查询语言"><span class="nav-number">2.</span> <span class="nav-text">数据查询语言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Web中的声明式查询就是CSS，比Javascript的命令式查询要好。"><span class="nav-number">2.1.</span> <span class="nav-text">Web中的声明式查询就是CSS，比Javascript的命令式查询要好。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapReduce查询-介于声明式和命令式之间"><span class="nav-number">2.2.</span> <span class="nav-text">MapReduce查询 介于声明式和命令式之间</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#图状数据模型"><span class="nav-number">3.</span> <span class="nav-text">图状数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cypher查询语言"><span class="nav-number">3.1.</span> <span class="nav-text">Cypher查询语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL的图查询"><span class="nav-number">3.2.</span> <span class="nav-text">SQL的图查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三元存储与SPARQL"><span class="nav-number">3.3.</span> <span class="nav-text">三元存储与SPARQL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDF数据模型"><span class="nav-number">3.3.1.</span> <span class="nav-text">RDF数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPARQL查询语言"><span class="nav-number">3.3.2.</span> <span class="nav-text">SPARQL查询语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Datalog基础"><span class="nav-number">3.3.3.</span> <span class="nav-text">Datalog基础</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

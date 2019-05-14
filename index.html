@@ -310,7 +310,10 @@
       
         
           
-            <h1 id="Removal"><a href="#Removal" class="headerlink" title="Removal"></a>Removal</h1><h2 id="remove-some-particular-char-from-string"><a href="#remove-some-particular-char-from-string" class="headerlink" title="remove some particular char from string"></a>remove some particular char from string</h2><h2 id="remove-all-leading-trailing-duplicated-empty-spaces-from-string"><a href="#remove-all-leading-trailing-duplicated-empty-spaces-from-string" class="headerlink" title="remove all leading/trailing/duplicated empty spaces from string"></a>remove all leading/trailing/duplicated empty spaces from string</h2><h1 id="De-duplication"><a href="#De-duplication" class="headerlink" title="De-duplication"></a>De-duplication</h1><h1 id="Substring-gt-strstr"><a href="#Substring-gt-strstr" class="headerlink" title="Substring -&gt; strstr"></a>Substring -&gt; strstr</h1><h1 id="reversal"><a href="#reversal" class="headerlink" title="reversal"></a>reversal</h1><h1 id="replacement"><a href="#replacement" class="headerlink" title="replacement"></a>replacement</h1><p>Advance</p>
+            <h1 id="Removal"><a href="#Removal" class="headerlink" title="Removal"></a>Removal</h1><h2 id="remove-some-particular-char-from-string"><a href="#remove-some-particular-char-from-string" class="headerlink" title="remove some particular char from string"></a>remove some particular char from string</h2><p>slow,fast two pointer</p>
+<h2 id="remove-all-leading-trailing-duplicated-empty-spaces-from-string"><a href="#remove-all-leading-trailing-duplicated-empty-spaces-from-string" class="headerlink" title="remove all leading/trailing/duplicated empty spaces from string"></a>remove all leading/trailing/duplicated empty spaces from string</h2><p>slow,fast two pointer, with handling special cases</p>
+<h1 id="De-duplication"><a href="#De-duplication" class="headerlink" title="De-duplication"></a>De-duplication</h1><p>slow,fast two pointer</p>
+<h1 id="Substring-gt-strstr"><a href="#Substring-gt-strstr" class="headerlink" title="Substring -&gt; strstr"></a>Substring -&gt; strstr</h1><h1 id="reversal"><a href="#reversal" class="headerlink" title="reversal"></a>reversal</h1><h1 id="replacement"><a href="#replacement" class="headerlink" title="replacement"></a>replacement</h1><p>Advance</p>
 <h1 id="moving-letters-around-ABCD1234-gt-A1B2C3D4"><a href="#moving-letters-around-ABCD1234-gt-A1B2C3D4" class="headerlink" title="moving letters around(ABCD1234 =&gt; A1B2C3D4)"></a>moving letters around(ABCD1234 =&gt; A1B2C3D4)</h1><h1 id="permutation-use-DFS"><a href="#permutation-use-DFS" class="headerlink" title="permutation(use DFS)"></a>permutation(use DFS)</h1><h1 id="Decoding-Encoding"><a href="#Decoding-Encoding" class="headerlink" title="Decoding/Encoding"></a>Decoding/Encoding</h1><h1 id="Longest-substring-that-contains-unique-chars"><a href="#Longest-substring-that-contains-unique-chars" class="headerlink" title="Longest substring that contains unique chars"></a>Longest substring that contains unique chars</h1><h1 id="Reg-Matching"><a href="#Reg-Matching" class="headerlink" title="Reg Matching"></a>Reg Matching</h1>
           
         
@@ -430,7 +433,134 @@
       
         
           
-            <h1 id="数据库核心：数据结构"><a href="#数据库核心：数据结构" class="headerlink" title="数据库核心：数据结构"></a>数据库核心：数据结构</h1><h1 id="事务处理与分析处理"><a href="#事务处理与分析处理" class="headerlink" title="事务处理与分析处理"></a>事务处理与分析处理</h1><h1 id="列存储"><a href="#列存储" class="headerlink" title="列存储"></a>列存储</h1>
+            <p>数据库只需要做两件事，1. 插入数据时候保存数据；2.之后读数据时，返回之前的结果。</p>
+<h1 id="数据库核心：数据结构"><a href="#数据库核心：数据结构" class="headerlink" title="数据库核心：数据结构"></a>数据库核心：数据结构</h1><p>为了高效查找数据库中特定键的值，我们需要一个数据结构：索引（index）。索引是从主数据衍生的<strong>附加（additional）</strong>结构。这是存储系统中一个重要的权衡：精心选择的索引加快了读查询的速度，但是每个索引都会拖慢写入速度。</p>
+<h2 id="哈希索引"><a href="#哈希索引" class="headerlink" title="哈希索引"></a>哈希索引</h2><p>key-value 数据的索引。</p>
+<p>最简单的索引策略，保存一个内存中的hashmap，把每一个key映射到特定的字节偏移量，这样就可以找到每一个key的位置。</p>
+<img src="/2019/05/05/DDIA-3-数据存储与检索/以类CSV格式存储键值对的日志，并使用内存哈希映射进行索引.png">
+<p>这个理念是Bitcask（Riak中的默认索引引擎）的核心做法。只要所有key可以放入内存，只需要一次磁盘寻址，就可以把value加载到内存中。</p>
+<h3 id="压缩"><a href="#压缩" class="headerlink" title="压缩"></a>压缩</h3><p>所有的新的数据都以日志的样子追加到一个文件中，如何避免文件越来越大最后耗尽磁盘的空间？</p>
+<ol>
+<li>压缩。将日志分解成一定的大小的段，当超过时候，就关闭它。后续的写入会写入新的段文件中。然后可以分别压缩这些段。这样的压缩意味着，在每一个段日志中丢弃重复的key，只保留最近的更新。</li>
+<li>多个段一起压缩，合并。由于段日志在写入后不会再修改，那么可以合并几个段的日志，到一个新的文件中。旧的日志可以删除。</li>
+</ol>
+<p>在这样的多段设计下，每个段都有自己的hashmap。查找过程就是一个段一个段的查询。由于有段合并，段的总数不会很多。</p>
+<h3 id="实现中的重要问题"><a href="#实现中的重要问题" class="headerlink" title="实现中的重要问题"></a>实现中的重要问题</h3><ol>
+<li>文件格式<br>CSV不是日志的最佳格式。更快更简单的是二进制格式，首字节存字符串长度，然后跟上原始字符串。</li>
+<li>删除记录<br>插入墓碑标记</li>
+<li>崩溃恢复<br>服务重启时，需要扫描所有的段来恢复hashmap，这样使得服务器重启变慢。Bitcask通过将每个hashmap的快照映射到磁盘，加速崩溃恢复。</li>
+<li>部分写入的记录<br>Bitcask采用了校验和，发现损坏部分就丢弃。</li>
+<li>并发控制<br>通常实现的选择只有一个写线程，简化了并发。而文件都是追加的写入，读并发更好。</li>
+</ol>
+<h3 id="为什么不原地更新？"><a href="#为什么不原地更新？" class="headerlink" title="为什么不原地更新？"></a>为什么不原地更新？</h3><ol>
+<li>顺序写比随机写性能更好。特别是在磁盘。</li>
+<li>文件是追加和不可变的，崩溃恢复更简单。</li>
+<li>合并段的操作可以避免文件出现碎片。</li>
+</ol>
+<h3 id="哈希索引的局限性"><a href="#哈希索引的局限性" class="headerlink" title="哈希索引的局限性"></a>哈希索引的局限性</h3><ol>
+<li>必须把key全部装入内存。即使在磁盘上维护hashmap，也很难保证高效的随机IO访问。处理哈希冲突也很复杂。</li>
+<li>区间查询效率不高。只能逐一查询。</li>
+</ol>
+<h2 id="SSTables和LSM-Tree"><a href="#SSTables和LSM-Tree" class="headerlink" title="SSTables和LSM-Tree"></a>SSTables和LSM-Tree</h2><p>之前的段文件只可以追加，并且不要求key有序。现在我们可以对段文件的格式做一个简单的改变：我们要求<strong>键值对的序列按键排序</strong>。这就是<strong>SSTables（Sorted String Tables）</strong>的数据格式。我们还要求同一个key只会出现在一个段中。</p>
+<p>SSTables优点：</p>
+<ol>
+<li>合并段更简单。就像merge sort一样。</li>
+<li>内存中的hashmap索引是稀疏的。<br>在文件中查找key时，不需要在内存中保存所有的key。例如查询handiwork时，不需要handiwork在hashmap中有可以。而知道handbag和handsome的偏移量时，因为key已经排序，可以从handbag开始扫描到handsome就可以确定handiwork在不在。</li>
+<li>压缩时，可以利用稀疏索引，降低了IO带宽。</li>
+</ol>
+<h3 id="构建和维护SSTables"><a href="#构建和维护SSTables" class="headerlink" title="构建和维护SSTables"></a>构建和维护SSTables</h3><p>要解决排序问题。方法是，</p>
+<ol>
+<li>在内存中保存一个排序结构，比如红黑树，AVL树。</li>
+<li>在插入修改时候可以很快的响应。</li>
+<li>可以顺序的读区它们。</li>
+</ol>
+<h4 id="存储引擎工作流程"><a href="#存储引擎工作流程" class="headerlink" title="存储引擎工作流程"></a>存储引擎工作流程</h4><ol>
+<li>写入时，将数据加入内存表中，可以是红黑树实现。</li>
+<li>当内存中的红黑树大小超过阀值时，把它用SSTable的格式写入磁盘。</li>
+<li>处理读请求时，先尝试查询内存表，如果miss就查询磁盘段文件s。</li>
+<li>周期性的执行合并和压缩。丢弃被覆盖和删除的值。</li>
+</ol>
+<h3 id="用SSTable实现LSM-Tree（Log-structured-Merge-Tree）"><a href="#用SSTable实现LSM-Tree（Log-structured-Merge-Tree）" class="headerlink" title="用SSTable实现LSM-Tree（Log-structured Merge-Tree）"></a>用SSTable实现LSM-Tree（Log-structured Merge-Tree）</h3><p>上面的算法时LevelDB和RocksDB使用的，用于嵌入到其他应用的key-value存储引擎。类似的存储引擎也用在了Cassandra和HBase中，这两个引擎都源于Google的BigTable论文。最初这个索引结构在早起的系统中被命名LSM-Tree。因此，基于合并和压缩的排序文件原理的存储引擎，通常都被称作LSM存储引擎。</p>
+<p>全文搜索，Lucene是ElasticSearch和Solr的索引引擎。采用了类似的方法保存字典。全文索引复杂的多，但想法类似。</p>
+<h3 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a>性能优化</h3><ol>
+<li>查询不存在的key时，会从内存开始扫描到磁盘的最后一个段。解决方法是，Bloom Filter。</li>
+<li>压缩合并的时机。分为大小分级和分层压缩两个方法。一个是小的SSTables被连续合并到大的旧的SSTables。另一个是key的范围分裂成多个更小的SSTables，旧数据被移动到单独的层级。</li>
+</ol>
+<p>由于数据是按照排序存储，因此可以高效的执行区间查询。因为磁盘是顺序写入的，LSM-Tree的写入吞吐量可以非常高。</p>
+<h2 id="B-trees索引"><a href="#B-trees索引" class="headerlink" title="B-trees索引"></a>B-trees索引</h2><p>应用最广泛的索引结构。和SSTable一样，B-tree保留按key排，也可以实现高效的范围查询。</p>
+<p>B-tree将数据库分解成固定大小的块和页（4KB or more）。这种设计更接近底层硬件，因为磁盘也是固定大小的块的排列。</p>
+<p>每个页，可以用地址标志，是磁盘地址，而不是内存。这样可以用这些页面引用构造一个树状页面进行索引。索引的根是一个页面，之后的查找根据地址，读取响应的页。</p>
+<p>分支因子。</p>
+<p>大多数数据库的索引适合3-4层的B-tree.因此不需要遍历非常深的页面层次即可找到所需的页。</p>
+<p>B树：多路搜索树，每个结点存储M/2到M个关键字，非叶子结点存储指向关键字范围的子结点；所有关键字在整颗树中出现，且只出现一次，非叶子结点可以命中；<br>B+树：在B-树基础上，为叶子结点增加链表指针，所有关键字都在叶子结点中出现，非叶子结点作为叶子结点的索引；B+树总是到叶子结点才命中；</p>
+<h3 id="使B-tree可靠"><a href="#使B-tree可靠" class="headerlink" title="使B-tree可靠"></a>使B-tree可靠</h3><p>B-tree底层的基本操作是使用新数据覆盖磁盘的旧页。磁盘是覆盖扇区，对于SSD，擦除和重写的存储芯片块很大，情况更复杂。</p>
+<p>页面溢出，需要分裂页时，也要覆盖其父页对更新后的两个子页的引用。属于复杂操作。在完成更新前发生崩溃，可能会产生孤儿页面。</p>
+<p>崩溃恢复，使用redo Log。写数据之前先写日志。</p>
+<p>并发控制。</p>
+<h3 id="优化B-tree"><a href="#优化B-tree" class="headerlink" title="优化B-tree"></a>优化B-tree</h3><ol>
+<li>一些数据库不是用覆盖页，而是做复制。</li>
+<li>保存key的缩略信息而不是完整的key，来节省空间。只需要提供足够的信息来描述key的起止范围。</li>
+<li>页可以存在磁盘的任何位置。可能回有随机的IO，而不是连续的。有些B-tree尝试实现对B-tree进行布局，但是随着树的增长，这个顺序会越来越难维护。</li>
+<li>添加额外指针。左到右的指针，加速遍历。</li>
+</ol>
+<h2 id="对比B-tree-LSM-tree"><a href="#对比B-tree-LSM-tree" class="headerlink" title="对比B-tree, LSM-tree"></a>对比B-tree, LSM-tree</h2><p>根据经验，LSM-Tree写入更快，而B-tree读更快。读取通常在LSM—Tree中较慢，因为要检查多个不同的数据结构和SSTables。</p>
+<h3 id="LSM-Tree优点"><a href="#LSM-Tree优点" class="headerlink" title="LSM-Tree优点"></a>LSM-Tree优点</h3><ol>
+<li>LSM只写入一次数据（不考虑写放大（写入引起的压缩和合并）），而B-tree写入两次（一次redo log，一次数据本身）。</li>
+<li>LSM可以成熟比B-tree更大的吞吐量。有时具有较低的写放大，顺序写入速度快。</li>
+<li>可以支持更好的压缩，文件比B-tree小很多。没有B-tree产生碎片的问题。</li>
+</ol>
+<h3 id="LSM-Tree缺点"><a href="#LSM-Tree缺点" class="headerlink" title="LSM-Tree缺点"></a>LSM-Tree缺点</h3><ol>
+<li>响应延迟不确定，因为压缩和合并。</li>
+<li>由于配置问题，会出现压缩跟不上写入速度的问题。来不及合并，直到磁盘空间不足。</li>
+<li>事务支持不如B-tree</li>
+</ol>
+<h2 id="其他索引"><a href="#其他索引" class="headerlink" title="其他索引"></a>其他索引</h2><h3 id="在索引中存储值"><a href="#在索引中存储值" class="headerlink" title="在索引中存储值"></a>在索引中存储值</h3><p>索引中存储行或则行的具体位置（堆文件法）。将索引行直接存在索引中，聚集索引。MySQL的InnoDB存储引擎中，表的主键是聚集索引，二级索引引用主键。</p>
+<h3 id="多列索引"><a href="#多列索引" class="headerlink" title="多列索引"></a>多列索引</h3><p>级联索引，通过将一列追加到另一列，将几个字段组合成一个键。只能从前到后匹配。B-tree和LSM-tree都无法高效的应对这种查询。</p>
+<p>更常见的索引空间，R树。PostGIS使用PostgreSQL的广义搜索书索引实现了地理空间索引作为R树。</p>
+<h3 id="全文搜索和模糊索引"><a href="#全文搜索和模糊索引" class="headerlink" title="全文搜索和模糊索引"></a>全文搜索和模糊索引</h3><p>之前的搜索都是准确匹配，而不能应对类似的key的搜索，例如错误的拼写。</p>
+<p>Lucene引擎支持在某个编辑距离内的模糊搜索。LevelDB中这个内存中的索引是一些key的稀疏集合。但在Lucene中，内存中的索引是key中的字符串序列的有限状态机，类似字典树。这个自动机可以转换成Leveshtein自动机，支持编辑距离内的搜索。</p>
+<h3 id="在内存中保存所有内容"><a href="#在内存中保存所有内容" class="headerlink" title="在内存中保存所有内容"></a>在内存中保存所有内容</h3><p>内存数据库。例如Memcached，做缓存。数据在重启后可以恢复。</p>
+<p>内存数据可以更快的原因，是因为它们可以避免使用写磁盘的格式对内存数据结构编码的开销。</p>
+<p>提供了给予磁盘索引难以实现的数据结构，例如Redis中的优先级队列和集合。</p>
+<p>可以使用反缓存的方法，当没有足够的内存时，将一部分不常用数据倒入磁盘，类似操作系统的虚拟内存。</p>
+<p>将来的NVM（non-volatile memory）技术广泛的普及，也可能很大的改变存储引擎的设计。</p>
+<h1 id="事务处理OLTP与分析处理OLAP，"><a href="#事务处理OLTP与分析处理OLAP，" class="headerlink" title="事务处理OLTP与分析处理OLAP，"></a>事务处理OLTP与分析处理OLAP，</h1><p>事务意味着允许客户端进行低延迟读区和写入，相比于只能周期性的运行的批处理作业。事务不一定具有ACID属性。</p>
+<p>OLTP每次返回少量的数据，随机访问，低延迟要求。OLAP对大量数据访问，批量导入（ETL）或事件流，内部分析师，为决策提供支持。</p>
+<h2 id="数据仓库"><a href="#数据仓库" class="headerlink" title="数据仓库"></a>数据仓库</h2><p>数据仓库是一个单独的数据库，分析师可以在不影响OLTP的情况下，任意使用数据仓库。数据仓库包含公司所有OLTP数据库的只读副本。</p>
+<p>单独使用数据仓库的优势在于数据仓库可以针对分析访问模式进行优化。本文前半部分讨论的索引模型只适合与OLTP而不适合做分析查询。</p>
+<h3 id="OLTP数据库和数据仓库的差异"><a href="#OLTP数据库和数据仓库的差异" class="headerlink" title="OLTP数据库和数据仓库的差异"></a>OLTP数据库和数据仓库的差异</h3><p>数据仓库也支持SQL查询接口，但是和OLTP的实现差异很大。</p>
+<p>一些数据库（SQL Server和SAP HANA）在同一产品中支持事务处理和数据仓库。然而，它们是两个独立的存储和查询引擎，只是通过一个SQL接口来访问。</p>
+<p>一些商用的数据仓库，Teradata，Vertica，SAP HANA等很贵。还有开源的基于Hadoop的SQL项目，例如Apache Hive，Spark SQL，Cloudera Impala，Facebook Presto，Apache Tajo和Apache Drill. 其中一些是基于Google Dremel而构建的。</p>
+<h3 id="星型与雪花型分析模式"><a href="#星型与雪花型分析模式" class="headerlink" title="星型与雪花型分析模式"></a>星型与雪花型分析模式</h3><p>许多数据仓库都使用了星型模式，也称为维度建模。</p>
+<p>这种模式的中心是一个所谓的事实表。事实表的每一行表示在特定时间发生的事件。</p>
+<img src="/2019/05/05/DDIA-3-数据存储与检索/用于数据仓库的星型模型例子.png">
+<p>通常，事实被捕获为单独的事件，这样之后的分析具有很大的灵活性。</p>
+<p>事实表中的列是属性，其他列可能会引用其他表的外键，成为维度表，这些维度代表事件的发生地点，时间，方式和原因。</p>
+<p>名称<strong>星型模式</strong>来源于关系表可视化的适合，事实表位于中间，被一系列维度表包围。</p>
+<p>该模型的一个变体成为<strong>雪花模型</strong>，其中维度进一步细分为子空间。例如，dimproduct表中的每一行可以再次向外引用品牌和类型的外键。这样更规范，但是更复杂。分析人员一般首选星型。</p>
+<p>典型的数据仓库中，表都非常宽，事实表通常超过100列，甚至几百列。维度表也可能很宽。</p>
+<h1 id="列存储"><a href="#列存储" class="headerlink" title="列存储"></a>列存储</h1><p>主要关注事实表的海量数据问题，通常有万亿行、PB级别的数据。</p>
+<p>虽然通常事实表超过100列，但是一般一次分析也只会访问其中的4，5列。如何高效的执行这中类型的查询？</p>
+<p>OLTP系统中，数据库的存储都是面向行的。如果属性超过100列，那么需要把很多不需要的数据读入内存，然后丢弃。非常低效。</p>
+<p>面向列存储，不是将一行的内容存在一起，而是把每一列的所有值存在一起。</p>
+<h2 id="列压缩"><a href="#列压缩" class="headerlink" title="列压缩"></a>列压缩</h2><p>面向列的存储非常适合压缩。一直技术是位图编码。</p>
+<img src="/2019/05/05/DDIA-3-数据存储与检索/压缩位图索引存储布局.png">
+<p>每一个不同的值一个位图，位图的位数是行数。</p>
+<p>Bigtable模型仍然主要是面向行的。</p>
+<h3 id="内存带宽和矢量化处理"><a href="#内存带宽和矢量化处理" class="headerlink" title="内存带宽和矢量化处理"></a>内存带宽和矢量化处理</h3><p>除了减少需要从磁盘加载的数据量之外，列存储也有利于高效利用CPU的周期性。</p>
+<h2 id="列存储中的排序"><a href="#列存储中的排序" class="headerlink" title="列存储中的排序"></a>列存储中的排序</h2><p>列的存储如果是按照某个常见的顺序，例如date，就可以做类似于SSTables的索引机制。注意单独排序某列没用，需要正行排序。</p>
+<p>数据仓库管理员需要基于经验选择合适的排序列，可以单列也可以是多列。这样查询优化器可以更高效。</p>
+<p>另一个好处是可以进行压缩。可以进行游程编码，位图那样。</p>
+<h3 id="几种不同的排序"><a href="#几种不同的排序" class="headerlink" title="几种不同的排序"></a>几种不同的排序</h3><ol>
+<li>C-Store的改进。用不同的方式存储相同的数据。使不同的排序查询都获益。也就是通过排序后的冗余数据加速。</li>
+<li>列排序，类似于面向行的二级索引。区别是，列的索引中，存的是值而不是地址。</li>
+</ol>
+<h2 id="列存储与写操作"><a href="#列存储与写操作" class="headerlink" title="列存储与写操作"></a>列存储与写操作</h2><p>上述的优化，都是对读的优化，这会让写变得更困难。类似B-tree的就地更新的操作，对压缩列是不可能的。</p>
+<p>一个方案是类似LSM-tree。先写入内存的排序数据结构，然后在一定的时候把内存的数据顺序的倒入磁盘，接着进行有可能的文件合并。这样查询的时候需要检查内存中的数据，和磁盘中的数据。这对于查询方是透明的。</p>
+<h2 id="聚合：数据立方体和物化视图"><a href="#聚合：数据立方体和物化视图" class="headerlink" title="聚合：数据立方体和物化视图"></a>聚合：数据立方体和物化视图</h2><p>数据仓库不是一定要用列存储的。但是列存储因为查询分析更快，所以正在迅速普及。数据仓库另一个方面是物化聚合，就是把常用的查询物理存储化，缓存一些查询结果。</p>
+<p>实现：物化视图。 物化视图的常见特例称为数据立方体或OLAP立方。它是按不同维度分组的聚合网格。以沿着每行或每列应用相同的汇总，并获得一个维度减少的汇总（按产品的销售额，无论日期，还是按日期销售，无论产品如何）。</p>
+<p>缺点是数据立方体不具有查询原始数据的灵活性。因此，大多数数据仓库试图保留尽可能多的原始数据，并将聚合数据（如数据立方体）仅用作某些查询的性能提升。</p>
+
           
         
       

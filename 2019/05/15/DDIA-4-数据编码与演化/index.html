@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="应用程序在根据需求不断的变化时，往往会对其存储的数据有更改的情况。 当数据格式或者模式发生变化的时候，经常需要对应用程序的代码修改。对于一个大型程序，这并非容易。  服务器应用需要滚动升级。这样部署新版本的时候，不需要停止服务。 客户端升级，只能寄希望于用户。很有可能用户永远不会升级。  升级中需要考虑的亮点：  向前兼容。新代码读老数据。（容易） 向后兼容。老代码读新数据。（难）  数据编码格式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDIA-4-数据编码与演化">
+<meta property="og:url" content="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="应用程序在根据需求不断的变化时，往往会对其存储的数据有更改的情况。 当数据格式或者模式发生变化的时候，经常需要对应用程序的代码修改。对于一个大型程序，这并非容易。  服务器应用需要滚动升级。这样部署新版本的时候，不需要停止服务。 客户端升级，只能寄希望于用户。很有可能用户永远不会升级。  升级中需要考虑的亮点：  向前兼容。新代码读老数据。（容易） 向后兼容。老代码读新数据。（难）  数据编码格式">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/一条JSON记录对应的MessagePack的二进制表示.png">
+<meta property="og:image" content="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/使用BinaryProtocol的编码例子.png">
+<meta property="og:image" content="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/使用CompactProtocol的编码例子.png">
+<meta property="og:image" content="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/使用Avro编码的例子.png">
+<meta property="og:updated_time" content="2019-05-19T11:57:25.418Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDIA-4-数据编码与演化">
+<meta name="twitter:description" content="应用程序在根据需求不断的变化时，往往会对其存储的数据有更改的情况。 当数据格式或者模式发生变化的时候，经常需要对应用程序的代码修改。对于一个大型程序，这并非容易。  服务器应用需要滚动升级。这样部署新版本的时候，不需要停止服务。 客户端升级，只能寄希望于用户。很有可能用户永远不会升级。  升级中需要考虑的亮点：  向前兼容。新代码读老数据。（容易） 向后兼容。老代码读新数据。（难）  数据编码格式">
+<meta name="twitter:image" content="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/一条JSON记录对应的MessagePack的二进制表示.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/">
+
+
+
+
+
+  <title>DDIA-4-数据编码与演化 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/15/DDIA-4-数据编码与演化/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DDIA-4-数据编码与演化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-15T20:46:32+08:00">
+                2019-05-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>应用程序在根据需求不断的变化时，往往会对其存储的数据有更改的情况。</p>
+<p>当数据格式或者模式发生变化的时候，经常需要对应用程序的代码修改。对于一个大型程序，这并非容易。</p>
+<ol>
+<li>服务器应用需要滚动升级。这样部署新版本的时候，不需要停止服务。</li>
+<li>客户端升级，只能寄希望于用户。很有可能用户永远不会升级。</li>
+</ol>
+<p>升级中需要考虑的亮点：</p>
+<ol>
+<li>向前兼容。新代码读老数据。（容易）</li>
+<li>向后兼容。老代码读新数据。（难）</li>
+</ol>
+<h1 id="数据编码格式"><a href="#数据编码格式" class="headerlink" title="数据编码格式"></a>数据编码格式</h1><p>程序中的数据，至少有两种不同的表示形式</p>
+<ol>
+<li>内存中。</li>
+<li>写入文件或者发送到网络中。</li>
+</ol>
+<p>两种形式之间的转换，成为序列化Serialize和反序列化Deserialize。或者编码Encode，解码Decode。</p>
+<h2 id="语言特定的格式"><a href="#语言特定的格式" class="headerlink" title="语言特定的格式"></a>语言特定的格式</h2><p>比如Java中java.io.Serializable接口；Ruby的Marshal；Python的pickle等。</p>
+<p>这类编码的问题：</p>
+<ol>
+<li>编码和语言绑定在一起，无法跨语言使用。</li>
+<li>安全问题。远程执行任意代码。可以恢复成任意类，意味着Decode的过程中需要有能力创建任意的类。</li>
+<li>向前向后兼容问题。</li>
+<li>效率低。比如Java内置序列化。</li>
+</ol>
+<h2 id="JSON，XML与它们的二进制遍体"><a href="#JSON，XML与它们的二进制遍体" class="headerlink" title="JSON，XML与它们的二进制遍体"></a>JSON，XML与它们的二进制遍体</h2><p>XML被批评主要在于其冗长和不必要的复杂。JSON受欢迎主要是在Web浏览器中的原生支持。CSV格式简单，功能弱一些。</p>
+<p>它们都是文本格式的，可读性强。但也有<strong>问题</strong>：</p>
+<ol>
+<li>数字编码有很多模糊的地方。XML和CSV中无法区分数字和数字组成的字符串；JSON不区分整数和浮点数，而且不指定精度。</li>
+<li>对Unicode字符串支持好，但是不支持二进制数据。所以人们使用Base64将二进制数据编码成String来传递。</li>
+<li>XML和JSON都有可选的模式支持。数据的正确性解释，取决于模式中的信息，</li>
+<li>CSV没有任何模式，需要程序解释。</li>
+</ol>
+<h2 id="二进制编码"><a href="#二进制编码" class="headerlink" title="二进制编码"></a>二进制编码</h2><p>更紧凑更快的解析格式。可以节省空间和时间。在TB级别的数据时尤其关键。</p>
+<h3 id="MessagePack"><a href="#MessagePack" class="headerlink" title="MessagePack"></a>MessagePack</h3><p>最最基础的二进制化JSON方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;userName&quot;: &quot;Martin&quot;,</span><br><span class="line">    &quot;favoriteNumber: 1337,</span><br><span class="line">    &quot;interests&quot;: [&quot;daydreaming&quot;, &quot;hacking&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<img src="/2019/05/15/DDIA-4-数据编码与演化/一条JSON记录对应的MessagePack的二进制表示.png">
+<p>上图的二进制的结构解读：</p>
+<ol>
+<li>第一个字节0x83，表示接下来是包含三个fields的对象（第四位0x03，高四位0x80）</li>
+<li>第二字节0xa8，表示接下来的字符串，长度为八个字节</li>
+<li>再往下的八个字节时ASCII的字段，userName</li>
+<li>在接下来7个字节前缀0xa6表示后面有六个字节，Martin</li>
+</ol>
+<p>结论：<br>整体编码占用66个字节，比原始的JSON编码（81个）少一些，但是不明显。</p>
+<p>下面的方案中只用32个字节就可以完成同样记录的二进制化。</p>
+<h2 id="Thrift与Protocol-Buffers"><a href="#Thrift与Protocol-Buffers" class="headerlink" title="Thrift与Protocol Buffers"></a>Thrift与Protocol Buffers</h2><p>它们都是基于相同原理的二进制编码方式。都需要使用<strong>模式（Schema）</strong>来编码任意数据。</p>
+<ul>
+<li><p>使用Thrift的接口定义语言（IDL）来描述模式：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct Person &#123;</span><br><span class="line">    1: required string       userName,</span><br><span class="line">    2: optional i64          favoriteNumber,</span><br><span class="line">    3: optional list&lt;string&gt; interests</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用Protocol Buffers的等效模式定义看起来非常相似：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">    required string user_name       = 1;</span><br><span class="line">    optional int64  favorite_number = 2;</span><br><span class="line">    repeated string interests       = 3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Thrift和Protocol Buffers都有各自的代码生成工具，并支持各种编程语言。应用程序可以直接使用生成的代码完成Encode，Decode的工作。</p>
+<h3 id="Thrift的BinaryProtocal与CompactProtocol"><a href="#Thrift的BinaryProtocal与CompactProtocol" class="headerlink" title="Thrift的BinaryProtocal与CompactProtocol"></a>Thrift的BinaryProtocal与CompactProtocol</h3><ul>
+<li><p>BinaryProtocal</p>
+<img src="/2019/05/15/DDIA-4-数据编码与演化/使用BinaryProtocol的编码例子.png">
+<p>需要59个字节。</p>
+</li>
+</ul>
+<ol>
+<li>每个字段有一个类型注视（是字符串，整数，列表等），并可以指定长度（字符串长度，列表的count）</li>
+<li>与MessagePack最大的区别是没有字段名。</li>
+</ol>
+<ul>
+<li><p>CompactProtocol</p>
+<img src="/2019/05/15/DDIA-4-数据编码与演化/使用CompactProtocol的编码例子.png">
+<p>只需要34字节。</p>
+</li>
+</ul>
+<ol>
+<li>通过将字段类型和标签号打包在一个字节中。</li>
+<li>使用可变长度整数。 1337，不用一个字节中的全部8位都表示数值。使用两个字节编码，每个字节的最高位表示是否还有更多字节。</li>
+<li>可变长度整数意味着，-64到63的数字可以用一个字节表示，-8192到8191之间用两个字节。</li>
+</ol>
+<h3 id="Protocol-Buffer编码"><a href="#Protocol-Buffer编码" class="headerlink" title="Protocol Buffer编码"></a>Protocol Buffer编码</h3><p>只有一种编码模式。与CompactProtocol很类似。只用33个字节。</p>
+
+<p>不同之处：</p>
+<ol>
+<li>表示字段位置和类型的一个压缩的字节中的位数分配不同</li>
+<li>表示数字的填充方式不同。例如1337的表示一个是最左，一个是最右。</li>
+<li>表示列表的方式不同，Thrift是有列表type，而protocol buffer是用重复的field tag来表示列表或者数组</li>
+<li>没有end of struct</li>
+</ol>
+<p>一个细节，optional字段对于编码encode的结果没有任何影响（二进制中不会体现一个field是optional的）。optional的体现在于在Runtime 时后可以做检查，捕获错误。</p>
+<h3 id="字段标签和模式演化"><a href="#字段标签和模式演化" class="headerlink" title="字段标签和模式演化"></a>字段标签和模式演化</h3><p>如何保证修改模型时候，既保证向前又保证向后兼容呢？</p>
+<p>可以根据之前的例子看出，每个字段的标签号码（1，2，3等），与它的类型整合在一个字节中。由此看出field tag对编码数据的含义至关重要。</p>
+<ol>
+<li>不能随便改字段的标签，会导致现有的编码无效。保证这个原则，实现向后兼容。</li>
+<li>可以添加新的字段，只需要用一个新的标签。如果老代码读到带有新标签的数据，那么会忽略。这样可以向前兼容。</li>
+<li>新增字段不可以是required字段，或者没有默认值的字段，向后兼容。违反的结果，会让老数据无法被新代码读。</li>
+<li>删除字段只可以删除可选字段，老代码读新数据时才不会出检查问题，向前兼容。</li>
+</ol>
+<h3 id="数据类型和模式演化"><a href="#数据类型和模式演化" class="headerlink" title="数据类型和模式演化"></a>数据类型和模式演化</h3><p>改变数据类型会如何？可能是可以做的，但是风险在于丢失精度或者数据截断。</p>
+<ol>
+<li>例如一个32位整数变成一个64位的整数。新代码可以读老数据，因为可以用0填充缺失的位。如果是老代码读64位的数据，使用32位int存，则会截断。</li>
+<li>Protocol Buffer中没有数组或者列表。所以如果把单值的类型变成列表类型的，老代码读新数据，只会留下最后一个值。而新代码没什么问题。</li>
+</ol>
+<h2 id="Avro"><a href="#Avro" class="headerlink" title="Avro"></a>Avro</h2><p>另一种二进制编码格式。由于Thrift不适合Hadoop的用例，因此Avro在2009年作为Hadoop的子项目启动。</p>
+<p>Avro也用<strong>模式</strong>来制定数据结构的编码。它有两种语言：一种是Avro IDL，用于人工编辑，一种是基于JSON的易于机器读。</p>
+<p>基于Avro IDL的模式的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">record Person &#123;</span><br><span class="line">    string                userName;</span><br><span class="line">    union &#123; null, long &#125;  favoriteNumber = null;</span><br><span class="line">    array&lt;string&gt;         interests;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其等价JSON格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;type&quot;: &quot;record&quot;,</span><br><span class="line">    &quot;name&quot;: &quot;Person&quot;,</span><br><span class="line">    &quot;fields&quot;: [</span><br><span class="line">        &#123;&quot;name&quot;: &quot;userName&quot;, &quot;type&quot;: &quot;string&quot;&#125;,</span><br><span class="line">        &#123;&quot;name&quot;: &quot;favoriteNumber&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;long&quot;], &quot;default&quot;: null&#125;,</span><br><span class="line">        &#123;&quot;name&quot;: &quot;interests&quot;, &quot;type&quot;: &#123;&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: &quot;string&quot;&#125;</span><br><span class="line">    ] </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<img src="/2019/05/15/DDIA-4-数据编码与演化/使用Avro编码的例子.png">
+<p>主要区别：</p>
+<ol>
+<li>模式中没有标签号，是目前见过的所有编码中最紧凑的。</li>
+<li>字节序列中也没有类型信息。只是连在一起的一些列值组成。字符串是长度加UTF-8的字节流，整数使用可变长度编码（与CompactProtocol相同）。但是并没有任何信息表示这些field是什么类型。</li>
+</ol>
+<p>如何解析？<br>需要预先读区模式信息的数据，然后按照模式的顺序，遍历这些字段。</p>
+<p>然后直接用模式中的字段信息来决定每个field到底是什么类型。</p>
+<p>这意味着，读取数据的代码，必须使用当时写入数据是使用的<strong>模式</strong>，才可以正确还原数据。如果中间有任何不匹配，都无法解析。</p>
+<h3 id="Avro中的写模式和读模式"><a href="#Avro中的写模式和读模式" class="headerlink" title="Avro中的写模式和读模式"></a>Avro中的写模式和读模式</h3><ul>
+<li>写模式。encode时，使用的模式，可以将这个模式编译在应用中。</li>
+<li>读模式。decode时，应用代码依赖的模式，这个模式可能是在应用程序build过程中基于模式语言动态生成的。</li>
+</ul>
+<p><strong>Avro关键思想</strong> ，写模式和读模式不一定需要完全一样，只需要兼容。当数据被Decode的时候，Avro的 Library通过对比查看写模式和读模式之间的差异，把数据从写模式转换成读模式，然后继续decode。Avro规范定义了这种解决方法的工作原理。</p>
+<p>假如写模式和读模式的字段顺序不同，也没有关系，如果读的过程中遇到了只有在写模式中出现的字段，那可以忽略。如果在一个字段只在读模式中有，那么可以填充默认值。</p>
+<h3 id="Avro模式演化"><a href="#Avro模式演化" class="headerlink" title="Avro模式演化"></a>Avro模式演化</h3><ol>
+<li>只能添加或删除有默认值的字段。</li>
+<li>如果添加一个没有默认值的字段，破坏了向后兼容性</li>
+<li>如果删除一个没有默认值的字段，破坏了向前兼容性。</li>
+<li>null值的处理。</li>
+</ol>
+<h4 id="关键问题，写模式是什么？读模式如何直到某一个数据是用那个写模式编码的？"><a href="#关键问题，写模式是什么？读模式如何直到某一个数据是用那个写模式编码的？" class="headerlink" title="关键问题，写模式是什么？读模式如何直到某一个数据是用那个写模式编码的？"></a>关键问题，写模式是什么？读模式如何直到某一个数据是用那个写模式编码的？</h4><p>这个问题要取决于Avro使用的上下文：</p>
+<ol>
+<li>有很多记录的大文件。<br> Avro常见场景。尤其是Hadoop的上下文中。上百万的数据，都是用相同的模式编码。这种情况下，该文件的写入模式可以嵌入到文件的开头。Avro可以制定一个文件格式来做到这一点。</li>
+<li>具有单独写入记录的数据库<br> 数据库中的记录，可能是在不同的时间点写入的。每个时间点可能使用不同的写入模式。最简单的发难是在每个编码记录的开始处，包含一个版本号，制定着写入模式的版本。在数据库的一个地方存储所有的写入模式列表。这样读取时可以直到数据的写入模式。Espresso就是这样工作的。</li>
+<li>通过网络连接发送记录<br> 连接双方可以在建立连接时，协商模式的版本，然后在这个连接会话中使用这个模式。这也是Avro RPC的协议原理。</li>
+</ol>
+<h3 id="动态生成的模式"><a href="#动态生成的模式" class="headerlink" title="动态生成的模式"></a>动态生成的模式</h3><p>Avro的一个重要优点就是不包含任何标签号。</p>
+<p>不包含标签号是好理由： 动态生成模式更友好。</p>
+<p>关系型数据库，使用二进制方式，把内容转存到一个文件的例子。</p>
+<ol>
+<li>根据关系模型，生成Avro模式。并使用这个模式编码，把数据库内容倒入Avro对象容器文件中。列名对应Avro的field</li>
+<li>如果数据库的关系模型发生变化，则可以更新Avro的模式，使用新的Avro导出数据。不需要关注模式的改变，字段是通过名字来表识的，所以更新后的写模式仍然可以和老的读模式匹配。</li>
+</ol>
+<p>相比之下，Thrift和Protocol  Buffer都需要手动分配新的标签。而且还需要完成从数据库列名到新标签的映射。</p>
+<h3 id="代码生成和动态类型语言"><a href="#代码生成和动态类型语言" class="headerlink" title="代码生成和动态类型语言"></a>代码生成和动态类型语言</h3><ol>
+<li>静态类型语言<br>Thrift和Protocol Buffer依赖于代码生成。定义了模式之后，可以跨语言使用模式。对于Java，C++等语言非常有用。可以转换成内存结构，并且支持IDE的类型检查。</li>
+<li>动态语言（Javascript，Ruby，Python），因为没有编译时检查，代码生成没有什么意义。</li>
+<li>Avro为静态语言也提供了代码生成的工具，但是它也可以在在不生成代码的情况下使用。如果是一个嵌入了writer模式的对象容器文件，可以简单的使用Avro库打开，并用和JSON文件一样的方式查看。因为文件是字描述的。</li>
+</ol>
+<h2 id="模式的优点"><a href="#模式的优点" class="headerlink" title="模式的优点"></a>模式的优点</h2><ol>
+<li>模式语言简单。原理简单，使用更简单，广泛的编程语言支持。</li>
+<li>比JSON，XML，CSV，更紧凑</li>
+<li>模式有文档价值，不需要额外的手工维护的文档</li>
+</ol>
+<h1 id="数据流模式"><a href="#数据流模式" class="headerlink" title="数据流模式"></a>数据流模式</h1><h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><p>向数据库中存储内容，就是在给未来的自己发送消息。</p>
+<p>这种情况下，<strong>向后兼容</strong>是非常重要的。否则新代码无法读取存在数据库中以前写入的数据。</p>
+<p>需要注意的一点是，老代码读区新代码写入的数据时，更新后又写会数据库，要当心不要丢失新数据格式的原来的信息。</p>
+<p>将数据重写（迁移）到一个新的模式当然是可能的，但是在一个大数据集上执行是一个昂贵的事情，所以大多数数据库如果可能的话就避免它。</p>
+<h2 id="基于服务的数据流：REST与RPC"><a href="#基于服务的数据流：REST与RPC" class="headerlink" title="基于服务的数据流：REST与RPC"></a>基于服务的数据流：REST与RPC</h2><h3 id="Web的方式，基于HTTP。"><a href="#Web的方式，基于HTTP。" class="headerlink" title="Web的方式，基于HTTP。"></a>Web的方式，基于HTTP。</h3><ol>
+<li>使用客户端（浏览器，移动应用，PC应用等）访问服务器数据。</li>
+<li>使用服务器访问另一个服务器的Web服务。这样的应用构建方式最近叫做微服务。</li>
+</ol>
+<p>微服务的关键设计目标是，通过使服务可独立部署和演化，让应用程序更易于更改和维护。这样每一个团队可以能够经常发布新的版本，而不必与其他团队协调。因此服务器和客户端之间的数据编码必须在不同版本的API之间兼容。</p>
+<p>REST使一种HTTP服务的设计理念。SOAP基于XML，基于Web服务时，API被称为WSDL，支持代码生成。SOAP严重依赖工具，代码生成和IDE支持，与SOAP集成的成本很高。</p>
+<p>RESTful的API更简单，格式如OpenAPI，Swagger。<br>由于互联网上存在广泛的安全威胁，REST的安全生态系统非常强大，从防火墙到OAUTH（身份验证/授权）</p>
+<h3 id="远程过程调用RPC的问题"><a href="#远程过程调用RPC的问题" class="headerlink" title="远程过程调用RPC的问题"></a>远程过程调用RPC的问题</h3><p>看起来像是在使用本地方法。但是有缺陷需要解决：</p>
+<ol>
+<li>网络请求不可预测。速度方面，网络失败，需要准备重试的逻辑。</li>
+<li>可能超时，没有结果。无法知道发生了什么。</li>
+<li>重试的时候，需要保证调用的方法有幂等性保证。</li>
+<li>序列化时的问题，效率方面，编程语言方面的限制。</li>
+</ol>
+<h3 id="RPC发展"><a href="#RPC发展" class="headerlink" title="RPC发展"></a>RPC发展</h3><p>这种新一代的RPC框架更加明确的是，远程请求与本地函数调用不同。例如，Finagle和Rest.li 使用futures（promises）来封装可能失败的异步操作。Futures还可以简化需要并行发出多项服务的情况，并将其结果合并。 gRPC支持流，其中一个调用不仅包括一个请求和一个响应，还包括一系列的请求和响应。</p>
+<p>使用二进制编码格式的自定义RPC协议可以实现比通用的JSON over REST更好的性能。但是，RESTful API还有其他一些显着的优点：对于实验和调试（只需使用Web浏览器或命令行工具curl，无需任何代码生成或软件安装即可向其请求），它是受支持的所有的主流编程语言和平台，还有大量可用的工具（服务器，缓存，负载平衡器，代理，防火墙，监控，调试工具，测试工具等）的生态系统。由于这些原因，REST似乎是公共API的主要风格。 RPC框架的主要重点在于同一组织拥有的服务之间的请求，通常在同一数据中心内。</p>
+<h3 id="RPC的数据编码和演化"><a href="#RPC的数据编码和演化" class="headerlink" title="RPC的数据编码和演化"></a>RPC的数据编码和演化</h3><p>假定所有的服务器都会先更新，其次是所有的客户端。只需要在请求上具有向后兼容性，并且对响应具有前向兼容性。</p>
+<p>RPC方案中的向前向后兼容的解决方法，可他们在数据编码中使用的方法也有关。</p>
+<h2 id="异步消息传递，消息代理"><a href="#异步消息传递，消息代理" class="headerlink" title="异步消息传递，消息代理"></a>异步消息传递，消息代理</h2><p>中间件，可以低延迟的响应web请求。</p>
+<p>优点：</p>
+<ol>
+<li>如果接收方不可用，可以当作缓冲区，暂存消息，等恢复之后一起消费，实现HA。</li>
+<li>可以自动重新发送消息到崩溃进程。防止丢消息。</li>
+<li>结偶发送方和接收方，双方不需要知道对方的IP</li>
+<li>支持广播，一条消息被多个人接收</li>
+<li>子系统之间结偶</li>
+</ol>
+<p>可以使用任何编码方式。只要兼容。</p>
+<h2 id="分布式Actor框架"><a href="#分布式Actor框架" class="headerlink" title="分布式Actor框架"></a>分布式Actor框架</h2><p>并发编程模型。逻辑封装在Actor中。不直接操作线程。</p>
+<p>由于每个Actor一次只能处理一条消息，因此不需要担心线程，每个Actor可以由框架独立调度。</p>
+<p>分布式Actor框架中，编程模型被用来跨多节点进行scaling。位于不同节点之间的通讯可以使用encode decode的方式进行网络数据传输。</p>
+<p>分布式Actor框架的实质是将消息代理（MQ等）和Actor编程模型集成到一个框架中。</p>
+<p>三种流行的分布式Actor框架对于消息encoding的方式：</p>
+<ul>
+<li>默认情况下，Akka使用Java的内置序列化，不提供前向或后向兼容性。 但是，你可以用类似Protocol buffer的东西替代它，从而获得滚动升级的能力。</li>
+<li>Orleans 默认使用不支持滚动升级部署的自定义数据编码格式; 要部署新版本的应用程序，您需要设置一个新的群集，将流量从旧群集迁移到新群集，然后关闭旧群集。 像Akka一样，可以使用自定义序列化插件。</li>
+<li>在Erlang OTP中，对记录模式进行更改是非常困难的（尽管系统具有许多为高可用性设计的功能）。 滚动升级是可能的，但需要仔细计划。 一个新的实验性的maps数据类型（2014年在Erlang R17中引入的类似于JSON的结构）可能使得这个数据类型在未来更容易。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/05/Algorithim-String/" rel="next" title="Algorithim-String">
+                <i class="fa fa-chevron-left"></i> Algorithim-String
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据编码格式"><span class="nav-number">1.</span> <span class="nav-text">数据编码格式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#语言特定的格式"><span class="nav-number">1.1.</span> <span class="nav-text">语言特定的格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON，XML与它们的二进制遍体"><span class="nav-number">1.2.</span> <span class="nav-text">JSON，XML与它们的二进制遍体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二进制编码"><span class="nav-number">1.3.</span> <span class="nav-text">二进制编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MessagePack"><span class="nav-number">1.3.1.</span> <span class="nav-text">MessagePack</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thrift与Protocol-Buffers"><span class="nav-number">1.4.</span> <span class="nav-text">Thrift与Protocol Buffers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Thrift的BinaryProtocal与CompactProtocol"><span class="nav-number">1.4.1.</span> <span class="nav-text">Thrift的BinaryProtocal与CompactProtocol</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Protocol-Buffer编码"><span class="nav-number">1.4.2.</span> <span class="nav-text">Protocol Buffer编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段标签和模式演化"><span class="nav-number">1.4.3.</span> <span class="nav-text">字段标签和模式演化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据类型和模式演化"><span class="nav-number">1.4.4.</span> <span class="nav-text">数据类型和模式演化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Avro"><span class="nav-number">1.5.</span> <span class="nav-text">Avro</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Avro中的写模式和读模式"><span class="nav-number">1.5.1.</span> <span class="nav-text">Avro中的写模式和读模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Avro模式演化"><span class="nav-number">1.5.2.</span> <span class="nav-text">Avro模式演化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关键问题，写模式是什么？读模式如何直到某一个数据是用那个写模式编码的？"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">关键问题，写模式是什么？读模式如何直到某一个数据是用那个写模式编码的？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态生成的模式"><span class="nav-number">1.5.3.</span> <span class="nav-text">动态生成的模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码生成和动态类型语言"><span class="nav-number">1.5.4.</span> <span class="nav-text">代码生成和动态类型语言</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模式的优点"><span class="nav-number">1.6.</span> <span class="nav-text">模式的优点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据流模式"><span class="nav-number">2.</span> <span class="nav-text">数据流模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-number">2.1.</span> <span class="nav-text">数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于服务的数据流：REST与RPC"><span class="nav-number">2.2.</span> <span class="nav-text">基于服务的数据流：REST与RPC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Web的方式，基于HTTP。"><span class="nav-number">2.2.1.</span> <span class="nav-text">Web的方式，基于HTTP。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#远程过程调用RPC的问题"><span class="nav-number">2.2.2.</span> <span class="nav-text">远程过程调用RPC的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RPC发展"><span class="nav-number">2.2.3.</span> <span class="nav-text">RPC发展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RPC的数据编码和演化"><span class="nav-number">2.2.4.</span> <span class="nav-text">RPC的数据编码和演化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异步消息传递，消息代理"><span class="nav-number">2.3.</span> <span class="nav-text">异步消息传递，消息代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式Actor框架"><span class="nav-number">2.4.</span> <span class="nav-text">分布式Actor框架</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

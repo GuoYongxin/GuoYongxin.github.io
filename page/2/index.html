@@ -239,6 +239,146 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/09/iOS-编译Category遇到的问题/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/09/iOS-编译Category遇到的问题/" itemprop="url">iOS-编译Category遇到的问题</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-09T17:26:44+08:00">
+                2018-06-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>一个iOS菜鸟，最近工作中遇到了一个有关Category的问题。Objective-C语言。</p>
+<p>遇到问题的原因是，我给AppDelegate加一个Category的时候，忘记Check 中Production的Deployment Target。</p>
+<p>造成的结果是，我在Category中加的方法，在运行时怎么都不能被找到，然后就会Crash。运行期间报selector not recognized，不是property找不到，是method。</p>
+<p>解决方法当然就是把这个m文件选入Production的Target就好了。这些都很简单。</p>
+<p>问题在于，为什么Xcode没有在Compile Time找到这个问题呢？如果我编译，链接PROD的Target，按一般的静态语言，这个错误很容易被发现。所以就跟同事讨论了一下Obj-C的编译与Runtime的问题。</p>
+<p>再简单总结一下遇到的情况：</p>
+<p>测试1， 如果把普通类（非Category）的m文件从target排除掉，那么compiler在编译期，准确的说链接时，就会报错。</p>
+<p>测试2，把Category的m文件从target排除掉，编译期就不会报错，只会在运行到那一行Category的方法时，发现找不到Symbol。</p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>为什么呢？</p>
+<p>短的答案是，Category的方法调用不会被链接时确定，而是在Runtime去找。</p>
+<p>长的答案参考自Apple文档 <a href="https://developer.apple.com/library/archive/qa/qa1490/_index.html" target="_blank" rel="noopener">https://developer.apple.com/library/archive/qa/qa1490/_index.html</a></p>
+<p>里边这一段说明了情况，是说我们的主类去引用一个Category的method的时候并不能产生一个undefined symbol去给链接器处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">The dynamic nature of Objective-C complicates things slightly. Because the code that implements a method is not determined until the method is actually called, Objective-C does not define linker symbols for methods. Linker symbols are only defined for classes.</span><br><span class="line"></span><br><span class="line">For example, if main.m includes the code [[FooClass alloc] initWithBar:nil]; then main.o will contain an undefined symbol for FooClass, but no linker symbols for the -initWithBar: method will be in main.o.</span><br><span class="line"></span><br><span class="line">Since categories are a collection of methods, using a category&apos;s method does not generate an undefined symbol. This means the linker does not know to load an object file defining the category, if the class itself is already defined. This causes the same &quot;selector not recognized&quot; runtime exception you would see for any unimplemented method.</span><br></pre></td></tr></table></figure>
+<p>最终的结果是，在RUNTIME用@selector产生SEL的后，在Dispatch Table中找不该SEL ID到IMP</p>
+<h2 id="其他参考"><a href="#其他参考" class="headerlink" title="其他参考"></a>其他参考</h2><p>在研究有关Category的问题时候，又通过一些博客学习了一些新知识。</p>
+<p><a href="https://tech.meituan.com/DiveIntoCategory.html" target="_blank" rel="noopener">https://tech.meituan.com/DiveIntoCategory.html</a></p>
+<p><a href="https://www.jianshu.com/p/5aed848e283d" target="_blank" rel="noopener">https://www.jianshu.com/p/5aed848e283d</a></p>
+<p><a href="https://www.zhihu.com/question/27179396" target="_blank" rel="noopener">https://www.zhihu.com/question/27179396</a></p>
+<p><a href="https://hit-alibaba.github.io/interview/iOS/ObjC-Basic/Runtime.html" target="_blank" rel="noopener">https://hit-alibaba.github.io/interview/iOS/ObjC-Basic/Runtime.html</a></p>
+<p><a href="https://www.jianshu.com/p/4a09d5ebdc2c" target="_blank" rel="noopener">https://www.jianshu.com/p/4a09d5ebdc2c</a></p>
+<p><a href="https://blog.csdn.net/fengsh998/article/details/8614486" target="_blank" rel="noopener">https://blog.csdn.net/fengsh998/article/details/8614486</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/ES6-Arrow-Function/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1743,7 +1883,7 @@ Executor提供了一种标准的方法把任务提交与任务执行解耦开来
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

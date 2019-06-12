@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="数据分区的主要目的—提高可扩展性。也就是应对增长的负载，把负载均匀的分布到各个机器/节点上。 数据分区与数据复制通常结合使用，也就是每个分区在多个节点都存有副本。 一个节点可能有一个或多个分区。每个分区都有自己的主副本。  Key-Value 数据分区如何决定哪些记录放在哪个节点上？ 如果分区不均匀，那么会导致某些分区节点比其他分区承担更多的数据量的查询负载，成为倾斜。会导致分区效率下降。 避免热">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDIA-6-数据分区">
+<meta property="og:url" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="数据分区的主要目的—提高可扩展性。也就是应对增长的负载，把负载均匀的分布到各个机器/节点上。 数据分区与数据复制通常结合使用，也就是每个分区在多个节点都存有副本。 一个节点可能有一个或多个分区。每个分区都有自己的主副本。  Key-Value 数据分区如何决定哪些记录放在哪个节点上？ 如果分区不均匀，那么会导致某些分区节点比其他分区承担更多的数据量的查询负载，成为倾斜。会导致分区效率下降。 避免热">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/组合使用复制和分区：每个节点充当某些分区的领导者，其他分区充当追随者。.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/印刷版百科全书按照关键字范围进行分区.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/基于关键字的哈希值进行分区.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/按文档分区二级索引.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/按关键词对二级索引进行分区.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/将新节点添加到每个节点具有多个分区的数据库群集.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/将请求路由到正确节点的三种不同方式.png">
+<meta property="og:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/使用ZooKeeper跟踪分区分配给节点.png">
+<meta property="og:updated_time" content="2019-06-12T15:38:56.656Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDIA-6-数据分区">
+<meta name="twitter:description" content="数据分区的主要目的—提高可扩展性。也就是应对增长的负载，把负载均匀的分布到各个机器/节点上。 数据分区与数据复制通常结合使用，也就是每个分区在多个节点都存有副本。 一个节点可能有一个或多个分区。每个分区都有自己的主副本。  Key-Value 数据分区如何决定哪些记录放在哪个节点上？ 如果分区不均匀，那么会导致某些分区节点比其他分区承担更多的数据量的查询负载，成为倾斜。会导致分区效率下降。 避免热">
+<meta name="twitter:image" content="http://yoursite.com/2019/06/12/DDIA-6-数据分区/组合使用复制和分区：每个节点充当某些分区的领导者，其他分区充当追随者。.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/06/12/DDIA-6-数据分区/">
+
+
+
+
+
+  <title>DDIA-6-数据分区 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/12/DDIA-6-数据分区/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DDIA-6-数据分区</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-12T08:46:30+08:00">
+                2019-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>数据分区的主要目的—提高可扩展性。也就是应对增长的负载，把负载均匀的分布到各个机器/节点上。</p>
+<h1 id="数据分区与数据复制"><a href="#数据分区与数据复制" class="headerlink" title="数据分区与数据复制"></a>数据分区与数据复制</h1><p>通常结合使用，也就是每个分区在多个节点都存有副本。</p>
+<p>一个节点可能有一个或多个分区。每个分区都有自己的主副本。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/组合使用复制和分区：每个节点充当某些分区的领导者，其他分区充当追随者。.png">
+<h1 id="Key-Value-数据分区"><a href="#Key-Value-数据分区" class="headerlink" title="Key-Value 数据分区"></a>Key-Value 数据分区</h1><p>如何决定哪些记录放在哪个节点上？</p>
+<p>如果分区不均匀，那么会导致某些分区节点比其他分区承担更多的数据量的查询负载，成为<strong>倾斜</strong>。会导致分区效率下降。</p>
+<p>避免热点的最简单的方法是将记录<strong>随机分配</strong>给各个节点。可以比较均匀的分布数据。但是有一个缺点，当读区特定数据时，无法知道保存在哪个节点，所以必须并发读所有节点。这可以改进。</p>
+<h2 id="基于Key的区间分区"><a href="#基于Key的区间分区" class="headerlink" title="基于Key的区间分区"></a>基于Key的区间分区</h2><p>为每个分区指定一块连续的key范围，就像百科全书一样。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/印刷版百科全书按照关键字范围进行分区.png">
+<p>Bigtable使用了这种分区策略，以及其开源等价物HBase。</p>
+<ul>
+<li>优点，每个分区可以按照key排序（类似SSTables和LSM-Trees），可以轻松支持区间查询。</li>
+<li>缺点，某些访问模式会导致热点。</li>
+</ul>
+<h2 id="基于关键字哈希值分区"><a href="#基于关键字哈希值分区" class="headerlink" title="基于关键字哈希值分区"></a>基于关键字哈希值分区</h2><p>用来解决数据倾斜和热点问题。</p>
+<p>哈希函数的选择，不能使用内置的哈希函数，例如Java的Object.hashCode,同一个Key的返回值可能在不同的进程中不一样。</p>
+<p>每一个分区是一个哈希范围。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/基于关键字的哈希值进行分区.png">
+<p>分区的边界可以是均匀的，也可也是伪随机选择（一致性哈希）。</p>
+<p><strong>缺点</strong>，丧失了良好的分区查询特性。在MongoDB中，如果使用了哈希分片模式，则区间查询会发送到所有的分区上。</p>
+<p>Cassandra在两种分区策略中做了折中。使用了主key哈希，其他列区间的方式。可以支持在其他列上的高效区间查询。</p>
+<p><strong>一致性哈希</strong><br>是一种平均分配负载的方法，最初用于CDN，描述了重新平衡的特定方法。正如我们将在“重新平衡分区”中所看到的，这种特殊的方法对于数据库实际上并不是很好，所以在实际中很少使用。</p>
+<p><strong>组合索引</strong> 例如社交网络的（user_id, update_timestamp）。可以高效的检索一个用户在一段时间的所有更新，按照时间戳排序。</p>
+<h2 id="负载倾斜与消除热点"><a href="#负载倾斜与消除热点" class="headerlink" title="负载倾斜与消除热点"></a>负载倾斜与消除热点</h2><p>基于哈希的分区方法可以减轻热点，但是无法完全避免。极端情况就是所有的读写操作都是针对同一个key。社交网络上的名人有几千万粉丝的例子。</p>
+<p>解决方法：应用层来减轻倾斜程度。</p>
+<ul>
+<li><strong>写入</strong> 例如如果某个关键字被确定为热点，就在关键字开头或者结尾加一个随机数。这样只需要一个两位数的十进制数就可以把关键字分不到100个不同的关键字上。</li>
+<li><strong>读取</strong> 需要从所有100个关键字中读取数据然后进行合并。</li>
+</ul>
+<p>因此只有对少量关键字附加随机数才有意义。需要额外的元数据来标记哪些关键字进行了特殊处理。</p>
+<h1 id="分区与二级索引"><a href="#分区与二级索引" class="headerlink" title="分区与二级索引"></a>分区与二级索引</h1><p>二级索引，情况变得复杂。不能唯一表识一个记录，而是用来做特定值的查询。例如红色的车，包含hogwash的文章。</p>
+<h2 id="基于文档分区的二级索引"><a href="#基于文档分区的二级索引" class="headerlink" title="基于文档分区的二级索引"></a>基于文档分区的二级索引</h2><p>也称为本地索引。每个分区有自己的索引。</p>
+<p>搜索时候，需要将查询发送到所有的问去，然后合并所有的返回结果。这种方法也叫做分散/聚集。查询代价高昂。</p>
+<p>尽管如此，它还是广泛用于实践：MongoDB，Riak，Cassandra，ElasticSearch，SolrCloud，VoltDB。。。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/按文档分区二级索引.png">
+<h2 id="基于词条的二级索引分区"><a href="#基于词条的二级索引分区" class="headerlink" title="基于词条的二级索引分区"></a>基于词条的二级索引分区</h2><p>构建全局索引。全局索引也必须进行分区。可以与数据关键字采用不同的分区策略。</p>
+<p>读取更为高效。不需要分散/聚集。</p>
+<p>写入较慢且非常复杂。更新单个文档时，需要涉及到多个二级索引，写放大。所以，现有数据库都不支持同步更新二级索引。</p>
+<p>实践中，二级索引的更新都是异步的。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/按关键词对二级索引进行分区.png">
+<h1 id="分区再平衡"><a href="#分区再平衡" class="headerlink" title="分区再平衡"></a>分区再平衡</h1><p>应对数据库的变化，例如：</p>
+<ol>
+<li>查询压力增加，需要更多的CPU处理负载。</li>
+<li>数据规模增加，需要更多的磁盘和内存。</li>
+<li>节点故障，需要其他机器接管失效节点。</li>
+</ol>
+<p>以上这些变化都要求数据和请求从一个节点转移到另一个节点。这样一个迁移负载的过程成为再平衡。</p>
+<p>再平衡的目标：</p>
+<ol>
+<li>平衡后，负载，存储，读写请求等应该更均匀。</li>
+<li>再平衡过程中，可以正常的读写。</li>
+<li>避免不必要的负载迁移，尽量减少网络和磁盘IO影响。</li>
+</ol>
+<h2 id="再平衡策略"><a href="#再平衡策略" class="headerlink" title="再平衡策略"></a>再平衡策略</h2><h3 id="坏方法：取模-mod-N"><a href="#坏方法：取模-mod-N" class="headerlink" title="坏方法：取模 mod N"></a>坏方法：取模 mod N</h3><p>如果N变化，就会产生迁移。频繁的迁移增加了再平衡的成本。</p>
+<h3 id="简单的解决方法：固定数量分区"><a href="#简单的解决方法：固定数量分区" class="headerlink" title="简单的解决方法：固定数量分区"></a>简单的解决方法：固定数量分区</h3><ol>
+<li>首先，创建远超过实际节点数的分区。然后为每个节点分配多个分区。</li>
+<li>接下来，如果集群中添加了新节点，就从现有节点中匀走几个给新节点，直到分区再次达到全局平衡。</li>
+<li>如果删除节点，则执行相反的措施。</li>
+</ol>
+<img src="/2019/06/12/DDIA-6-数据分区/将新节点添加到每个节点具有多个分区的数据库群集.png">
+<p>迁移过程中，总分区数不变。也不会改变关键字到分区的映射关系。</p>
+<p>需要调整的是，分区与节点的对应关系。</p>
+<p>分区大小应该恰到好处。</p>
+<h3 id="动态分区"><a href="#动态分区" class="headerlink" title="动态分区"></a>动态分区</h3><p>HBase和RethinkDB等采用了动态创建分区的策略。当分区数据增长超过一个可配置的阀值，就将它拆分为两个分区，每个承担一半的数据量。反过来也是。</p>
+<p>动态分区不仅适用于关键字区间分区，也适用于基于哈希的分区策略。</p>
+<h3 id="按节点比例分区"><a href="#按节点比例分区" class="headerlink" title="按节点比例分区"></a>按节点比例分区</h3><p>每个节点具有固定数量的分区。Cassandra和Ketama采用了这种方式。</p>
+<p>当节点数不变时，每个分区的大小与数据集大小保持正比的增长关系。当节点数增加时，分区则会调整的更小。</p>
+<p>新节点加入集群时，会随机选择固定数量的现有分区进行分裂，然后拿走这额分区一半的数据量。</p>
+<p>随机选择分区边界，前提是要求采用基于哈希的分区。这也符合一致性哈希。</p>
+<h2 id="自动与手动再平衡"><a href="#自动与手动再平衡" class="headerlink" title="自动与手动再平衡"></a>自动与手动再平衡</h2><p>推荐手动，避免意外发生。</p>
+<h1 id="请求路由"><a href="#请求路由" class="headerlink" title="请求路由"></a>请求路由</h1><p>客户端请求时，如何直到应该链接哪个节点？</p>
+<p>属于服务发现的问题。任何通过网络访问的系统都有这样的要求，尤其是当服务目标支持高可用时。</p>
+<p><strong>处理策略</strong>：</p>
+<ol>
+<li>允许客户端链接任意的节点。如果请求的节点能满足客户端查询，则返回，否则转发到下一个合适的节点。</li>
+<li>客户端的请求都发送到一个路由层，路由层来转发请求到可以处理的节点。</li>
+<li>客户端感知分区和节点的关系，直接连接到目标节点。</li>
+</ol>
+<img src="/2019/06/12/DDIA-6-数据分区/将请求路由到正确节点的三种不同方式.png">
+<p>如何应对变化？很多分布式系统依赖一个独立的协调服务（如ZooKeeper），跟踪集群范围内的元数据。每个节点都向Zookeeper中注册自己，ZooKeeper维护了分区到节点的映射。客户端或者路由层订阅这个映射，当有改变时，会通知订阅者更改。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/使用ZooKeeper跟踪分区分配给节点.png">
+<p>​<br>Cassandra和Riak采取不同的方法：他们在节点之间使用流言协议（gossip protocol） 来传播群集状态的变化。请求可以发送到任意节点，该节点会转发到包含所请求的分区的适当节点（处理策略的方法1）。这个模型在数据库节点中增加了更多的复杂性，但是避免了对像ZooKeeper这样的外部协调服务的依赖。</p>
+<h2 id="执行并行查询"><a href="#执行并行查询" class="headerlink" title="执行并行查询"></a>执行并行查询</h2><p>目前只关注了读写单个关键字的建大查询，大多数是<strong>NoSQL</strong>分布式数据存储所支持的访问类型。</p>
+<p>然而，通常用于分析的大规模并行处理（MPP, Massively parallel processing） <strong>关系型数据库</strong>产品在其支持的查询类型方面要复杂得多。一个典型的数据仓库查询包含多个连接，过滤，分组和聚合操作。 MPP查询优化器将这个复杂的查询分解成许多执行阶段和分区，其中许多可以在数据库集群的不同节点上并行执行。涉及扫描大规模数据集的查询特别受益于这种并行执行。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/20/DDIA-5-数据复制/" rel="next" title="DDIA-5-数据复制">
+                <i class="fa fa-chevron-left"></i> DDIA-5-数据复制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/12/DDIA-7-事务/" rel="prev" title="DDIA-7-事务">
+                DDIA-7-事务 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据分区与数据复制"><span class="nav-number">1.</span> <span class="nav-text">数据分区与数据复制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Key-Value-数据分区"><span class="nav-number">2.</span> <span class="nav-text">Key-Value 数据分区</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基于Key的区间分区"><span class="nav-number">2.1.</span> <span class="nav-text">基于Key的区间分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于关键字哈希值分区"><span class="nav-number">2.2.</span> <span class="nav-text">基于关键字哈希值分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载倾斜与消除热点"><span class="nav-number">2.3.</span> <span class="nav-text">负载倾斜与消除热点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分区与二级索引"><span class="nav-number">3.</span> <span class="nav-text">分区与二级索引</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基于文档分区的二级索引"><span class="nav-number">3.1.</span> <span class="nav-text">基于文档分区的二级索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于词条的二级索引分区"><span class="nav-number">3.2.</span> <span class="nav-text">基于词条的二级索引分区</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分区再平衡"><span class="nav-number">4.</span> <span class="nav-text">分区再平衡</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#再平衡策略"><span class="nav-number">4.1.</span> <span class="nav-text">再平衡策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#坏方法：取模-mod-N"><span class="nav-number">4.1.1.</span> <span class="nav-text">坏方法：取模 mod N</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单的解决方法：固定数量分区"><span class="nav-number">4.1.2.</span> <span class="nav-text">简单的解决方法：固定数量分区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态分区"><span class="nav-number">4.1.3.</span> <span class="nav-text">动态分区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#按节点比例分区"><span class="nav-number">4.1.4.</span> <span class="nav-text">按节点比例分区</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动与手动再平衡"><span class="nav-number">4.2.</span> <span class="nav-text">自动与手动再平衡</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#请求路由"><span class="nav-number">5.</span> <span class="nav-text">请求路由</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行并行查询"><span class="nav-number">5.1.</span> <span class="nav-text">执行并行查询</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

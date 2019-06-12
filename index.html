@@ -239,6 +239,328 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/12/DDIA-7-事务/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/12/DDIA-7-事务/" itemprop="url">DDIA-7-事务</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-12T08:46:48+08:00">
+                2019-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/12/DDIA-6-数据分区/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/12/DDIA-6-数据分区/" itemprop="url">DDIA-6-数据分区</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-12T08:46:30+08:00">
+                2019-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>数据分区的主要目的—提高可扩展性。也就是应对增长的负载，把负载均匀的分布到各个机器/节点上。</p>
+<h1 id="数据分区与数据复制"><a href="#数据分区与数据复制" class="headerlink" title="数据分区与数据复制"></a>数据分区与数据复制</h1><p>通常结合使用，也就是每个分区在多个节点都存有副本。</p>
+<p>一个节点可能有一个或多个分区。每个分区都有自己的主副本。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/组合使用复制和分区：每个节点充当某些分区的领导者，其他分区充当追随者。.png">
+<h1 id="Key-Value-数据分区"><a href="#Key-Value-数据分区" class="headerlink" title="Key-Value 数据分区"></a>Key-Value 数据分区</h1><p>如何决定哪些记录放在哪个节点上？</p>
+<p>如果分区不均匀，那么会导致某些分区节点比其他分区承担更多的数据量的查询负载，成为<strong>倾斜</strong>。会导致分区效率下降。</p>
+<p>避免热点的最简单的方法是将记录<strong>随机分配</strong>给各个节点。可以比较均匀的分布数据。但是有一个缺点，当读区特定数据时，无法知道保存在哪个节点，所以必须并发读所有节点。这可以改进。</p>
+<h2 id="基于Key的区间分区"><a href="#基于Key的区间分区" class="headerlink" title="基于Key的区间分区"></a>基于Key的区间分区</h2><p>为每个分区指定一块连续的key范围，就像百科全书一样。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/印刷版百科全书按照关键字范围进行分区.png">
+<p>Bigtable使用了这种分区策略，以及其开源等价物HBase。</p>
+<ul>
+<li>优点，每个分区可以按照key排序（类似SSTables和LSM-Trees），可以轻松支持区间查询。</li>
+<li>缺点，某些访问模式会导致热点。</li>
+</ul>
+<h2 id="基于关键字哈希值分区"><a href="#基于关键字哈希值分区" class="headerlink" title="基于关键字哈希值分区"></a>基于关键字哈希值分区</h2><p>用来解决数据倾斜和热点问题。</p>
+<p>哈希函数的选择，不能使用内置的哈希函数，例如Java的Object.hashCode,同一个Key的返回值可能在不同的进程中不一样。</p>
+<p>每一个分区是一个哈希范围。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/基于关键字的哈希值进行分区.png">
+<p>分区的边界可以是均匀的，也可也是伪随机选择（一致性哈希）。</p>
+<p><strong>缺点</strong>，丧失了良好的分区查询特性。在MongoDB中，如果使用了哈希分片模式，则区间查询会发送到所有的分区上。</p>
+<p>Cassandra在两种分区策略中做了折中。使用了主key哈希，其他列区间的方式。可以支持在其他列上的高效区间查询。</p>
+<p><strong>一致性哈希</strong><br>是一种平均分配负载的方法，最初用于CDN，描述了重新平衡的特定方法。正如我们将在“重新平衡分区”中所看到的，这种特殊的方法对于数据库实际上并不是很好，所以在实际中很少使用。</p>
+<p><strong>组合索引</strong> 例如社交网络的（user_id, update_timestamp）。可以高效的检索一个用户在一段时间的所有更新，按照时间戳排序。</p>
+<h2 id="负载倾斜与消除热点"><a href="#负载倾斜与消除热点" class="headerlink" title="负载倾斜与消除热点"></a>负载倾斜与消除热点</h2><p>基于哈希的分区方法可以减轻热点，但是无法完全避免。极端情况就是所有的读写操作都是针对同一个key。社交网络上的名人有几千万粉丝的例子。</p>
+<p>解决方法：应用层来减轻倾斜程度。</p>
+<ul>
+<li><strong>写入</strong> 例如如果某个关键字被确定为热点，就在关键字开头或者结尾加一个随机数。这样只需要一个两位数的十进制数就可以把关键字分不到100个不同的关键字上。</li>
+<li><strong>读取</strong> 需要从所有100个关键字中读取数据然后进行合并。</li>
+</ul>
+<p>因此只有对少量关键字附加随机数才有意义。需要额外的元数据来标记哪些关键字进行了特殊处理。</p>
+<h1 id="分区与二级索引"><a href="#分区与二级索引" class="headerlink" title="分区与二级索引"></a>分区与二级索引</h1><p>二级索引，情况变得复杂。不能唯一表识一个记录，而是用来做特定值的查询。例如红色的车，包含hogwash的文章。</p>
+<h2 id="基于文档分区的二级索引"><a href="#基于文档分区的二级索引" class="headerlink" title="基于文档分区的二级索引"></a>基于文档分区的二级索引</h2><p>也称为本地索引。每个分区有自己的索引。</p>
+<p>搜索时候，需要将查询发送到所有的问去，然后合并所有的返回结果。这种方法也叫做分散/聚集。查询代价高昂。</p>
+<p>尽管如此，它还是广泛用于实践：MongoDB，Riak，Cassandra，ElasticSearch，SolrCloud，VoltDB。。。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/按文档分区二级索引.png">
+<h2 id="基于词条的二级索引分区"><a href="#基于词条的二级索引分区" class="headerlink" title="基于词条的二级索引分区"></a>基于词条的二级索引分区</h2><p>构建全局索引。全局索引也必须进行分区。可以与数据关键字采用不同的分区策略。</p>
+<p>读取更为高效。不需要分散/聚集。</p>
+<p>写入较慢且非常复杂。更新单个文档时，需要涉及到多个二级索引，写放大。所以，现有数据库都不支持同步更新二级索引。</p>
+<p>实践中，二级索引的更新都是异步的。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/按关键词对二级索引进行分区.png">
+<h1 id="分区再平衡"><a href="#分区再平衡" class="headerlink" title="分区再平衡"></a>分区再平衡</h1><p>应对数据库的变化，例如：</p>
+<ol>
+<li>查询压力增加，需要更多的CPU处理负载。</li>
+<li>数据规模增加，需要更多的磁盘和内存。</li>
+<li>节点故障，需要其他机器接管失效节点。</li>
+</ol>
+<p>以上这些变化都要求数据和请求从一个节点转移到另一个节点。这样一个迁移负载的过程成为再平衡。</p>
+<p>再平衡的目标：</p>
+<ol>
+<li>平衡后，负载，存储，读写请求等应该更均匀。</li>
+<li>再平衡过程中，可以正常的读写。</li>
+<li>避免不必要的负载迁移，尽量减少网络和磁盘IO影响。</li>
+</ol>
+<h2 id="再平衡策略"><a href="#再平衡策略" class="headerlink" title="再平衡策略"></a>再平衡策略</h2><h3 id="坏方法：取模-mod-N"><a href="#坏方法：取模-mod-N" class="headerlink" title="坏方法：取模 mod N"></a>坏方法：取模 mod N</h3><p>如果N变化，就会产生迁移。频繁的迁移增加了再平衡的成本。</p>
+<h3 id="简单的解决方法：固定数量分区"><a href="#简单的解决方法：固定数量分区" class="headerlink" title="简单的解决方法：固定数量分区"></a>简单的解决方法：固定数量分区</h3><ol>
+<li>首先，创建远超过实际节点数的分区。然后为每个节点分配多个分区。</li>
+<li>接下来，如果集群中添加了新节点，就从现有节点中匀走几个给新节点，直到分区再次达到全局平衡。</li>
+<li>如果删除节点，则执行相反的措施。</li>
+</ol>
+<img src="/2019/06/12/DDIA-6-数据分区/将新节点添加到每个节点具有多个分区的数据库群集.png">
+<p>迁移过程中，总分区数不变。也不会改变关键字到分区的映射关系。</p>
+<p>需要调整的是，分区与节点的对应关系。</p>
+<p>分区大小应该恰到好处。</p>
+<h3 id="动态分区"><a href="#动态分区" class="headerlink" title="动态分区"></a>动态分区</h3><p>HBase和RethinkDB等采用了动态创建分区的策略。当分区数据增长超过一个可配置的阀值，就将它拆分为两个分区，每个承担一半的数据量。反过来也是。</p>
+<p>动态分区不仅适用于关键字区间分区，也适用于基于哈希的分区策略。</p>
+<h3 id="按节点比例分区"><a href="#按节点比例分区" class="headerlink" title="按节点比例分区"></a>按节点比例分区</h3><p>每个节点具有固定数量的分区。Cassandra和Ketama采用了这种方式。</p>
+<p>当节点数不变时，每个分区的大小与数据集大小保持正比的增长关系。当节点数增加时，分区则会调整的更小。</p>
+<p>新节点加入集群时，会随机选择固定数量的现有分区进行分裂，然后拿走这额分区一半的数据量。</p>
+<p>随机选择分区边界，前提是要求采用基于哈希的分区。这也符合一致性哈希。</p>
+<h2 id="自动与手动再平衡"><a href="#自动与手动再平衡" class="headerlink" title="自动与手动再平衡"></a>自动与手动再平衡</h2><p>推荐手动，避免意外发生。</p>
+<h1 id="请求路由"><a href="#请求路由" class="headerlink" title="请求路由"></a>请求路由</h1><p>客户端请求时，如何直到应该链接哪个节点？</p>
+<p>属于服务发现的问题。任何通过网络访问的系统都有这样的要求，尤其是当服务目标支持高可用时。</p>
+<p><strong>处理策略</strong>：</p>
+<ol>
+<li>允许客户端链接任意的节点。如果请求的节点能满足客户端查询，则返回，否则转发到下一个合适的节点。</li>
+<li>客户端的请求都发送到一个路由层，路由层来转发请求到可以处理的节点。</li>
+<li>客户端感知分区和节点的关系，直接连接到目标节点。</li>
+</ol>
+<img src="/2019/06/12/DDIA-6-数据分区/将请求路由到正确节点的三种不同方式.png">
+<p>如何应对变化？很多分布式系统依赖一个独立的协调服务（如ZooKeeper），跟踪集群范围内的元数据。每个节点都向Zookeeper中注册自己，ZooKeeper维护了分区到节点的映射。客户端或者路由层订阅这个映射，当有改变时，会通知订阅者更改。</p>
+<img src="/2019/06/12/DDIA-6-数据分区/使用ZooKeeper跟踪分区分配给节点.png">
+<p>​<br>Cassandra和Riak采取不同的方法：他们在节点之间使用流言协议（gossip protocol） 来传播群集状态的变化。请求可以发送到任意节点，该节点会转发到包含所请求的分区的适当节点（处理策略的方法1）。这个模型在数据库节点中增加了更多的复杂性，但是避免了对像ZooKeeper这样的外部协调服务的依赖。</p>
+<h2 id="执行并行查询"><a href="#执行并行查询" class="headerlink" title="执行并行查询"></a>执行并行查询</h2><p>目前只关注了读写单个关键字的建大查询，大多数是<strong>NoSQL</strong>分布式数据存储所支持的访问类型。</p>
+<p>然而，通常用于分析的大规模并行处理（MPP, Massively parallel processing） <strong>关系型数据库</strong>产品在其支持的查询类型方面要复杂得多。一个典型的数据仓库查询包含多个连接，过滤，分组和聚合操作。 MPP查询优化器将这个复杂的查询分解成许多执行阶段和分区，其中许多可以在数据库集群的不同节点上并行执行。涉及扫描大规模数据集的查询特别受益于这种并行执行。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/20/DDIA-5-数据复制/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1910,274 +2232,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/31/Javascript函数式编程/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Roger Guo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Roger Guo's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/31/Javascript函数式编程/" itemprop="url">Javascript函数式编程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-31T22:54:16+08:00">
-                2018-08-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="纯函数"><a href="#纯函数" class="headerlink" title="纯函数"></a>纯函数</h1><h2 id="Side-Effect-副作用"><a href="#Side-Effect-副作用" class="headerlink" title="Side Effect, 副作用"></a>Side Effect, 副作用</h2><p>非纯函数会产生副作用。我们一般调用一个函数，是要得到一个返回值，或者处理一些数据。但是如果这个函数在给你返回结果之后，影响了其他对象的状态，包括传入参数，甚至一些全局变量，那么我们就说这个函数又Side Effect，副作用。</p>
-<p>所谓纯函数，就是不论你调用他多少次，他都会给你返回相同的结果，并且不会改变其他的变量的状态。</p>
-<p>非纯函数在易读性易理解方面，是没有纯函数强的。因为我们需要记住每一次调用非纯函数后产生的各种状态转化，这就增加了程序阅读的难度。</p>
-<p>非纯函数，会增加代码阅读时的困难。但这并不是说明我们要远离非纯函数，非纯函数是程序的必备部分。</p>
-<h2 id="构造一个纯函数"><a href="#构造一个纯函数" class="headerlink" title="构造一个纯函数"></a>构造一个纯函数</h2><p>一个比较直接的方式，传入所有依赖的状态并做copy。这可能带来开销问题，内存，时间等等。</p>
-<p>什么时候选择写一个纯函数，是要根据场景来判断的。纯函数不是解决任何问题的最好方法。</p>
-<h1 id="函数组合"><a href="#函数组合" class="headerlink" title="函数组合"></a>函数组合</h1><p>函数组合是为了避免产生连续的纯函数调用时，依赖的中间状态。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sum</span>(<span class="params">x,y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">multi</span>(<span class="params">x,y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x * y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> z = multi(<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">z = sum(z,<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 手动组合2</span></span><br><span class="line"><span class="keyword">var</span> z = sum(multi(<span class="number">3</span>,<span class="number">4</span>),<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 手动组合3</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">multiAndSum</span>(<span class="params">x,y,z</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sum(multi(x,y),z);</span><br><span class="line">&#125;</span><br><span class="line">multiAndSum(<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
-<p>组合的函数</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compose</span>(<span class="params">fn1, fn2</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">comp</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> args = [].slice.call(<span class="built_in">arguments</span>);</span><br><span class="line">        refurn fn2(fn1(args.shift(), args.shift()), args.shift());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> multiAndSum = compose2(multi, sum);</span><br><span class="line">multiAndSum(<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
-<h1 id="Immutability"><a href="#Immutability" class="headerlink" title="Immutability"></a>Immutability</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> x = <span class="number">2</span>;</span><br><span class="line">x++; <span class="comment">// allowed</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> y = <span class="number">3</span>;</span><br><span class="line">y++; <span class="comment">//not allowed</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> z = [<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>];</span><br><span class="line">z = <span class="number">10</span>; <span class="comment">//not allowed</span></span><br><span class="line">z[<span class="number">0</span>] = <span class="number">0</span>; <span class="comment">// allowed</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> w = Object.freeze([<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>])</span><br><span class="line">w = <span class="number">10</span>; /not allowed</span><br><span class="line">w[<span class="number">0</span>] = <span class="number">10</span>; /not allowed</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">function <span class="title">doubleThemMutable</span><span class="params">(list)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; list.length; i++&gt;) &#123;</span><br><span class="line">        list[i] = list[i] * <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> arr = [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>];</span><br><span class="line">doubleThemMutable(arr);</span><br><span class="line">arr; <span class="comment">// [6,8,10];</span></span><br><span class="line"><span class="function">function <span class="title">doubleThemImmutable</span><span class="params">(list)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> newList = [];</span><br><span class="line">     <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; list.length; i++&gt;) &#123;</span><br><span class="line">        newList[i] = list[i] * <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> arr = [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>];</span><br><span class="line"><span class="keyword">var</span> arr2 = doubelThemImmutable(arr);</span><br><span class="line">arr; <span class="comment">// [3,4,5]</span></span><br><span class="line">arr2; <span class="comment">//[6,8,10]</span></span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/31/Nginx配置笔记/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Roger Guo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Roger Guo's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/31/Nginx配置笔记/" itemprop="url">Nginx配置笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-31T22:06:41+08:00">
-                2018-08-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>在yum repo配置目录下创建nginx镜像配置， /etc/yum.repos.d/nginx.repo， 文件nginx.repo填入如下内容</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[nginx]</span><br><span class="line">name=nginx repo</span><br><span class="line">baseurl=http://nginx.org/packages/centos/$releasever/$basearch/</span><br><span class="line">gpgcheck=0</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure>
-<p>然后运行</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y</span><br></pre></td></tr></table></figure>
-<p>如果出错，需要检查配置文件内容是否有误，也有可能是cache问题，运行yum clean all 即可。</p>
-<p>常用命令</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/nginx start # 启动Nginx服务</span><br><span class="line"> </span><br><span class="line">/etc/init.d/nginx stop # 停止Nginx服务</span><br><span class="line"> </span><br><span class="line">/etc/nginx/nginx.conf # Nginx配置文件</span><br></pre></td></tr></table></figure>
-<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h2><p>将域名 <a href="http://www.domain.com" target="_blank" rel="noopener">www.domain.com</a> 的证书文件1_<a href="http://www.domain.com_bundle.crt" target="_blank" rel="noopener">www.domain.com_bundle.crt</a> 、私钥文件2_<a href="http://www.domain.com.key保存到同一个目录，例如/usr/local/nginx/conf目录下。" target="_blank" rel="noopener">www.domain.com.key保存到同一个目录，例如/usr/local/nginx/conf目录下。</a><br>更新Nginx根目录下 conf/nginx.conf 文件如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 443;</span><br><span class="line">        server_name www.domain.com; #填写绑定证书的域名</span><br><span class="line">        ssl on;</span><br><span class="line">        ssl_certificate 1_www.domain.com_bundle.crt;</span><br><span class="line">        ssl_certificate_key 2_www.domain.com.key;</span><br><span class="line">        ssl_session_timeout 5m;</span><br><span class="line">        ssl_protocols TLSv1 TLSv1.1 TLSv1.2; #按照这个协议配置</span><br><span class="line">        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;#按照这个套件配置</span><br><span class="line">        ssl_prefer_server_ciphers on;</span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html; #站点目录</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="HTTP-rewrite-to-HTTPS"><a href="#HTTP-rewrite-to-HTTPS" class="headerlink" title="HTTP rewrite to HTTPS"></a>HTTP rewrite to HTTPS</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">   listen         80;</span><br><span class="line">   server_name    www.domain.com;</span><br><span class="line">   return         301 https://$server_name$request_uri;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://serverfault.com/questions/67316/in-nginx-how-can-i-rewrite-all-http-requests-to-https-while-maintaining-sub-dom" target="_blank" rel="noopener">https://serverfault.com/questions/67316/in-nginx-how-can-i-rewrite-all-http-requests-to-https-while-maintaining-sub-dom</a></p>
-<p><a href="https://www.nginx.com/resources/wiki/start/topics/tutorials/install/" target="_blank" rel="noopener">https://www.nginx.com/resources/wiki/start/topics/tutorials/install/</a></p>
-<p><a href="https://nginx.org/en/docs/beginners_guide.html" target="_blank" rel="noopener">https://nginx.org/en/docs/beginners_guide.html</a></p>
-<p><a href="https://cloud.tencent.com/document/product/400/4143" target="_blank" rel="noopener">https://cloud.tencent.com/document/product/400/4143</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2223,7 +2282,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">22</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

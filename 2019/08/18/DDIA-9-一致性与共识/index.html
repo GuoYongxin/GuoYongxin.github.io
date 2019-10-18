@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一致性保证 最终一致性是一个非常弱的保证。当系统提供了弱保证的数据库时，要认清系统的局限性。（最终一致性数据库不同副本的状态可能不同） 需要更强的一致性保证来满足一些业务的需求。  可线性化基本思想：让系统看起来好像只有一个副本，并且所有的操作都是原子的 非线性化，看世界杯直播的例子 用户可以发现不一致是因为有系统外部的信息通道。 如何达到线性化？问题，三个用户同时读写变量x从用户的角度来讲，标红">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDIA-9-一致性与共识">
+<meta property="og:url" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/index.html">
+<meta property="og:site_name" content="Roger Guo&#39;s Blog">
+<meta property="og:description" content="一致性保证 最终一致性是一个非常弱的保证。当系统提供了弱保证的数据库时，要认清系统的局限性。（最终一致性数据库不同副本的状态可能不同） 需要更强的一致性保证来满足一些业务的需求。  可线性化基本思想：让系统看起来好像只有一个副本，并且所有的操作都是原子的 非线性化，看世界杯直播的例子 用户可以发现不一致是因为有系统外部的信息通道。 如何达到线性化？问题，三个用户同时读写变量x从用户的角度来讲，标红">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/一个非线性化的体育网站系统.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/并发的读写请求.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/任何一个读取返回新值后，所有后续读取（在相同或其他客户端上）也必须返回新值.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/Web服务器和图像调整器通过文件存储和消息队列进行通信，打开竞争条件的可能性。.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/非线性一致的执行，尽管使用了严格的法定人数.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/网络中断迫使在线性一致性和可用性之间做出选择.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/Lamport时间戳提供了与因果关系一致的总排序.png">
+<meta property="og:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/两阶段提交（2PC）的成功执行.png">
+<meta property="og:updated_time" content="2019-10-18T00:29:58.382Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDIA-9-一致性与共识">
+<meta name="twitter:description" content="一致性保证 最终一致性是一个非常弱的保证。当系统提供了弱保证的数据库时，要认清系统的局限性。（最终一致性数据库不同副本的状态可能不同） 需要更强的一致性保证来满足一些业务的需求。  可线性化基本思想：让系统看起来好像只有一个副本，并且所有的操作都是原子的 非线性化，看世界杯直播的例子 用户可以发现不一致是因为有系统外部的信息通道。 如何达到线性化？问题，三个用户同时读写变量x从用户的角度来讲，标红">
+<meta name="twitter:image" content="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/一个非线性化的体育网站系统.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/">
+
+
+
+
+
+  <title>DDIA-9-一致性与共识 | Roger Guo's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Roger Guo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DDIA-9-一致性与共识</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-18T23:10:14+08:00">
+                2019-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="一致性保证"><a href="#一致性保证" class="headerlink" title="一致性保证"></a>一致性保证</h1><ol>
+<li>最终一致性是一个非常弱的保证。当系统提供了弱保证的数据库时，要认清系统的局限性。（最终一致性数据库不同副本的状态可能不同）</li>
+<li>需要更强的一致性保证来满足一些业务的需求。</li>
+</ol>
+<h1 id="可线性化"><a href="#可线性化" class="headerlink" title="可线性化"></a>可线性化</h1><p>基本思想：<strong>让系统看起来好像只有一个副本，并且所有的操作都是原子的</strong></p>
+<h2 id="非线性化，看世界杯直播的例子"><a href="#非线性化，看世界杯直播的例子" class="headerlink" title="非线性化，看世界杯直播的例子"></a>非线性化，看世界杯直播的例子</h2><img src="/2019/08/18/DDIA-9-一致性与共识/一个非线性化的体育网站系统.png">
+<p>用户可以发现不一致是因为有系统外部的信息通道。</p>
+<h2 id="如何达到线性化？"><a href="#如何达到线性化？" class="headerlink" title="如何达到线性化？"></a>如何达到线性化？</h2><h3 id="问题，三个用户同时读写变量x"><a href="#问题，三个用户同时读写变量x" class="headerlink" title="问题，三个用户同时读写变量x"></a>问题，三个用户同时读写变量x</h3><p>从用户的角度来讲，标红的request在没有线性一致保证时候可能返回任何值。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/并发的读写请求.png">
+<h3 id="实现线性一致，要添加一个约束"><a href="#实现线性一致，要添加一个约束" class="headerlink" title="实现线性一致，要添加一个约束"></a>实现线性一致，要添加一个约束</h3><img src="/2019/08/18/DDIA-9-一致性与共识/任何一个读取返回新值后，所有后续读取（在相同或其他客户端上）也必须返回新值.png">
+<p>由于B的读取严格在发生于A的读取之后，因此即使C的写入仍在进行中，也必须返回 1。</p>
+<h3 id="增加CAS操作"><a href="#增加CAS操作" class="headerlink" title="增加CAS操作"></a>增加CAS操作</h3>
+<h2 id="可串行化-VS-可线性化"><a href="#可串行化-VS-可线性化" class="headerlink" title="可串行化 VS 可线性化"></a>可串行化 VS 可线性化</h2><h3 id="可串行化"><a href="#可串行化" class="headerlink" title="可串行化"></a>可串行化</h3><p>是事务隔离属性。<br>确保了事务执行的<strong>结果</strong>与串行执行结果一样。</p>
+<h3 id="可线性化-1"><a href="#可线性化-1" class="headerlink" title="可线性化"></a>可线性化</h3><p>是读写寄存器的最新值保证。<br>跟事务没有关系。</p>
+<h2 id="需要线性化的场景"><a href="#需要线性化的场景" class="headerlink" title="需要线性化的场景"></a>需要线性化的场景</h2><h3 id="加锁与主节点选举"><a href="#加锁与主节点选举" class="headerlink" title="加锁与主节点选举"></a>加锁与主节点选举</h3><p>主从复制数据库，只能有一个主节点，否则会产生脑裂。</p>
+<p>常见方法是使用锁。先获得锁的人成为主节点。</p>
+<p>不管这个锁是如何实现的，它必须是线性一致的：所有节点必须就哪个节点拥有锁达成一致，否则就没用了。</p>
+<p>​诸如Apache ZooKeeper 和etcd之类的协调服务通常用于实现分布式锁和领导者选举。它们使用一致性算法，以容错的方式实现线性一致的操作（在本章后面的“容错共识”中讨论此类算法）。还有许多微妙的细节来正确地实现锁和领导者选择（例如，参阅“领导者和锁”中的屏蔽问题）。<br>线性一致性存储服务是这些协调任务的基础。</p>
+<h3 id="约束与唯一性保证"><a href="#约束与唯一性保证" class="headerlink" title="约束与唯一性保证"></a>约束与唯一性保证</h3><p>注册用户名/邮箱唯一。</p>
+<p>这种情况实际上类似于一个锁：当一个用户注册你的服务时，可以认为他们获得了所选用户名的“锁定”。</p>
+<h3 id="跨通道的时间依赖"><a href="#跨通道的时间依赖" class="headerlink" title="跨通道的时间依赖"></a>跨通道的时间依赖</h3><p>看球赛中的例子。由于系统中存在额外的信道（Alice的声音传到了Bob的耳朵中），线性一致性的违背才被注意到。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/Web服务器和图像调整器通过文件存储和消息队列进行通信，打开竞争条件的可能性。.png">
+<p>如果你可以控制额外信道（例如消息队列的例子，而不是在Alice和Bob的例子），则可以使用在“读己之写”讨论过的备选方法，不过会有额外的复杂度代价。</p>
+<h2 id="实现线性化系统"><a href="#实现线性化系统" class="headerlink" title="实现线性化系统"></a>实现线性化系统</h2><p>系统容错做常见的解决方案是复制。 </p>
+<ol>
+<li>单主系统可能实现线性化。从主节点读或者同步更新从节点。</li>
+<li>共识算法。通过协商一致性协议算法可以防止脑裂和读取过期数据，通过一致性算法可以实现核心数据线性化的安全存储。这是ZooKeeper与Chubby等分布式协调服务的基础算法。</li>
+</ol>
+<h3 id="法定人数读Quorum"><a href="#法定人数读Quorum" class="headerlink" title="法定人数读Quorum"></a>法定人数读Quorum</h3><p>在某些情况，即使w + r &gt; n，也会不是线性的。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/非线性一致的执行，尽管使用了严格的法定人数.png">
+<h2 id="线性化的代价"><a href="#线性化的代价" class="headerlink" title="线性化的代价"></a>线性化的代价</h2><p>​许多分布式数据库也是如此：它们是为了提高性能而选择了牺牲线性一致性，而不是为了容错。线性一致的速度很慢——这始终是事实，而不仅仅是网络故障期间。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/网络中断迫使在线性一致性和可用性之间做出选择.png">
+<h3 id="CAP理论"><a href="#CAP理论" class="headerlink" title="CAP理论"></a>CAP理论</h3><p>CAP理论，简而言之便是：数据系统必须在<strong>一致性</strong>、<strong>可用性</strong>、<strong>分区容忍性</strong>的三角关系之中有所权衡，任何系统没有办法同时满足三种特性。</p>
+<p>所以使用<strong>线性化</strong>的一致性自然会需要在<strong>可用性上做一些妥协</strong>， 在单Leader多Follower机制之下，需要满足线性化一致性的写入和读取的客户端必须连接到Leader。如果Leader产生中断，仍然可以读取Follower的数据，但此时就无法保证线性化的要求了。</p>
+<p>​许多分布式数据库也是如此：它们是为了提高性能而选择了牺牲线性一致性，而不是为了容错。线性一致的速度很慢——这始终是事实，而不仅仅是网络故障期间。</p>
+<h1 id="顺序"><a href="#顺序" class="headerlink" title="顺序"></a>顺序</h1><h2 id="顺序与因果关系"><a href="#顺序与因果关系" class="headerlink" title="顺序与因果关系"></a>顺序与因果关系</h2><p>顺序有助于保证因果关系。</p>
+<p>因果顺序不是全序。</p>
+<p>可线性化强于因果一致性。</p>
+<h3 id="线性一致性"><a href="#线性一致性" class="headerlink" title="线性一致性"></a>线性一致性</h3><p>在线性一致的系统中，操作是全序的：如果系统表现的就好像只有一个数据副本，并且所有操作都是原子性的，这意味着对任何两个操作，我们总是能判定哪个操作先发生。</p>
+<h3 id="因果性"><a href="#因果性" class="headerlink" title="因果性"></a>因果性</h3><p>我们说过，如果两个操作都没有在彼此之前发生，那么这两个操作是并发的（参阅“Happens-Before”的关系和并发）。换句话说，如果两个事件是因果相关的（一个发生在另一个事件之前），则它们之间是有序的，但如果它们是并发的，则它们之间的顺序是无法比较的。这意味着因果关系定义了一个偏序，而不是一个全序：一些操作相互之间是有顺序的，但有些则是无法比较的。</p>
+<p>那么因果顺序和线性一致性之间的关系是什么？答案是线性一致性隐含着（implies）因果关系：任何线性一致的系统都能正确保持因果性。</p>
+<p>在许多情况下，看上去需要线性一致性的系统，实际上需要的只是因果一致性，因果一致性可以更高效地实现。</p>
+<h2 id="序列号排序"><a href="#序列号排序" class="headerlink" title="序列号排序"></a>序列号排序</h2><p>我们可以使用序列号（sequence nunber）或时间戳（timestamp）来排序事件。时间戳不一定来自时钟（或物理时钟，存在许多问题，如 “不可靠时钟” 中所述）。它可以来自一个逻辑时钟（logical clock），这是一个用来生成标识操作的数字序列的算法，典型实现是使用一个每次操作自增的计数器。</p>
+<p>这些序列号生成器不能正确地捕获跨节点的操作顺序。</p>
+<h3 id="Lamport时间戳"><a href="#Lamport时间戳" class="headerlink" title="Lamport时间戳"></a>Lamport时间戳</h3><p>每个节点都有一个唯一标识符，和一个保存自己执行操作数量的计数器。 兰伯特时间戳就是两者的简单组合：（计数器，节点ID）$(counter, node ID)$。两个节点有时可能具有相同的计数器值，但通过在时间戳中包含节点ID，每个时间戳都是唯一的。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/Lamport时间戳提供了与因果关系一致的总排序.png">
+<p>兰伯特时间戳与物理时间时钟没有任何关系，但是它提供了一个全序：<strong>如果你有两个时间戳，则计数器值大者是更大的时间戳。如果计数器值相同，则节点ID越大的，时间戳越大。</strong></p>
+<h4 id="光有时间戳排序还不够"><a href="#光有时间戳排序还不够" class="headerlink" title="光有时间戳排序还不够"></a>光有时间戳排序还不够</h4><p>只有在所有的操作都被收集之后，操作的全序才会出现。如果另一个节点已经产生了一些操作，但你还不知道那些操作是什么，那就无法构造所有操作最终的全序关系：来自另一个节点的未知操作可能需要被插入到全序中的不同位置。</p>
+<p>​总之：为了实诸如如用户名上的唯一约束这种东西，仅有操作的全序是不够的，你还需要知道这个<strong>全序何时会尘埃落定</strong>。如果你有一个创建用户名的操作，并且确定在全序中，没有任何其他节点可以在你的操作之前插入对同一用户名的声称，那么你就可以安全地宣告操作执行成功。</p>
+<h2 id="全序广播"><a href="#全序广播" class="headerlink" title="全序广播"></a>全序广播</h2><p>单主复制通过选择一个节点作为主库来确定操作的全序，并在主库的单个CPU核上对所有操作进行排序。</p>
+<p>接下来的挑战是，如果吞吐量超出单个主库的处理能力，这种情况下如何扩展系统；以及，如果主库失效（“处理节点宕机”），如何处理故障切换。</p>
+<p>全序广播要满足两个安全属性：</p>
+<ol>
+<li>可靠交付（reliable delivery）</li>
+</ol>
+<p>​ 没有消息丢失：如果消息被传递到一个节点，它将被传递到所有节点。</p>
+<ol start="2">
+<li>全序交付（totally ordered delivery）*</li>
+</ol>
+<p>​ 消息以相同的顺序传递给每个节点。</p>
+<p>正确的全序广播算法必须始终保证可靠性和有序性，<strong>即使节点或网络出现故障</strong>。（Retry等）</p>
+<h3 id="通过全序广播实现线性化一致性"><a href="#通过全序广播实现线性化一致性" class="headerlink" title="通过全序广播实现线性化一致性"></a>通过全序广播实现线性化一致性</h3><p>全序广播是异步的：消息被保证以固定的顺序可靠地传送，但是<strong>不能保证消息何时被送达</strong>（所以一个接收者可能落后于其他接收者）。相比之下，线性一致性是新鲜性的保证：读取一定能看见最新的写入值。</p>
+<p>你可以通过将全序广播当成仅追加日志的方式来实现这种线性一致的CAS操作：</p>
+<ol>
+<li>在日志中追加一条消息，试探性地指明你要声明的用户名。</li>
+<li>读日志，并等待你所附加的信息被回送。</li>
+<li>检查是否有任何消息声称目标用户名的所有权。如果这些消息中的第一条就你自己的消息，那么你就成功了：你可以提交声称的用户名（也许是通过向日志追加另一条消息）并向客户端确认。如果所需用户名的第一条消息来自其他用户，则中止操作。</li>
+</ol>
+<p>所有节点同意一个写请求到底是提交成功还是中止。可以保证线性化写入。</p>
+<p>上述步骤在<strong>读取时不能保证线性</strong>。因为消息传递的延迟性，所以读操作的结果可能是过时的。</p>
+<p>当然这里可以通过返回最新日志消息的位置，通过查询位置，等待所有条目需要读取的条目被写入，再进行读操作，便能够达到读操作的线性一致性。（在ZooKeeper中通过sync()操作实现），或者可以通过强制读取Leader节点，显然Leader节点上的数据一定是最新的结果。</p>
+<h1 id="分布式事务与共识"><a href="#分布式事务与共识" class="headerlink" title="分布式事务与共识"></a>分布式事务与共识</h1><p>需要集群节点一致性的场景举例：</p>
+<ol>
+<li>主节点选举</li>
+<li>原子事务提交</li>
+</ol>
+<h2 id="原子提交与两阶段提交"><a href="#原子提交与两阶段提交" class="headerlink" title="原子提交与两阶段提交"></a>原子提交与两阶段提交</h2><p>提交事务的结果有可能通过事后执行另一个补偿事务来取消，即<strong>补偿事务</strong>。但从数据库的角度来看，这是一个单独的事务，因此任何关于跨事务正确性的保证都是应用层负责。</p>
+<h3 id="两阶段提交"><a href="#两阶段提交" class="headerlink" title="两阶段提交"></a>两阶段提交</h3><p>两阶段提交（two-phase commit）是一种用于实现跨多个节点的原子事务提交的算法，即确保所有节点提交或所有节点中止。 它是分布式数据库中的经典算法。 2PC在某些数据库内部使用，也以XA事务的形式对应用可用（例如Java Transaction API支持）或以SOAP Web服务的WS-AtomicTransaction 形式提供给应用。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/两阶段提交（2PC）的成功执行.png">
+<p>新增组建<strong>协调者</strong>。协调者通常在请求事务的相同应用进程中以库的形式实现（例如，嵌入在Java EE容器中），但也可以是单独的进程或服务。</p>
+<p><strong>参与者不能单方面放弃</strong>，必须等待协调者决定</p>
+<p><strong>协调者崩溃</strong>，那么参与者不知道接下来如何行动。</p>
+<p>可以完成2PC的唯一方法是等待协调者恢复。这就是为什么协调者必须在向参与者发送提交或中止请求之前，将其提交或中止决定写入磁盘上的事务日志。</p>
+<h4 id="三阶段提交"><a href="#三阶段提交" class="headerlink" title="三阶段提交"></a>三阶段提交</h4><p>前提：假定网络延迟有界，节点响应时间有界。无界情况下不能保证原子性。</p>
+<h2 id="实践中的分布式事务"><a href="#实践中的分布式事务" class="headerlink" title="实践中的分布式事务"></a>实践中的分布式事务</h2><p>许多云服务由于其导致的运维问题，而选择不实现分布式事务。</p>
+<p>异构分布式事务的原子提交协议。不同于分布式数据库内部的事务。</p>
+<h3 id="XA事务"><a href="#XA事务" class="headerlink" title="XA事务"></a>XA事务</h3><p>X/Open XA（<strong>扩展架构（eXtended Architecture）</strong>的缩写）是跨异构技术实现两阶段提交的标准。它于1991年推出并得到了广泛的实现：许多传统关系数据库（包括PostgreSQL，MySQL，DB2，SQL Server和Oracle）和消息代理（包括ActiveMQ，HornetQ，MSMQ和IBM MQ） 都支持XA。</p>
+<p>​XA不是一个网络协议——它只是一个用来与事务协调者连接的C API。其他语言也有这种API的绑定；例如在Java EE应用的世界中，XA事务是使用Java事务API（JTA, Java Transaction API）实现的，而许多使用Java数据库连接（JDBC, Java Database Connectivity）的数据库驱动，以及许多使用Java消息服务（JMS）API的消息代理都支持Java事务API（JTA）。</p>
+<p>数据库服务器不能直接联系协调者，因为所有通信都必须通过客户端库。</p>
+<h4 id="停顿时间仍持有锁"><a href="#停顿时间仍持有锁" class="headerlink" title="停顿时间仍持有锁"></a>停顿时间仍持有锁</h4><p>如果协调者已经崩溃，需要20分钟才能重启，那么这些锁将会被持有20分钟。如果协调者的日志由于某种原因彻底丢失，这些锁将被永久持有 —— 或至少在管理员手动解决该情况之前。</p>
+<h4 id="从协调者故障中恢复"><a href="#从协调者故障中恢复" class="headerlink" title="从协调者故障中恢复"></a>从协调者故障中恢复</h4><p>许多XA的实现都有一个叫做启发式决策（heuristic decistions）的紧急逃生舱口：允许参与者单方面决定放弃或提交一个存疑事务，而无需协调者做出最终决定。要清楚的是，这里启发式是<strong>可能破坏原子性（probably breaking atomicity）</strong>的委婉说法，因为它违背了两阶段提交的系统承诺。因此，启发式决策只是为了逃出灾难性的情况而准备的，而不是为了日常使用的。</p>
+<h3 id="分布式事务的限制"><a href="#分布式事务的限制" class="headerlink" title="分布式事务的限制"></a>分布式事务的限制</h3><p>运维问题：</p>
+<ol>
+<li>如果协调者没有复制，而是只在单台机器上运行，那么它是整个系统的<strong>失效单点</strong>（因为它的失效会导致其他应用服务器阻塞在存疑事务持有的锁上）。令人惊讶的是，许多协调者实现默认情况下并不是高可用的，或者只有基本的复制支持。</li>
+<li>许多服务器端应用都是使用无状态模式开发的（受HTTP的青睐），所有持久状态都存储在数据库中，因此具有应用服务器可随意按需添加删除的优点。但是，当协调者成为应用服务器的一部分时，它会<strong>改变部署的性质</strong>。突然间，<strong>协调者的日志成为持久系统状态的关键部分</strong>—— 与数据库本身一样重要，因为协调者日志是为了在崩溃后恢复存疑事务所必需的。这样的应用服务器不再是无状态的了。</li>
+<li>由于XA需要兼容各种数据系统，因此它必须是<strong>所有系统的最低标准</strong>。例如，它不能检测不同系统间的死锁（因为这将需要一个标准协议来让系统交换每个事务正在等待的锁的信息），而且它无法与SSI 协同工作，因为这需要一个跨系统定位冲突的协议。</li>
+<li>对于数据库内部的分布式事务（不是XA），限制没有这么大，例如，分布式版本的SSI 是可能的。然而仍然存在问题：2PC成功提交一个事务需要所有参与者的响应。因此，如果系统的任何部分损坏，事务也会失败。因此，分布式事务又有<strong>扩大失效（amplifying failures）</strong>的趋势，这又与我们构建容错系统的目标背道而驰。</li>
+</ol>
+<h2 id="支持容错共识"><a href="#支持容错共识" class="headerlink" title="支持容错共识"></a>支持容错共识</h2><p>共识算法必须满足：</p>
+<ol>
+<li>一致同意（Uniform agreement）</li>
+</ol>
+<p>​ 没有两个节点的决定不同。</p>
+<ol start="2">
+<li>完整性（Integrity）</li>
+</ol>
+<p>​ 没有节点决定两次。</p>
+<ol start="3">
+<li>有效性（Validity）</li>
+</ol>
+<p>​ 如果一个节点决定了值 v ，则 v 由某个节点所提议。</p>
+<ol start="4">
+<li>终止（Termination） 由所有未崩溃的节点来最终决定值。</li>
+</ol>
+<p><strong>一致同意</strong>和<strong>完整性</strong>属性定义了共识的核心思想：所有人都决定了相同的结果，一旦决定了，你就不能改变主意。</p>
+<p><strong>有效性</strong>属性主要是为了排除无意义的解决方案：例如，无论提议了什么值，你都可以有一个始终决定值为null的算法。</p>
+<p>摒弃容错性：可以指定一个节点成为Leader，由Leader节点做出所有的决定。但是，如果Leader节点失效，则系统陷入瘫痪。两阶段提交协议之中的协调器就是一个Leader，一旦协调器失效了，系统无法进行工作。而更好的协商一致性算法要求，即使某些节点失效了，系统仍然能够正常工作。当然，如果所有节点都崩溃了，并且没有一个节点正在运行，那么任何算法都不可能鸡血运行，所以说算法可以容忍的故障数量是有限的：事实上，可以证明任何协商一致算法至少需要大多数节点正常运行，来确保协商一致。</p>
+<h3 id="共识算法"><a href="#共识算法" class="headerlink" title="共识算法"></a>共识算法</h3><p>在分布式系统之中存在许多协商一致性算法算法如：Paxos，Raft，Zab等等。本篇之中，不会涉及到不同算法的全部细节，会通过他们来了解一些高级思想。</p>
+<p>这里的一致性算法符合全序广播的特性，全序广播需要以相同的顺序向所有节点精确地传递一次消息。在每一轮的协商之中，每个节点都可以提出下一个要发送的消息，然后由协商达成一致，并在系统之中传递的下一条消息。所有节点共同决定以相同的顺序传递相同的消息，且消息不重复，消息不会被破坏，也不会凭空产生。（这里忽略拜占庭问题，如果需要引入拜占庭容错，需要采用类似于区块链之中的Pow算法）</p>
+<h3 id="主从复制与共识"><a href="#主从复制与共识" class="headerlink" title="主从复制与共识"></a>主从复制与共识</h3><p>要选出一个领导者，我们首先需要一个领导者。要解决共识问题，我们首先需要解决共识问题。我们如何跳出这个先有鸡还是先有蛋的问题？</p>
+<h3 id="epoch-number与法定人数（Quorum）"><a href="#epoch-number与法定人数（Quorum）" class="headerlink" title="epoch number与法定人数（Quorum）"></a>epoch number与法定人数（Quorum）</h3><p>迄今为止所讨论的所有共识协议，在内部都以某种形式使用一个领导者，但它们并不能保证领导者是独一无二的。相反，它们可以做出更弱的保证：协议定义了一个时代编号（epoch number）（在Paxos中称为投票编号（ballot number），视图戳复制中的视图编号（view number），以及Raft中的任期号码（term number）），<strong>并确保在每个世代中，领导者都是唯一的</strong>。</p>
+<p>​在任何领导者被允许决定任何事情之前，必须先检查是否存在其他带有更高时代编号的领导者，它们可能会做出相互冲突的决定。</p>
+<p>因此，我们有两轮投票：<br>第一次是为了选出一位领导者，<br>第二次是对领导者的提议进行表决。</p>
+<p>关键的洞察在于，<strong>这两次投票的法定人群必须相互重叠</strong>（overlap）：如果一个提案的表决通过，则至少得有一个参与投票的节点也必须参加过最近的领导者选举。</p>
+<h3 id="共识的局限性"><a href="#共识的局限性" class="headerlink" title="共识的局限性"></a>共识的局限性</h3><ol>
+<li>性能</li>
+<li>复杂</li>
+</ol>
+<p>节点在做出决定之前对提议进行投票的过程是一种同步复制。<br>共识系统总是需要严格多数来运转。<br>​共识系统通常依靠超时来检测失效的节点。<br>有时共识算法对网络问题特别敏感。</p>
+<h2 id="成员与协调服务"><a href="#成员与协调服务" class="headerlink" title="成员与协调服务"></a>成员与协调服务</h2><p>如何使用ZooKeeper这样的服务？</p>
+<p>作为应用开发人员，你很少需要直接使用ZooKeeper，因为它实际上不适合当成通用数据库来用。更有可能的是，你会通过其他项目间接依赖它，例如HBase，Hadoop YARN，OpenStack Nova和Kafka都依赖ZooKeeper在后台运行。这些项目从它那里得到了什么？</p>
+<p>ZooKeeper与etcd的特点：</p>
+<ol>
+<li>不用保存大量数据</li>
+<li>数据库复制中，每条消息代表的是数据库写请求</li>
+</ol>
+<p>ZooKeeper模仿了Google的Chubby锁服务，不仅实现了全序广播（因此也实现了共识），而且还构建了一组有趣的其他特性，这些特性在构建分布式系统时变得特别有用：</p>
+<ol>
+<li>线性一致性的原子操作<br> 使用原子CAS操作可以实现锁</li>
+<li>操作的全序排序<br> 一个单调递增的事务ID（zxid）和版本号（cversion）</li>
+<li>失效检测<br> 心跳链接</li>
+<li>变更通知<br> 通过订阅通知，客户端不用再通过频繁轮询的方式来找出变更。</li>
+</ol>
+<p>场景1:<br>    节点任务分配。主节点选举。分区资源（数据库，消息，文件，actor）分配。<br>场景2:<br>    服务发现。查找需要服务的IP地址。<br>场景3:<br>    成员服务。查看成员是否Live。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/27/DDIA-8-分布式系统的挑战/" rel="next" title="DDIA-8-分布式系统的挑战">
+                <i class="fa fa-chevron-left"></i> DDIA-8-分布式系统的挑战
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/24/Spring-动态代理与泛型接口注入/" rel="prev" title="Spring-动态代理与泛型接口注入">
+                Spring-动态代理与泛型接口注入 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Roger Guo</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一致性保证"><span class="nav-number">1.</span> <span class="nav-text">一致性保证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#可线性化"><span class="nav-number">2.</span> <span class="nav-text">可线性化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#非线性化，看世界杯直播的例子"><span class="nav-number">2.1.</span> <span class="nav-text">非线性化，看世界杯直播的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何达到线性化？"><span class="nav-number">2.2.</span> <span class="nav-text">如何达到线性化？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题，三个用户同时读写变量x"><span class="nav-number">2.2.1.</span> <span class="nav-text">问题，三个用户同时读写变量x</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现线性一致，要添加一个约束"><span class="nav-number">2.2.2.</span> <span class="nav-text">实现线性一致，要添加一个约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加CAS操作"><span class="nav-number">2.2.3.</span> <span class="nav-text">增加CAS操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可串行化-VS-可线性化"><span class="nav-number">2.3.</span> <span class="nav-text">可串行化 VS 可线性化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#可串行化"><span class="nav-number">2.3.1.</span> <span class="nav-text">可串行化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可线性化-1"><span class="nav-number">2.3.2.</span> <span class="nav-text">可线性化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#需要线性化的场景"><span class="nav-number">2.4.</span> <span class="nav-text">需要线性化的场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加锁与主节点选举"><span class="nav-number">2.4.1.</span> <span class="nav-text">加锁与主节点选举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#约束与唯一性保证"><span class="nav-number">2.4.2.</span> <span class="nav-text">约束与唯一性保证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#跨通道的时间依赖"><span class="nav-number">2.4.3.</span> <span class="nav-text">跨通道的时间依赖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现线性化系统"><span class="nav-number">2.5.</span> <span class="nav-text">实现线性化系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#法定人数读Quorum"><span class="nav-number">2.5.1.</span> <span class="nav-text">法定人数读Quorum</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线性化的代价"><span class="nav-number">2.6.</span> <span class="nav-text">线性化的代价</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP理论"><span class="nav-number">2.6.1.</span> <span class="nav-text">CAP理论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#顺序"><span class="nav-number">3.</span> <span class="nav-text">顺序</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#顺序与因果关系"><span class="nav-number">3.1.</span> <span class="nav-text">顺序与因果关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#线性一致性"><span class="nav-number">3.1.1.</span> <span class="nav-text">线性一致性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#因果性"><span class="nav-number">3.1.2.</span> <span class="nav-text">因果性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#序列号排序"><span class="nav-number">3.2.</span> <span class="nav-text">序列号排序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lamport时间戳"><span class="nav-number">3.2.1.</span> <span class="nav-text">Lamport时间戳</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#光有时间戳排序还不够"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">光有时间戳排序还不够</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全序广播"><span class="nav-number">3.3.</span> <span class="nav-text">全序广播</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过全序广播实现线性化一致性"><span class="nav-number">3.3.1.</span> <span class="nav-text">通过全序广播实现线性化一致性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分布式事务与共识"><span class="nav-number">4.</span> <span class="nav-text">分布式事务与共识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原子提交与两阶段提交"><span class="nav-number">4.1.</span> <span class="nav-text">原子提交与两阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#两阶段提交"><span class="nav-number">4.1.1.</span> <span class="nav-text">两阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三阶段提交"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">三阶段提交</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实践中的分布式事务"><span class="nav-number">4.2.</span> <span class="nav-text">实践中的分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#XA事务"><span class="nav-number">4.2.1.</span> <span class="nav-text">XA事务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#停顿时间仍持有锁"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">停顿时间仍持有锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从协调者故障中恢复"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">从协调者故障中恢复</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式事务的限制"><span class="nav-number">4.2.2.</span> <span class="nav-text">分布式事务的限制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#支持容错共识"><span class="nav-number">4.3.</span> <span class="nav-text">支持容错共识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#共识算法"><span class="nav-number">4.3.1.</span> <span class="nav-text">共识算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制与共识"><span class="nav-number">4.3.2.</span> <span class="nav-text">主从复制与共识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoch-number与法定人数（Quorum）"><span class="nav-number">4.3.3.</span> <span class="nav-text">epoch number与法定人数（Quorum）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#共识的局限性"><span class="nav-number">4.3.4.</span> <span class="nav-text">共识的局限性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#成员与协调服务"><span class="nav-number">4.4.</span> <span class="nav-text">成员与协调服务</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Roger Guo</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

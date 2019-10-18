@@ -239,6 +239,352 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/" itemprop="url">DDIA-1-可靠可扩展可维护的应用系统</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-20T19:35:16+08:00">
+                2019-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="数据密集型应用的模块"><a href="#数据密集型应用的模块" class="headerlink" title="数据密集型应用的模块"></a>数据密集型应用的模块</h1><p>当今许多应用大多是数据数据密集（data-intensive）而不是计算密集型（compute-intensive）的。所以CPU的处理能力往往不是应用程序的瓶颈。关键在于数据的量、数据的复杂度以及数据的快速多变性。</p>
+<p>应用往往包含以下模块：</p>
+<ol>
+<li>数据库：用于存储数据</li>
+<li>高速缓存：缓存复杂或者操作代价昂贵的结果，加快下一次访问</li>
+<li>索引：用户可以按照关键字搜索数据并支持各种过滤</li>
+<li>流式处理：持续发送消息到另一个进程，处理采用异步方式</li>
+<li>批处理：定期处理大量积累的数据</li>
+</ol>
+<h2 id="数据系统的架构"><a href="#数据系统的架构" class="headerlink" title="数据系统的架构"></a>数据系统的架构</h2><img src="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/一个可能的组合使用多个组件的数据系统架构.png" title="一个数据架构系统，包含了不同的组件">
+<h1 id="核心设计目标"><a href="#核心设计目标" class="headerlink" title="核心设计目标"></a>核心设计目标</h1><h2 id="可靠性"><a href="#可靠性" class="headerlink" title="可靠性"></a>可靠性</h2><p>出现意外情况，比如硬件、软件故障、人为失误等，系统可以继续正常运转，至少确保功能正确。</p>
+<h3 id="硬件故障"><a href="#硬件故障" class="headerlink" title="硬件故障"></a>硬件故障</h3><p>比较容易出现的，硬盘崩溃，内存故障，电网停电。</p>
+<p>第一反应是为硬件冗余来减少系统故障率。例如磁盘RAID，服务器双电源，甚至热插拔CPU，数据中心添加备用电源、发电机。</p>
+<p>这样当一个组件发生故障时，冗余组件可以快速接管，之后运维人员可以修复或者更换坏掉的组件。</p>
+<p>直到最近，采用硬件冗余方案对于大多数应用场景还是足够的，它让单机完全失效的概率降到最低。只要可以把备份迅速恢复到新的机器上，故障的停机时间在大多数应用中并不是灾难性的。</p>
+<p>现在，通过软件容错的方式来容易多机失效成为新的手段，或者成为硬件容错方案的有力补充。例如滚动升级。</p>
+<h3 id="软件错误"><a href="#软件错误" class="headerlink" title="软件错误"></a>软件错误</h3><p>这类故障更难预料。各个节点直接是由软件关联的，可能会导致更多的系统故障。</p>
+<p>例如，</p>
+<ol>
+<li>由于软件错误，导致特定的输入引发应用的崩溃。例如Linux内核bug，在2012年6月30的闰秒时候触发，导致很多应用程序被挂掉。</li>
+<li>失控的进程把系统的资源耗尽，导致这些共享资源不能被释放。</li>
+<li>系统的Dependency出了问题，返回值异常。</li>
+<li>组件中的小故障触发另一个组件中的故障，进而触发更多的故障。</li>
+</ol>
+<p>没有快速的解决方法。只能仔细考虑很多细节。</p>
+<ol>
+<li>检查系统的假设条件和系统之间的交互</li>
+<li>进行全面的测试</li>
+<li>进程隔离，</li>
+<li>允许进程崩溃后自动重启</li>
+<li>反复评估、监控并分析生产环境中的行为表现。</li>
+</ol>
+<p>例如消息队列中，输出消息的数量应等于输入消息的数量。如果发现不一致，则立即告警。</p>
+<h3 id="人为失误"><a href="#人为失误" class="headerlink" title="人为失误"></a>人为失误</h3><p>人无法做到万无一失。运维人员的配置错误可能是系统下线的第一大原因。</p>
+<p>要保证系统可靠，如何减少人为错误对它的影响？</p>
+<ol>
+<li>用最小出错的方式来设计系统。让做错事更难。</li>
+<li>想办法分离最容易出错的地方，容易引发故障的接口。使用Sandbox隔离真正的生产和测试环境。</li>
+<li>充分的测试。单元测试，集成测试，手动测试。边界条件的考虑。</li>
+<li>当出现人为失误时，有快速回滚或者回复的机制。滚动发布新代码。</li>
+<li>监控子系统需要详细和清晰。</li>
+<li>推行管理流程和相关培训。</li>
+</ol>
+<h2 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h2><p>随着规模的增长，例如数据量、流量和复杂性，系统应该可以用合理的方式进行应对，满足这种增长。</p>
+<p>当应用负载增加的时候，比如用户从1w到100w，从100w到1000w，应用程序如何应对增长的负载。</p>
+<p>相关参数：Web服务的QPS，数据库的写入比例，DAU，缓存命中率。有时候平均值很重要，有时候短时间内的峰值会成为系统瓶颈。</p>
+<p>Twitter的Fan-out结构，对数据量提出了挑战。当一个人发Tweet时候，怎么处理Timeline这个请求。根据粉丝的数量，区别处理。</p>
+<h3 id="如何描述性能"><a href="#如何描述性能" class="headerlink" title="如何描述性能"></a>如何描述性能</h3><p>系统负载增加后，会发生什么，两种思考方式</p>
+<ol>
+<li>系统资源不变（CPU，内存，带宽），系统的性能会发生什么变化？</li>
+<li>如果要保持性能不变，需要增加多少资源？</li>
+</ol>
+<p>不同类型的系统关心的性能指标不同</p>
+<ol>
+<li>批处理系统通常关心<strong>吞吐量（throughput）</strong>，例如Hadoop，每秒可以处理多少条数据或者完成一个作业总共需要多少时间。</li>
+<li>Online系统中，更看重服务的<strong>响应时间（response time）</strong>，即客户端从发出请求到得到回复的总时间。</li>
+</ol>
+<img src="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/响应时间.png" title="展示了一个服务100次请求响应时间的均值与百分位数、中位数">
+<p>对于响应时间，如下图，有一些很长的，算异常请求，可能是由于数据大很多。但也有可能是其他因素造成的，例如上下文切换、进程调度、网络丢包、TCP重传、垃圾回收STW，缺页中断、磁盘IO。</p>
+<p>最好使用百分位数，中位数（50%）来评估系统的响应时间。</p>
+<p>采用较高的响应时间百分位数很重要，因为直接影响用户的总体服务体验。例如亚马逊采用99.9百分位来定义服务响应时间。优化99.9%的目标可能成本很高。能不能带来收益很关键。</p>
+<p>​排队延迟（queueing delay）通常占了高百分位点处响应时间的很大一部分。由于服务器只能并行处理少量的事务（如受其CPU核数的限制），所以只要有少量缓慢的请求就能阻碍后续请求的处理，这种效应有时被称为头部阻塞（head-of-line blocking）</p>
+<h3 id="应对负载增加"><a href="#应对负载增加" class="headerlink" title="应对负载增加"></a>应对负载增加</h3><p>垂直扩展和水平扩展。</p>
+<p>好的系统有弹性特征，可以自动检测负载的变化，来自动添加更多的计算资源。</p>
+<p>可扩展架构通常都是从通用模块逐步构建出来的。</p>
+<h2 id="可维护性"><a href="#可维护性" class="headerlink" title="可维护性"></a>可维护性</h2><p>项目会随着时间的推移，项目会需要新的人员参与到开发和运维工作中，来满足系统的稳定和新场景的适应。系统应该高效的变化。</p>
+<p>​软件的大部分开销并不在最初的开发阶段，而是在持续的维护阶段，包括修复漏洞、保持系统正常运行、调查失效、适配新的平台、为新的场景进行修改、偿还技术债、添加新的功能等等。</p>
+<p>为此，我们将特别关注软件系统的三个设计原则：</p>
+<h3 id="可操作性（Operability）"><a href="#可操作性（Operability）" class="headerlink" title="可操作性（Operability）"></a>可操作性（Operability）</h3><p>​    便于运维团队保持系统平稳运行。<br>良好的可操作性意味着更轻松的日常工作，进而运维团队能专注于高价值的事情。数据系统可以通过各种方式使日常任务更轻松：</p>
+<h3 id="简单性（Simplicity）"><a href="#简单性（Simplicity）" class="headerlink" title="简单性（Simplicity）"></a>简单性（Simplicity）</h3><p>​    从系统中消除尽可能多的复杂度（complexity），使新工程师也能轻松理解系统。（注意这和用户接口的简单性不一样。）<br>   <strong>复杂度（complexity）</strong>有各种可能的症状，例如：状态空间激增、模块间紧密耦合、纠结的依赖关系、不一致的命名和术语、解决性能问题的Hack、需要绕开的特例等等，</p>
+<h3 id="可演化性（evolability）"><a href="#可演化性（evolability）" class="headerlink" title="可演化性（evolability）"></a>可演化性（evolability）</h3><p>​    使工程师在未来能轻松地对系统进行更改，当需求变化时为新应用场景做适配。也称为可扩展性（extensibility），可修改性（modifiability）或可塑性（plasticity）。<br>    组织流程方面，敏捷开发，TDD，重构。<br>    修改数据系统并使其适应不断变化需求的容易程度，是与简单性和抽象性密切相关的：简单易懂的系统通常比复杂系统更容易修改</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/13/文明之光-近代音乐发展/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/13/文明之光-近代音乐发展/" itemprop="url">文明之光-近代音乐发展</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-13T17:19:18+08:00">
+                2019-04-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>透过古典音乐的发展历程，可以感受到近代人文主义的兴起和发展，以及时代的变迁。</p>
+<h1 id="巴洛克音乐"><a href="#巴洛克音乐" class="headerlink" title="巴洛克音乐"></a>巴洛克音乐</h1><h2 id="形成时期"><a href="#形成时期" class="headerlink" title="形成时期"></a>形成时期</h2><p>早起音乐与宗教有关。后来人们富裕之后，音乐的宗教气息逐渐减少，世俗的元素开始增加。欧洲音乐第二次走向世俗是发生在文艺复兴时期，而其中产生质变是在18世纪初的巴洛克时期。因此巴洛克音乐是所有古典音乐的基础。</p>
+<h2 id="什么是巴洛克"><a href="#什么是巴洛克" class="headerlink" title="什么是巴洛克"></a>什么是巴洛克</h2><p>源于西班牙语Barocco，引申的意思是充满细节。主要是指文艺复兴后期，豪华的建筑和精致的装饰风格。后来被用到了绘画和音乐中，也是类似的意思。巴洛克音乐华丽精致，加入了大量的修饰性音符。巴洛克时期的影响力最大的音乐家是巴赫。</p>
+<img src="/2019/04/13/文明之光-近代音乐发展/barocco.png" title="巴洛克建筑的立柱">
+<h2 id="巴赫（1685-1750）"><a href="#巴赫（1685-1750）" class="headerlink" title="巴赫（1685-1750）"></a>巴赫（1685-1750）</h2><iframe width="100%" height="400px" src="//player.bilibili.com/player.html?aid=5990334&cid=9724899&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+<p>出身音乐世家。音乐天才。小时候因为父母趋势的早，被养在哥哥家。由于家庭负担问题15岁就要自己去挣钱养活自己。在教会表演，王公贵族的乐队里担任管风琴师。</p>
+<p>下了很多苦功夫学习，21岁成为德意志地区有名的乐器师，担任城市乐团首席音乐总监。1717年在柯腾宫廷担任首席乐队长，在此期间创作了《勃兰登堡协奏曲》，创作水平到了炉火纯青的地步。</p>
+<p>巴赫在音乐上的贡献非常高。</p>
+<p><strong>在音乐之道上</strong>，有些人认为他比之后的贝多芬莫扎特地位还要高，原因就是在于他奠定了古典音乐的基础。巴赫教会了后人如何使用音符构建出音乐作品。<br>另一个贡献，帮音乐从宗教走向世俗。把严肃的沉重的宗教曲目，变化成美妙的优雅的表演。<br>巴赫确立了德意志地区在几百年之后中古典音乐的地位。巴赫之前，意大利比较厉害。巴赫是第一个把南欧丰富新颖的音乐表现形式容易单一呆板的德意志音乐的。</p>
+<p><strong>在音乐之术上</strong>，有声乐和器乐两个方面。<br>声乐方面，巴赫的声乐作品中，康塔塔的数量占比很高。在巴赫的康塔塔中，首尾都是宗教的赞歌，中段是围绕主题的独唱咏叹调、重唱和合唱构成。这样的结构非常合理，既能表现宗教音乐的神圣，又带有民间艺术的美感。<br>在器乐曲上，巴赫是我们今天经常听到的奏鸣曲和协奏曲的先驱。协奏曲诞生于意大利。巴赫整天沉醉与各种乐器的组合实验。从此有了一种乐器为主，其他乐器为辅的协奏曲。配器有弦乐、羽管键琴、双簧管、小号、圆号、低音奥维尔，等等。最著名的就是《勃兰登堡协奏曲》。巴赫之后的音乐家，莫扎特、贝多芬等人在他的基础上不断完善协奏曲的创作技巧。</p>
+<p>巴赫时代并不具备将创作的音乐普及全欧洲的条件。因此在他去世几十年后就被人们遗忘了。巴赫作品的重新发现和认识，要感谢浪漫主义时期的<strong>门德尔松</strong>（1809-1847）。门德尔松整理和出版了巴尔德音乐，在巴赫去世百年之后，人们才重新认识到这位奠定了现代音乐基础的作曲家的伟大。</p>
+<p>巴赫一生作品之多，质量之高，让后世音乐家难以望其项背。作品包括几百首康塔塔，大量协奏曲，五部弥撒，大量的赋格。</p>
+<h1 id="古典主义音乐"><a href="#古典主义音乐" class="headerlink" title="古典主义音乐"></a>古典主义音乐</h1><p>古典主义是指欧洲18世纪末19世纪初的文化和艺术思潮。那时正是资产阶级取代贵族统治欧洲的时期，音乐和艺术都是姨资产阶级追求的自由和人性解放为背景创作的。讲究理性、秩序、和谐。</p>
+<h2 id="海顿"><a href="#海顿" class="headerlink" title="海顿"></a>海顿</h2><p>海顿、莫扎特和贝多芬。生于奥地利的海顿不仅是古典主义时期第一位重要的作曲家，也是<strong>交响乐之父</strong>。海顿不仅确立了交响乐的形式，而且一生创作了108首交响乐，超过莫扎特，贝多芬、舒伯特、舒曼、门德尔松、柴可夫斯基、马勒等人的创作总和。</p>
+<p>海顿最大的贡献在于确定了交响乐的形式，即由四个乐章组成，分别是快板-慢板-诙谐曲或者小步舞曲-快板。直到今天大部分交响乐依然沿用这个传统。</p>
+<h2 id="莫扎特"><a href="#莫扎特" class="headerlink" title="莫扎特"></a>莫扎特</h2><p>神童、天才。六岁就在维也纳宫廷为特蕾莎女王表演钢琴。莫扎特音乐轻柔曼妙，充满了阳光。可能不再年轻、有一些闲暇并且积累了一些人生经历时，才会发现莫扎特很适合自己。</p>
+<iframe width="100%" height="400px" src="//player.bilibili.com/player.html?aid=7779069&cid=12755148&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+<h2 id="贝多芬"><a href="#贝多芬" class="headerlink" title="贝多芬"></a>贝多芬</h2><img src="/2019/04/13/文明之光-近代音乐发展/2019-04-13-21-12-59.png" title="贝多芬的肖像，收藏于贝多芬波恩故居，手中作品是《庄严弥撒曲》">
+<p>乐圣。罗曼罗兰说贝多芬时人类历史上最伟大的英雄。1770年生于波恩。爷爷是宫廷乐队长，父亲是男高音。拜师奈弗，在两年后成为乐队的管风琴师并发布了三首奏鸣曲。</p>
+<p>波恩大公弗朗兹十分欣赏年轻的贝多芬，成了他早起的保护人。介绍他去维也纳拜师莫扎特。不过由于莫扎特当时在忙于创作，没有成功。后来贝多芬回到波恩遇到了海顿，波恩建议他到维也纳学习。贝多芬1792年第二次到维也纳，并在那里度过了他一生的大部分时间。</p>
+<p>接受了法国启蒙运动平等自由博爱的思想。成为自由主义者。贝多芬一生追求人性的解放，他的作品一直体现出一种向上的理想主义倾向。《第二交响曲》，形成自己的风格，英雄主义倾向很明显。两年后《第三（英雄）交响曲》，本来想献给拿破仑，最后听说拿破仑成帝了，起的把拿破仑名字划掉。</p>
+<p>英雄交响曲分为四个乐章。第一乐章为快板，描写了法国大革命的情景，场面宏大。第二乐章，《葬礼进行曲》，描写英雄牺牲，人民为他送葬。第三乐章为快节奏诙谐曲。第四乐章为快板，奔放和柔美交替，越来越强烈，直到最后一个壮丽的高潮。</p>
+<p>贝多芬有两段重要的爱情，最后都没有变成婚姻。第一段中写下了《月光奏鸣曲》，这段感情深深的伤害了贝多芬，甚至想到自杀。第二段特蕾莎，刻骨铭心，完成《第四交响曲》，《热情奏鸣曲》，《致爱丽丝》。</p>
+<p>贝多芬30岁后耳聋越来越严重，把自己和命运抗争的心情写在《第五交响曲》，东亚又称为《命运交响曲》。恩格斯评价，如果你没听过这部壮丽的作品的话，那么可以说你一生什么作品都没听过。</p>
+<p>《第六交响曲》，打破了四个乐章的限制，并且给每个乐章起了标题，在该曲中，用乐器模仿自然的声音。</p>
+<p>最后的理想是想把《欢乐颂》的文字通过合唱的形式加到交响乐中，创作了被称为《合唱》的《第九交响曲》。1824年5月7日在维也纳首演，结束后整个音乐厅爆发出雷鸣般的掌声，可是贝多芬已经听不到了。女高音牵着贝多芬转过身来后，贝多芬激动的昏了过去。当时热烈的场面如同暴动，观众给予了五次掌声。而对国王也只有三次。</p>
+<p>小说《约翰·克里斯朵夫》，前一半是以贝多芬为原型写的。</p>
+<iframe width="100%" height="400px" src="//player.bilibili.com/player.html?aid=7844540&cid=12871747&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+<h1 id="浪漫主义音乐"><a href="#浪漫主义音乐" class="headerlink" title="浪漫主义音乐"></a>浪漫主义音乐</h1><p>拿破仑战争之后，欧洲进入平稳。浪漫主义音乐家更注重感情和音乐本身的外在表现，而不看重形式和结构。</p>
+<h2 id="舒伯特"><a href="#舒伯特" class="headerlink" title="舒伯特"></a>舒伯特</h2><p>600首歌曲，10部交响曲，22部钢琴奏鸣曲和大量的其他作品。</p>
+<h2 id="门德尔松"><a href="#门德尔松" class="headerlink" title="门德尔松"></a>门德尔松</h2><p>《仲夏夜之梦》等作品。收集整理了从巴赫到舒曼等著名音乐家的大量作品，对欧洲音乐的传承贡献很大。</p>
+<h2 id="肖邦"><a href="#肖邦" class="headerlink" title="肖邦"></a>肖邦</h2><p>1810年出生于波兰。六岁开始学钢琴，8岁登台演出，被认为是继莫扎特贝多芬后的又一位神童。<br>《A大调军队波兰舞曲》和《降A大调英雄波兰舞曲》最有阳刚之气。<br>在法国生活了半辈子，一直眷恋故乡波兰。一生创作很多钢琴曲。作品四类，一类波兰的民族音乐，二类是法国的沙龙音乐，包括圆舞曲、即兴曲、夜曲；三类是炫技类作品；四类是表述内心情感作品。</p>
+<h1 id="民族主义音乐"><a href="#民族主义音乐" class="headerlink" title="民族主义音乐"></a>民族主义音乐</h1><p>19世纪末，欧洲人的国家意识加强，浪漫主义音乐渐渐演变成民族主义音乐。成就最高的是俄罗斯的作曲家。</p>
+<h2 id="柴可夫斯基"><a href="#柴可夫斯基" class="headerlink" title="柴可夫斯基"></a>柴可夫斯基</h2><p>出身于俄罗斯贵族家庭，父亲从小要求他学习法律，从事相关法律工作。但是他并不喜欢，22岁后考入圣彼得堡音乐学院学习音乐创作。1876年写出了《天鹅湖》芭蕾舞剧。梅克夫人与柴可夫斯基精神上交往了13年并在经济上支持他，并为他排忧解难。成为专职作曲家。但从未谋面。《1812序曲》纪念俄罗斯人在1812年打败拿破仑。1893年创作出了最重要的作品《第六（悲怆）交响曲》写尽了自己的一生酸甜苦辣。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/24/文明之光-反垄断/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1280,367 +1626,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/11/Java并发编程-性能与活跃性以及并发程序测试/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Roger Guo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Roger Guo's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/02/11/Java并发编程-性能与活跃性以及并发程序测试/" itemprop="url">Java并发编程-性能与活跃性以及并发程序测试</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-11T10:58:03+08:00">
-                2018-02-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="活跃性问题"><a href="#活跃性问题" class="headerlink" title="活跃性问题"></a>活跃性问题</h2><p>我们通过加锁来确保线程安全，但是如果过度使用加锁，可能引起死锁。我们通过信号量和线程池，来限制对有限资源的使用，但是在有些情况下，这也可能造成死锁。<br>Java程序无法自动从死锁状态恢复，所以我们在设计程序时候，要找到可能导致死锁的条件。</p>
-<h3 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h3><p>经典的死锁问题就是哲学家进餐问题。<br><img src="./Dining.jpg" alt="Dining philosophers problem"><br>有些筷子管理算法能够让每个人都吃到东西，但有些算法可能导致一部分或者所有哲学家都饿死。</p>
-<p>后一种情况就是死锁：每个人拥有其他人需要的资源，同时又等待其他人已经拥有的资源，并且每个人在获得所需要的所有资源前都不会放弃已经拥有的资源。</p>
-<h4 id="顺序死锁"><a href="#顺序死锁" class="headerlink" title="顺序死锁"></a>顺序死锁</h4><p><img src="./LeftRightDeadLock.gif" alt="Left Right Deadlock"><br>如果所有线程都按照固定的顺序来获得锁，那么就不会出现顺序死锁问题。<br>如果想要验证锁的顺序的一致性，需要对程序中的加锁行为进行全局分析。</p>
-<h5 id="动态的顺序死锁问题"><a href="#动态的顺序死锁问题" class="headerlink" title="动态的顺序死锁问题"></a>动态的顺序死锁问题</h5><p>有时候并不是可以很清楚的知道是否会发生顺序死锁。<br><figure class="highlight java"><figcaption><span>动态的顺序死锁</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DeadLock！</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transferMoney</span><span class="params">(Account fromAccount, Account toAccount, DollarAmout amount)</span> <span class="keyword">throws</span> InsufficientFundsException </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (fromAccount) &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (toAccount) &#123;</span><br><span class="line">            <span class="keyword">if</span> (fromAccount.getBalance().compareTo(amount) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InsufficientFundsException();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                fromAccount.debit(amount);</span><br><span class="line">                toAccount.credit(amount);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>transferMoney在什么时候会发生死锁？看起来线程是按照相同的顺序来加锁的，但事实上，加锁的顺序取决于传入参数的顺序。<br>A: transferMoney(myAccount, yourAccount, 10);<br>B: transferMoney(yourAccount, myAccount, 20);</p>
-<p>要解决上面的问题，则一定要定义锁的顺序。比较直观的，就是在要加锁的所有参数上做一个排序。可以使用System.identityHashCode方法，该方法返回Object.hashCode的返回值。</p>
-<p>下边是一个经典的解决方法<br><figure class="highlight java"><figcaption><span>通过合理顺序来避免死锁</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object tieLock = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transferMoney</span><span class="params">(<span class="keyword">final</span> Account fromAcct, <span class="keyword">final</span> Account toAcct, DollarAmount amount)</span> <span class="keyword">throws</span> InsufficientFundsException </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Helper</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">()</span> <span class="keyword">throws</span> InsufficientFundsException </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (fromAcct.getBalance().compareTo(amount) &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InsufficientFundsException();</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                fromAcct.debit(amount);</span><br><span class="line">                toAcct.credit(amount);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> fromHash = System.identityHashCode(fromAcct);</span><br><span class="line">    <span class="keyword">int</span> toHash = System.identityHashCode(toAcct);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(fromHash &lt; toHash) &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (fromAcct) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span>(toAcct) &#123;</span><br><span class="line">                <span class="keyword">new</span> Helper().transfer();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (fromHash &gt; toHash) &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (toAcct) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span>(fromAcct) &#123;</span><br><span class="line">                <span class="keyword">new</span> Helper().transfer();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">synchronized</span>(tieLock) &#123; <span class="comment">// 极少数情况下，两个对象可能有相同的HashCode，通过一个‘加时赛’锁，保证每次只有一个线程会处理这种情况，避免死锁</span></span><br><span class="line">            <span class="keyword">synchronized</span> (fromAcct) &#123;</span><br><span class="line">                <span class="keyword">synchronized</span>(toAcct) &#123;</span><br><span class="line">                    <span class="keyword">new</span> Helper().transfer();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="协作对象之间发生死锁"><a href="#协作对象之间发生死锁" class="headerlink" title="协作对象之间发生死锁"></a>协作对象之间发生死锁</h4><p>有些获取多个锁的操作并不像之前的例子那么明显，两个锁可能不是在同一个方法中被获得的。在持有所锁的情况下调用外部的方法，需要警惕死锁。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DeadLock！ Don't do this</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Taxi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GuardedBy</span>(<span class="string">"this"</span>) <span class="keyword">private</span> Point location, destination;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Taxi</span><span class="params">(Dispatcher dispather)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.dispather = dispather;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Point <span class="title">getLocation</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.location;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setLocation</span><span class="params">(Point location)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.location = location;</span><br><span class="line">        <span class="keyword">if</span>(location.equals(destination))</span><br><span class="line">            dispathcher.notifyAvaiable(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dispatcher</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GuardedBy</span>(<span class="string">"this"</span>) <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;Taxi&gt; taxis;</span><br><span class="line">    <span class="meta">@GuardedBy</span>(<span class="string">"this"</span>) <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;Taxi&gt; availableTaxis;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Dispatcher</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        taxis = <span class="keyword">new</span> HashSet&lt;Taxi&gt;();</span><br><span class="line">        availableTaxis = <span class="keyword">new</span> HashSet&lt;Taxi&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">notifyAvailable</span><span class="params">(Taxi taxi)</span> </span>&#123;</span><br><span class="line">        availableTaxis.add(taxi);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Image <span class="title">getImage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Image image = <span class="keyword">new</span> Image();</span><br><span class="line">        <span class="keyword">for</span>(Taxi t: taxis) </span><br><span class="line">            image.drawMarker(t.getLocation());</span><br><span class="line">        <span class="keyword">return</span> image;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>尽管没有任何方法会显示的获取两个锁，但是setLocation和getImage等方法的调用者都会获得两个锁。但是他们的顺序是相反的。所有可能产生死锁。</p>
-<p>如果在持有锁的情况下调用外部方法，那么有可能会出现活跃性问题。如果这个外部方法去获得其他的锁，或者阻塞时间过长，那么会导致其他的线程无法获得当前被持有的锁。</p>
-<p>解决方法。调用这种依赖外部方法的函数时，使用开放调用。也就是不对整个方法使用synchronized，而是对需要涉及共享状态的操作加锁，来保证加锁的顺序。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DeadLock！ Don't do this</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Taxi</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Point <span class="title">getLocation</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.location;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLocation</span><span class="params">(Point location)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> reachedLocation;</span><br><span class="line">        <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.location = location;</span><br><span class="line">            reachedLocation = location.equals(desitination);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(reachedLocation)</span><br><span class="line">            dispathcher.notifyAvaiable(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dispatcher</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">notifyAvailable</span><span class="params">(Taxi taxi)</span> </span>&#123;</span><br><span class="line">        availableTaxis.add(taxi);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Image <span class="title">getImage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Set&lt;Taxi&gt; copy;</span><br><span class="line">        sychronized(<span class="keyword">this</span>) &#123;</span><br><span class="line">           copy  = <span class="keyword">new</span> HashSet&lt;Taxi&gt;(taxis);</span><br><span class="line">        &#125;</span><br><span class="line">        Image image = <span class="keyword">new</span> Image();</span><br><span class="line">        <span class="keyword">for</span>(Taxi t: taxis)</span><br><span class="line">            image.drawMarker(t.getLocation());</span><br><span class="line">        <span class="keyword">return</span> image;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>使用开放调用，更容易分析加锁顺序，找出死锁的可能性。</p>
-<p>有时候，把原来的同步代码块用开放调用的形式重写后，会发生一些意想不到的结果。因为可能会失去一些原子性。多数情况可以接受失去原子性。而某些情况下，失去原子性会引发错误。这需要通过一些调用的协议，而非加锁来解决。</p>
-<h4 id="资源死锁"><a href="#资源死锁" class="headerlink" title="资源死锁"></a>资源死锁</h4><p>例如几个服务需要两个数据库连接来完成任务，而数据库连接池很小，会发生资源死锁。</p>
-<h3 id="避免死锁"><a href="#避免死锁" class="headerlink" title="避免死锁"></a>避免死锁</h3><p>如果一个程序在执行每个任务时只能获得一个锁，那么永远都不会产生因为锁顺序引起的死锁。当然这样并不现实。<br>如果必须获得多个锁，那么在设计时一定要考虑锁的顺序问题：减少潜在的加锁交互的数量，将获取锁时需要遵循的协议写入文档。<br>在使用细粒度的加锁时，首先找出什么地方会获得多个锁，然后进行全局分析，确保顺序一致。<br>尽可能的使用开放调用，这可以简化分析过程。</p>
-<p>可以使用指定超时时限的锁，tryLock，超时后会返回一个失败信息。可以记录这个失败信息，然后进行分析，或者可以retry。<br>通过JVM的Thread Dump来帮助识别死锁的发生。Dump的信息包括运行中的各个线程的栈信息，还包括加锁信息，例如每个线程持有哪些锁，在那些被阻塞的线程正在等待哪个锁。</p>
-<p>在Unix平台上出发Thread Dump，是向JVM进行发送SIGQUIT信号(kill-3)，或者Ctrl-\按键。Windows下Ctrl-Break。</p>
-<h3 id="其他的活跃性问题"><a href="#其他的活跃性问题" class="headerlink" title="其他的活跃性问题"></a>其他的活跃性问题</h3><h4 id="饥饿"><a href="#饥饿" class="headerlink" title="饥饿"></a>饥饿</h4><p>最多的例子是因为优先级问题，有些任务永远得不到执行。<br>尽量不去使用线程的优先级。在大多数并发应用中，都可以使用默认的优先级。</p>
-<h4 id="响应性"><a href="#响应性" class="headerlink" title="响应性"></a>响应性</h4><p>CPU密集型的后台任务可能会对性能造成影响，因为它们会与事件线程/主线程共同竞争CPU时钟周期。</p>
-<h4 id="活锁"><a href="#活锁" class="headerlink" title="活锁"></a>活锁</h4><p>线程中出现了谦让，到这线程之前都无法完成任务，时间都消耗在不断的拿锁，放弃，拿锁，放弃。<br>类似于过独木桥，两个人在桥上遇到后堵住了对方，然后都退后，过相同的时间后双方有重试，周而复始，永远没有人能前进。</p>
-<h2 id="性能与可伸缩性"><a href="#性能与可伸缩性" class="headerlink" title="性能与可伸缩性"></a>性能与可伸缩性</h2><h3 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h3><p>想要通过并发来获得更好的性能，需要做好两件事情：</p>
-<ol>
-<li>更有效的利用现有的计算与处理资源。</li>
-<li>在添加了新的计算和处理资源后，尽可能的利用这些新的资源。</li>
-</ol>
-<p>从性能监测的角度来看，CPU需要一直处于忙碌状态。如果程序无法使现有的CPU保持忙碌，那么再添加新的CPU也没用。</p>
-<p>可伸缩性是指当计算资源增加时（CPU，内存，I/O带宽等），程序的吞吐量或者处理能力能够相应的增加。</p>
-<p>对于服务器应用来说，“多少”这个方面————可伸缩性，吞吐量，生产量，往往要比“多快”这个方面更受重视。</p>
-<h4 id="性能权衡"><a href="#性能权衡" class="headerlink" title="性能权衡"></a>性能权衡</h4><p>在几乎所有的工程决策中都会涉及某些形式的权衡。在建设桥梁时，使用更粗的钢筋可以提高桥的负载能力和安全性，但是也会提高建造成本。在软件工程中谁绕路会涉及资金和人身安全，但是做出正确的权衡时也需要考虑很多方面的信息。<br>不要乱优化。首先要使程序正确，如果运行的还不够快，再去设法提高他的运行速度。<br>在任何与性能相关的决策时，都应该考虑以下问题：</p>
-<ol>
-<li>怎么理解更快，可以有数字比较吗？</li>
-<li>在什么环境和情况下这个方法可以运行的更快？能否有实验数据支持？</li>
-<li>这些情况发生的频率有多高？</li>
-<li>其他情况下不同环境中能否重用这些代码？</li>
-<li>有没有其他隐形的代价？例如开发风险和维护风险？</li>
-</ol>
-<p>要以测试为基准，不可以猜测。利用现有的成熟的工具，perbar等，可以监测CPU的忙碌程度。</p>
-<h4 id="Amdahl定律"><a href="#Amdahl定律" class="headerlink" title="Amdahl定律"></a>Amdahl定律</h4><p>有些任务并行可以提高效率，有些并不能。</p>
-<p>Amdahl定律描述的是，再增加计算资源的情况下，程序在理论上能够实现的最高加速比。F是必须串行与所有任务的比值，N是处理器数量<br><img src="./Amdahl.gif" alt="Amdahl"><br>当N区域无穷大时，最高的加速比时1/F，因此加入有50%的计算需要串行执行，那么最高的加速比是2。</p>
-<p>下图可以看出，处理器的利用率在不同串行比例（0.25%，0.5%……）以及处理器数量下的变化曲线。可以明显的看到串行比例对CPU利用率的影响是很大的。<br><img src="./Amdahl-curv.gif" alt="Amdahl-curv"></p>
-<p>Amdahl定律的作用，主要是量化当有更多资源时，可以加速的比率。更重要的时对出现的可伸缩性局限有清醒的认识。</p>
-<h3 id="线程引入的开销"><a href="#线程引入的开销" class="headerlink" title="线程引入的开销"></a>线程引入的开销</h3><h4 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h4><p>在大多数通用的处理器中，上下文切换的开销相当于5000~10000个时钟周期，也就是几微妙。<br>UNIX系统的vmstat命令和Windows的perfmon工具都能够查看上下文切换次数以及在内核中执行时间所占比例等信息。如果内核占用率较高（超过10%），那么表示调度活动发生的很频繁，可能是由I/O或竞争锁导致的阻塞引起的。</p>
-<h4 id="内存同步"><a href="#内存同步" class="headerlink" title="内存同步"></a>内存同步</h4><p>在synchronized和volatile提供的可见性保证中，会使用一些特殊指令，也就是内存栅栏Memory Barrier，来刷新缓存。内存栅栏时缓存无效刷新硬件的写缓冲。<br>所以内存栅栏可能会对性能带来间接的影响，因为它在抑制一些优化，包括编译器的优化，重排序。<br>现代的JVM能够通过优化来去掉一些不会发生竞争的锁，从而减少不必要的同步开销。</p>
-<h4 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h4><p>竞争的同步可能需要操作系统接入，从而增加开销。在锁上发生竞争后，竞争失败的线程肯定会阻塞。JVM在实现阻塞行为时，可以采用自旋等待，或者通过操作系统挂起被阻塞的线程。大多数JVM在等待锁时都是将线程挂起。</p>
-<h3 id="减少锁的竞争"><a href="#减少锁的竞争" class="headerlink" title="减少锁的竞争"></a>减少锁的竞争</h3><ol>
-<li><p>缩小锁的范围，快进快出，在访问完共享资源后尽快释放</p>
-</li>
-<li><p>减小锁的粒度，只锁自己需要的资源</p>
-</li>
-<li><p>锁分段，Lock Striping, 例如ConcurrentHashMap</p>
-</li>
-<li><p>避免热点域，例如每个操作都会修改一个变量，HashMap的Size方法</p>
-</li>
-<li><p>使用ReadWriteLock,原子变量来代替独占锁</p>
-</li>
-<li><p>避免使用对象池</p>
-</li>
-</ol>
-<h2 id="并发程序测试"><a href="#并发程序测试" class="headerlink" title="并发程序测试"></a>并发程序测试</h2><p>由于并发程序有一些不确定性，这和串行程序比，要增加</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/07/Java并发编程-结构化并发应用程序/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Roger Guo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Roger Guo's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/02/07/Java并发编程-结构化并发应用程序/" itemprop="url">Java并发编程-结构化并发应用程序</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-07T09:40:36+08:00">
-                2018-02-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="任务执行"><a href="#任务执行" class="headerlink" title="任务执行"></a>任务执行</h2><p>大多数并发应用程序都是围绕任务执行来构造的。任务，在理想状态下，是一些离散的工作单元。通过把应用程序的工作分解到多个任务中，可以简化程序的组织结构，提供一种自然的并行结构来提升工作的并发性。</p>
-<h3 id="在线程中执行任务"><a href="#在线程中执行任务" class="headerlink" title="在线程中执行任务"></a>在线程中执行任务</h3><p>当围绕任务执行来设计应用程序的结构时，第一步就是要找到清晰的任务边界。大多数服务器应用程序都提供一种自然的任务边界选择方式：以独立的客户请求为边界。Web服务器，邮件服务器，文件服务器，数据库服务器等。将独立的请求作为任务表边界，既可以实现任务的独立性，又可以实现合理的任务规模。</p>
-<h4 id="串行执行"><a href="#串行执行" class="headerlink" title="串行执行"></a>串行执行</h4><figure class="highlight java"><figcaption><span>Serialized Web Server</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SingleThreadWebServer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ServerSocket socket = <span class="keyword">new</span> ServerSocket(<span class="number">80</span>);</span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">            Socket connection = socket.accept();</span><br><span class="line">            handleRequest(connection);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>串行的处理请求，一般来说无法提供高吞吐率或快速的响应。服务器的资源利用率会非常低，多数时间都耗费在IO操作上。</p>
-<h4 id="显示的创建线程"><a href="#显示的创建线程" class="headerlink" title="显示的创建线程"></a>显示的创建线程</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Don't do this way</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ThreadPerTaskWebServer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ServerSocket socket = <span class="keyword">new</span> ServerSocket(<span class="number">80</span>);</span><br><span class="line">        whilte(<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">final</span> Socket connection = socket.accept();</span><br><span class="line">            Runnable task = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    handleRequest(connection);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">new</span> Thread(task).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="不停创建线程的缺点"><a href="#不停创建线程的缺点" class="headerlink" title="不停创建线程的缺点"></a>不停创建线程的缺点</h4><ol>
-<li>线程生命周期的开销非常高</li>
-<li>资源消耗，大量的空闲线程会占用很多内存.</li>
-<li>稳定性，OutOfMemoryError<h3 id="Executor框架"><a href="#Executor框架" class="headerlink" title="Executor框架"></a>Executor框架</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Executor</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable command)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-Executor提供了一种标准的方法把任务提交与任务执行解耦开来。Executor基于生产者消费者模式，提交任务的操作是生产者，执行人物的消费者。<h4 id="例，基于Executor的Web服务器"><a href="#例，基于Executor的Web服务器" class="headerlink" title="例，基于Executor的Web服务器"></a>例，基于Executor的Web服务器</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TaskExecutionWebServer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> NTHREADS = <span class="number">100</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor exec = Executors.newFixedThreadPool(NTHREADS);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ServerSocket socket = <span class="keyword">new</span> ServerSocket(<span class="number">80</span>);</span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">final</span> Socket connection = socket.accept();</span><br><span class="line">            Runnable task = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    handleRequest(connection);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            exec.execute(task);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-通过使用Executor，将请求处理任务的提交与任务的实际执行解耦。只要改变Executor的实现，便可改变任务的执行方式，策略和服务器的行为。<h4 id="执行策略"><a href="#执行策略" class="headerlink" title="执行策略"></a>执行策略</h4>不同的执行策略，是不同的资源管理方式，最好的策略要根据当时可用的计算资源以及对服务质量的需求而定。<br>通过限制并发线程数量，可以避免程序因为过多的请求而耗尽服务器资源，最终导致失败。或者由于资源短缺，发生竞争，而导致性能问题。<br>把任务提交，与执行策略分离开来，有助于在部署时选择与可用资源最匹配的策略，发挥最大效能。<h4 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h4>线程池，管理一组同类型工作线程的资源池。线程池与工作队列密切相关。工作队列保存了所有等待执行的任务。</li>
-</ol>
-<p>java.util.concurrent.Executors中提供了常用的静态工厂方法，来创建线程池。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">newFixedThreadPool(int nThreads)</span><br><span class="line">Creates a thread pool that reuses a fixed number of threads operating off a shared unbounded queue.</span><br><span class="line"></span><br><span class="line">newCachedThreadPool()</span><br><span class="line">Creates a thread pool that creates new threads as needed, but will reuse previously constructed threads when they are available.</span><br><span class="line"></span><br><span class="line">newSingleThreadExecutor()</span><br><span class="line">Creates an Executor that uses a single worker thread operating off an unbounded queue.</span><br><span class="line"></span><br><span class="line">newScheduledThreadPool(int corePoolSize)</span><br><span class="line">Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.</span><br></pre></td></tr></table></figure>
-<p>其中前三个方法都是对java.util.concurrent.ThreadPoolExecutor这个类的包装使用，而ThreadPoolExecutor实现了ExecutorService接口。</p>
-<h4 id="Executor生命周期"><a href="#Executor生命周期" class="headerlink" title="Executor生命周期"></a>Executor生命周期</h4><p>Executor的生命周期有三种状态：运行，关闭，已终止。<br><figure class="highlight java"><figcaption><span>Life cycle management API of ExecutorService</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ExecutorService</span> <span class="title">entends</span> <span class="title">Executor</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">shutdown</span><span class="params">()</span></span>; <span class="comment">// Stop accept new request</span></span><br><span class="line">    <span class="function">List&lt;Runnable&gt; <span class="title">shutdownNow</span><span class="params">()</span></span>; <span class="comment">// Stop accept, and immediately stop all the executing threads</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isShutdown</span><span class="params">()</span></span>; </span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isTerminated</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">awaitTermination</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException</span>; <span class="comment">// wait until it is terminated.</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="延迟任务与周期任务"><a href="#延迟任务与周期任务" class="headerlink" title="延迟任务与周期任务"></a>延迟任务与周期任务</h4><p>通过使用ScheduledThreadPoolExecutor来执行延迟任务或者周期任务。</p>
-<h3 id="可利用并行性"><a href="#可利用并行性" class="headerlink" title="可利用并行性"></a>可利用并行性</h3><p>大多数服务器应用程序，明显的任务边界是每个客户的请求。在单个客户请求中仍可以发掘并发的可能性。</p>
-<h4 id="例，串行页面渲染器"><a href="#例，串行页面渲染器" class="headerlink" title="例，串行页面渲染器"></a>例，串行页面渲染器</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleThreadRenderer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">renderPage</span><span class="params">(CharSequence source)</span> </span>&#123;</span><br><span class="line">        renderText(source);</span><br><span class="line">        List&lt;ImageData&gt; imageData = <span class="keyword">new</span> ArrayList&lt;ImageData&gt;();</span><br><span class="line">        <span class="keyword">for</span> (ImageInfo imageInfo: scanForImageInfo(source))</span><br><span class="line">            imageData.add(imageInfo.downloadImage()); <span class="comment">// During this loop, the CPU is almost in idle state due to I/O, not utilize the resources fully. </span></span><br><span class="line">        <span class="keyword">for</span> (ImageData data: imageData)</span><br><span class="line">            renderImage(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="有结果的任务Callable与Future"><a href="#有结果的任务Callable与Future" class="headerlink" title="有结果的任务Callable与Future"></a>有结果的任务Callable与Future</h4><p>Runnable的最大局限在于，他不能返回一个值，或者抛出受检查的异常。<br>Callable是一种更好的抽象。<br>Future表示一个任务的生命周期，可以判断任务是否完成或者已经取消。<br>ExecutorService中的submit方法会返回一个Future。或者可以显示的为某个指定的Runnable或者Callable实例化一个FutureTask，用newTaskFor方法或者其构造函数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">V <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Future</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isCanceleed</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isDone</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException, CancellationException</span>;</span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, ExecutionException, CancellationException, TimeoutException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>提交Runnable或者Callable时，就是把Runnable从任务提交的线程，安全的发布到最终执行任务的线程，等待执行。<br>同样的在给Future的结果赋值时，也是把结果从计算线程，安全的发布到调用get方法的线程中。</p>
-<h4 id="例，使用Future实现页面渲染器"><a href="#例，使用Future实现页面渲染器" class="headerlink" title="例，使用Future实现页面渲染器"></a>例，使用Future实现页面渲染器</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FutureRenderer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ExecutorService executor = ...;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">renderPage</span><span class="params">(CharSequence source)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> List&lt;ImageInfo&gt; imageInfos = scanForImageInfo(source);</span><br><span class="line">        Callable&lt;List&lt;ImageData&gt;&gt; task = <span class="keyword">new</span> Callable&lt;List&lt;ImageData&gt;&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> List&lt;ImageData&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                List&lt;ImageData&gt; result = <span class="keyword">new</span> ArrayList&lt;ImageData&gt;();</span><br><span class="line">                <span class="keyword">for</span>(ImageInfo imageInfo: imageinfos)</span><br><span class="line">                    result.add(imageInfo.downloadImage());</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Future&lt;List&lt;ImageData&gt;&gt; future = executor.submit(task);</span><br><span class="line">        renderText(source);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            List&lt;ImageData&gt; imageData = future.get();</span><br><span class="line">            <span class="keyword">for</span>(ImageData data: imageData)</span><br><span class="line">                renderImage(data);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">            future.cancel(<span class="keyword">true</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上面的代码把渲染文字与下载图像分开，稍微提升了一点性能。但是问题在于，必须要等所有图像都下载完毕，Future才能完成，才可以渲染图像。<br>我们可以使用CompletionService来更好地利用并行资源。CompletionService把Executor和BlockingQueue的功能融合，可以通过submit来提交Callable，也可以使用take和poll方法，来获得已经完成的任务结果。<br>ExecutorCompletionService的实现也很简单。他需要一个BlockingQueue来保存结果。当提交任务时，我们把任务包装成一个叫QueueingFuture的类，这个类继承FutureTask，并且改写protected的方法done，在这方法中加入把结果放入BlockingQueue的逻辑。当一个计算任务结束时，就调用FutureTask的done方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">QueueingFuture</span>&lt;<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">FutureTask</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    QueueingFuture(Callable&lt;V&gt; c) &#123; <span class="keyword">super</span>(c); &#125;</span><br><span class="line">    QueueingFuture(Runnable t, V r) &#123; <span class="keyword">super</span>(t, r); &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">done</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        completionQueue.add(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="使用CompletionService的页面渲染器"><a href="#使用CompletionService的页面渲染器" class="headerlink" title="使用CompletionService的页面渲染器"></a>使用CompletionService的页面渲染器</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Renderer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ExecutorService executor;</span><br><span class="line"></span><br><span class="line">    Renderer(ExecutorService executor) &#123; <span class="keyword">this</span>.executor = executor; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">renderPage</span><span class="params">(CharSequence source)</span> </span>&#123;</span><br><span class="line">        List&lt;ImageInfo&gt; info = scanForImageImage(source);</span><br><span class="line">        CompletionService&lt;ImageData&gt; completionService = <span class="keyword">new</span> ExecutorCompletionService&lt;ImageData&gt;(executor);</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">final</span> ImageInfo imageInfo: info) </span><br><span class="line">            completionService.submit(<span class="keyword">new</span> Callable&lt;ImageData&gt;() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> ImageData <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">return</span> imageInfo.downloadImage();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        renderText(source);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> t = <span class="number">0</span>, n = info.size(); t &lt; n; t++) &#123;</span><br><span class="line">                Future&lt;ImageData&gt; f = completionService.take();</span><br><span class="line">                ImageData data = f.get();</span><br><span class="line">                renderImage(data);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span>(InterruptedException e) &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">        &#125; <span class="keyword">catch</span>(ExecutionException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="取消与关闭"><a href="#取消与关闭" class="headerlink" title="取消与关闭"></a>取消与关闭</h2><p>把任务和线程安全、快速、可靠的停止下来，不是一件容易的事情。<br>中断是一种协作机制，可以使一个线程种植另一个线程的当前工作。这种协作模式的好处在于，当需要停止时，它们会首先清除当前正在执行的工作，然后在结束。</p>
-<h3 id="任务取消"><a href="#任务取消" class="headerlink" title="任务取消"></a>任务取消</h3><p>取消一个任务的原因有，<br>用户请求取消，例如用户点击了取消按钮；<br>有时间限制的操作，例如超时；<br>应用程序事件，例如算法中可能并行的去计算多个空间，当其中一个得出结果时，可以取消其他的分支；<br>错误，例如写入文件是空间不足会报错；<br>关闭，当程序要关闭时，需要处理正在运行和在等待的任务。</p>
-<p>Java中没有一种安全的抢占式的停止方式来终止一个任务线程，而协作模式是更好的一种方式。</p>
-<p>一个可取消的任务必须有它的取消策略。这个策略中详细的定义了其他代码如何取消该任务，任务在何时检查是否已经请求了取消，以及响应取消时会执行哪些操作。</p>
-<p>一个原始的办法时任务在执行过程中不断的检查一个自定义变量，在被设置后退出。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PrimeGeneraor</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GuardedBy</span>(<span class="string">"this"</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> List&lt;BigInteger&gt; primes = <span class="keyword">new</span> ArrayList&lt;BigInteger&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> cancelled;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        BigInteger p = BigIntger.ONE;</span><br><span class="line">        <span class="keyword">while</span>(!cancelled) &#123;</span><br><span class="line">            p = p.nextProbalePrime();</span><br><span class="line">            <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">                primes.add(p);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span> </span>&#123; cancelled = <span class="keyword">true</span>; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> List&lt;BigInteger&gt; <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ArrayList&lt;BigInteger&gt;(primes);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h4><p>使用检查自定义变量的方法的问题在于，当执行一个阻塞方法时，例如阻塞队列put方法调用时队列满，就不会再有机会检查到这个标志位。</p>
-<p>每个线程都有一个boolean类型的中断状态。当线程中断时，这个线程的中断状态将被设置为true。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">interrupt</span><span class="params">()</span> </span>&#123; ... &#125; <span class="comment">// 中断目标线程</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isInterrupted</span><span class="params">()</span> </span>&#123; ... &#125; <span class="comment">// 返回目标线程是否中断</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">interrupted</span><span class="params">()</span> </span>&#123; ... &#125; <span class="comment">// 清除当前线程的中断状态</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>对中断操作的正确理解是，它并不会真正地中断一个正在运行的线程，而只是发出中断请求，然后由下一个适合的时刻中断自己。<br>使用静态的interrupted时应该小心，因为它会清除当前线程的中断状态。如果调用interrupted时返回了true，那么除非你想屏蔽这个中断，否则一定要处理。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PrimeProducer</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> BlockingQueue&lt;BigInteger&gt; queue;</span><br><span class="line"></span><br><span class="line">    PrimeProducer(BlockingQueue&lt;BigInteger&gt; queue) &#123;</span><br><span class="line">        <span class="keyword">this</span>.queue = queue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            BigInteger p = BigInteger.ONE;</span><br><span class="line">            <span class="keyword">while</span>(!Thread.currentThread().isInterrupted()) </span><br><span class="line">                queue.put(p = p.nextProbablePrime());</span><br><span class="line">        &#125; <span class="keyword">catch</span>(InterrunptedException consumed) &#123;</span><br><span class="line">            <span class="comment">// exit...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span> </span>&#123; interrupt(); &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="中断策略"><a href="#中断策略" class="headerlink" title="中断策略"></a>中断策略</h4><p>中断策略规定线程如何解释某个中断请求————当发现中断请求时，应该做哪些工作，那些工作单元对于终端来说是原子操作，以及以多块的速度来响应中断。<br>最合理的中断策略是某种形式的线程级取消操作或者服务级取消操作：尽快推出，在必要时清理，通知某个所有者该线程已经退出。<br>由于每个线程拥有各自的中断策略，因此除非你知道中断对该线程的含义，否则就不应该中断这个线程。</p>
-<h4 id="响应中断"><a href="#响应中断" class="headerlink" title="响应中断"></a>响应中断</h4><p>当调用可中断的阻塞函数时，有两种使用的策略处理中断异常：</p>
-<ol>
-<li>传递异常</li>
-<li>恢复中断状态</li>
-</ol>
-<p>如果不想传递或无法传递InterruptedException，那么需要寻找另一种方式来保存中断请求。一个方法就是通过再次调用interrupt来恢复中断状态。<br>只有实现了线程中断策略的代码才可以屏蔽中断请求。常规的任务和库函数代码中都不应屏蔽中断请求。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Task <span class="title">getNextTask</span><span class="params">(BlockingQueue&lt;Task&gt; queue)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> queue.take();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                interrupted = <span class="keyword">true</span>;</span><br><span class="line">                <span class="comment">// 如果在这里恢复中断状态，会引起无限循环</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(interrupted)</span><br><span class="line">            Thread.currentThread().interrupt(); <span class="comment">// 在返回前恢复中断状态</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="例，计时运行"><a href="#例，计时运行" class="headerlink" title="例，计时运行"></a>例，计时运行</h4><p>下面的代码，是一个任意的Runnable在指定时间内运行完成的例子。在调用这个timedRun方法的线程中运行这个任务，并安排了一个取消操作。<br><figure class="highlight java"><figcaption><span>scheduling an Interrupt on a Borrowed Thread</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ScheduledExecutorService cancelExec = ...;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">timedRun</span><span class="params">(Runnable r, <span class="keyword">long</span> timeout, TimeUnit unit)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Thread taskThread = Thread.currentThread();</span><br><span class="line">    cancelExec.schedule(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            taskThread.interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, timeout, unit);</span><br><span class="line">    r.run();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这个方法非常简单，但是破坏了规则，就是在中断线程前，应该了解他的中断策略。因为timedRun可以从任意一个线程中调用，它无法知道这个调用线程的中断策略。如果run方法在超时限制前完成，那么线程中断操作是什么代码我们就不得而知了。反过来，如果任务不响应中断，那么timedRun会在任务结束时才返回。会给调用者带来负面影响。</p>
-<h4 id="通过Future实现取消"><a href="#通过Future实现取消" class="headerlink" title="通过Future实现取消"></a>通过Future实现取消</h4><p>将任务提交交给一个ExecutorService，并通过一个定时的get方法获得结果。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">timedRun</span><span class="params">(Runnable r, <span class="keyword">long</span> timeout, Timeunit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    Future&lt;?&gt; task = taskExec.submit(r);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        task.get(timeout, unit);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (TimeoutException e) &#123;</span><br><span class="line">        <span class="comment">// 接下来任务将被取消</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">        <span class="comment">// 如果在任务中抛出了异常，那么重新抛出该异常</span></span><br><span class="line">        <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">// 如果任务已经结束，那么执行取消操作也没有任何负面影响</span></span><br><span class="line">        <span class="comment">// 如果任务正在执行，那么会被中断</span></span><br><span class="line">        task.cancel(<span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="处理不可中断的阻塞"><a href="#处理不可中断的阻塞" class="headerlink" title="处理不可中断的阻塞"></a>处理不可中断的阻塞</h4><p>并非所有的可阻塞方法或者阻塞机制都能响应中断。如果一个线程由于执行同步的Socket I/O或者等待获得内置锁而阻塞，那么中断请求只能设置现成的中断状态，除此之外没有其他任何作用。<br>对于由于执行不可中断操作而被阻塞的线程，可以使用类似于中断的手段来停止这些县城，但要求我们必须知道线程阻塞的原因。</p>
-<ol>
-<li><strong>同步的Socket I/O</strong>。虽然InputStream和OutputStream中的read，write都不会响应中断，但是通过关闭底层的Socket，可以使线程抛出一个SocketException。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReaderThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Socket socket;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">interrupt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            socket.close();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (IOException ignored) &#123;&#125;</span><br><span class="line">        <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><strong>Java.io 中的同步I/O</strong>。Channel会派出AsynchronousCloseException。</li>
-<li><strong>异步的Socket I/O</strong>，也是调用close或者wakeup方法。</li>
-<li><strong>获取某个锁</strong>。无法响应。但是通过Lock类中提供的lockInterruptibly方法，运行在等待一个锁时仍能响应中断。</li>
-</ol>
-<h3 id="停止基于线程的服务"><a href="#停止基于线程的服务" class="headerlink" title="停止基于线程的服务"></a>停止基于线程的服务</h3><p>包括了LogWrite，LogService，关闭ExecutorService，Poison Pill，等例子。</p>
-<h3 id="处理非正常的线程终止"><a href="#处理非正常的线程终止" class="headerlink" title="处理非正常的线程终止"></a>处理非正常的线程终止</h3><p>任何代码都可能抛出一个RuntimeException。每当调用另一个方法时，都要对他的行为保持怀疑。<br><figure class="highlight java"><figcaption><span>典型的线程池Worker线程结构</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Throwable thrown = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span>(!isInterrupted())</span><br><span class="line">            runTask(getTaskFromQueue());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        thrown = e;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        threadExited(<span class="keyword">this</span>, thrown);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>未捕获异常处理，UncaughtExceptionHandler。</p>
-<h3 id="JVM关闭"><a href="#JVM关闭" class="headerlink" title="JVM关闭"></a>JVM关闭</h3><h4 id="Shutdown-Hook"><a href="#Shutdown-Hook" class="headerlink" title="Shutdown Hook"></a>Shutdown Hook</h4><h4 id="Daemon-Thread的使用场景与局限"><a href="#Daemon-Thread的使用场景与局限" class="headerlink" title="Daemon Thread的使用场景与局限"></a>Daemon Thread的使用场景与局限</h4><h4 id="避免使用finalize"><a href="#避免使用finalize" class="headerlink" title="避免使用finalize"></a>避免使用finalize</h4><h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><h3 id="在任务与执行策略之间的隐耦合"><a href="#在任务与执行策略之间的隐耦合" class="headerlink" title="在任务与执行策略之间的隐耦合"></a>在任务与执行策略之间的隐耦合</h3><p>包括</p>
-<ol>
-<li>依赖性任务。两个并行的任务之间有依赖。</li>
-<li>使用线程封闭机制的任务。</li>
-<li>对时间响应铭感的任务，GUI程序。</li>
-<li>使用ThreadLocal的任务。线程池中不该使用。</li>
-</ol>
-<h3 id="线程池大小"><a href="#线程池大小" class="headerlink" title="线程池大小"></a>线程池大小</h3><p>根据CPU个数，目标使用率等参数决定。<br>ThreadPoolExecutor的设计。</p>
-<h2 id="GUI界面的程序"><a href="#GUI界面的程序" class="headerlink" title="GUI界面的程序"></a>GUI界面的程序</h2><h3 id="为什么GUI是单线程的"><a href="#为什么GUI是单线程的" class="headerlink" title="为什么GUI是单线程的"></a>为什么GUI是单线程的</h3><p>因为简单。对线程的GUI系统容易死锁。</p>
-<p>当前的GUI框架使用了专门的事件分发线程（Event Dispath Thread, EDT）来处理GUI事件。也就是主线程。</p>
-<p>GUI应用程序需要处理一些细粒度的时间，例如点击鼠标、按下键盘或定时器超时等。因为只有单个线程来处理所有的GUI任务，因此会采用串行处理的方式。串行任务处理的不利之处在于，如果某个任务执行的时间很长，那么其他任务必须等到该任务执行结束。<br>在事件线程中执行的任务必须尽快的把控制权交还给事件线程。</p>
-<p>短时间的GIU任务和长时间的GUI任务，处理有区别。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1691,7 +1676,7 @@ Executor提供了一种标准的方法把任务提交与任务执行解耦开来
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -239,6 +239,388 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/24/Spring-动态代理与泛型接口注入/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/24/Spring-动态代理与泛型接口注入/" itemprop="url">Spring-动态代理与泛型接口注入</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-24T09:56:11+08:00">
+                2019-08-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h1><h1 id="Java自带的Dynamic-Proxy与CGLib代理"><a href="#Java自带的Dynamic-Proxy与CGLib代理" class="headerlink" title="Java自带的Dynamic Proxy与CGLib代理"></a>Java自带的Dynamic Proxy与CGLib代理</h1><h1 id="泛型注入"><a href="#泛型注入" class="headerlink" title="泛型注入"></a>泛型注入</h1><h2 id="Provider"><a href="#Provider" class="headerlink" title="@Provider"></a>@Provider</h2><h2 id="Autowired"><a href="#Autowired" class="headerlink" title="@Autowired"></a>@Autowired</h2><h1 id="Transactional"><a href="#Transactional" class="headerlink" title="@Transactional"></a>@Transactional</h1><h1 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h1>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/18/DDIA-9-一致性与共识/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roger Guo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Roger Guo's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/18/DDIA-9-一致性与共识/" itemprop="url">DDIA-9-一致性与共识</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-18T23:10:14+08:00">
+                2019-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="一致性保证"><a href="#一致性保证" class="headerlink" title="一致性保证"></a>一致性保证</h1><ol>
+<li>最终一致性是一个非常弱的保证。当系统提供了弱保证的数据库时，要认清系统的局限性。（最终一致性数据库不同副本的状态可能不同）</li>
+<li>需要更强的一致性保证来满足一些业务的需求。</li>
+</ol>
+<h1 id="可线性化"><a href="#可线性化" class="headerlink" title="可线性化"></a>可线性化</h1><p>基本思想：<strong>让系统看起来好像只有一个副本，并且所有的操作都是原子的</strong></p>
+<h2 id="非线性化，看世界杯直播的例子"><a href="#非线性化，看世界杯直播的例子" class="headerlink" title="非线性化，看世界杯直播的例子"></a>非线性化，看世界杯直播的例子</h2><img src="/2019/08/18/DDIA-9-一致性与共识/一个非线性化的体育网站系统.png">
+<p>用户可以发现不一致是因为有系统外部的信息通道。</p>
+<h2 id="如何达到线性化？"><a href="#如何达到线性化？" class="headerlink" title="如何达到线性化？"></a>如何达到线性化？</h2><h3 id="问题，三个用户同时读写变量x"><a href="#问题，三个用户同时读写变量x" class="headerlink" title="问题，三个用户同时读写变量x"></a>问题，三个用户同时读写变量x</h3><p>从用户的角度来讲，标红的request在没有线性一致保证时候可能返回任何值。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/并发的读写请求.png">
+<h3 id="实现线性一致，要添加一个约束"><a href="#实现线性一致，要添加一个约束" class="headerlink" title="实现线性一致，要添加一个约束"></a>实现线性一致，要添加一个约束</h3><img src="/2019/08/18/DDIA-9-一致性与共识/任何一个读取返回新值后，所有后续读取（在相同或其他客户端上）也必须返回新值.png">
+<p>由于B的读取严格在发生于A的读取之后，因此即使C的写入仍在进行中，也必须返回 1。</p>
+<h3 id="增加CAS操作"><a href="#增加CAS操作" class="headerlink" title="增加CAS操作"></a>增加CAS操作</h3>
+<h2 id="可串行化-VS-可线性化"><a href="#可串行化-VS-可线性化" class="headerlink" title="可串行化 VS 可线性化"></a>可串行化 VS 可线性化</h2><h3 id="可串行化"><a href="#可串行化" class="headerlink" title="可串行化"></a>可串行化</h3><p>是事务隔离属性。<br>确保了事务执行的<strong>结果</strong>与串行执行结果一样。</p>
+<h3 id="可线性化-1"><a href="#可线性化-1" class="headerlink" title="可线性化"></a>可线性化</h3><p>是读写寄存器的最新值保证。<br>跟事务没有关系。</p>
+<h2 id="需要线性化的场景"><a href="#需要线性化的场景" class="headerlink" title="需要线性化的场景"></a>需要线性化的场景</h2><h3 id="加锁与主节点选举"><a href="#加锁与主节点选举" class="headerlink" title="加锁与主节点选举"></a>加锁与主节点选举</h3><p>主从复制数据库，只能有一个主节点，否则会产生脑裂。</p>
+<p>常见方法是使用锁。先获得锁的人成为主节点。</p>
+<p>不管这个锁是如何实现的，它必须是线性一致的：所有节点必须就哪个节点拥有锁达成一致，否则就没用了。</p>
+<p>​诸如Apache ZooKeeper 和etcd之类的协调服务通常用于实现分布式锁和领导者选举。它们使用一致性算法，以容错的方式实现线性一致的操作（在本章后面的“容错共识”中讨论此类算法）。还有许多微妙的细节来正确地实现锁和领导者选择（例如，参阅“领导者和锁”中的屏蔽问题）。<br>线性一致性存储服务是这些协调任务的基础。</p>
+<h3 id="约束与唯一性保证"><a href="#约束与唯一性保证" class="headerlink" title="约束与唯一性保证"></a>约束与唯一性保证</h3><p>注册用户名/邮箱唯一。</p>
+<p>这种情况实际上类似于一个锁：当一个用户注册你的服务时，可以认为他们获得了所选用户名的“锁定”。</p>
+<h3 id="跨通道的时间依赖"><a href="#跨通道的时间依赖" class="headerlink" title="跨通道的时间依赖"></a>跨通道的时间依赖</h3><p>看球赛中的例子。由于系统中存在额外的信道（Alice的声音传到了Bob的耳朵中），线性一致性的违背才被注意到。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/Web服务器和图像调整器通过文件存储和消息队列进行通信，打开竞争条件的可能性。.png">
+<p>如果你可以控制额外信道（例如消息队列的例子，而不是在Alice和Bob的例子），则可以使用在“读己之写”讨论过的备选方法，不过会有额外的复杂度代价。</p>
+<h2 id="实现线性化系统"><a href="#实现线性化系统" class="headerlink" title="实现线性化系统"></a>实现线性化系统</h2><p>系统容错做常见的解决方案是复制。 </p>
+<ol>
+<li>单主系统可能实现线性化。从主节点读或者同步更新从节点。</li>
+<li>共识算法。通过协商一致性协议算法可以防止脑裂和读取过期数据，通过一致性算法可以实现核心数据线性化的安全存储。这是ZooKeeper与Chubby等分布式协调服务的基础算法。</li>
+</ol>
+<h3 id="法定人数读Quorum"><a href="#法定人数读Quorum" class="headerlink" title="法定人数读Quorum"></a>法定人数读Quorum</h3><p>在某些情况，即使w + r &gt; n，也会不是线性的。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/非线性一致的执行，尽管使用了严格的法定人数.png">
+<h2 id="线性化的代价"><a href="#线性化的代价" class="headerlink" title="线性化的代价"></a>线性化的代价</h2><p>​许多分布式数据库也是如此：它们是为了提高性能而选择了牺牲线性一致性，而不是为了容错。线性一致的速度很慢——这始终是事实，而不仅仅是网络故障期间。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/网络中断迫使在线性一致性和可用性之间做出选择.png">
+<h3 id="CAP理论"><a href="#CAP理论" class="headerlink" title="CAP理论"></a>CAP理论</h3><p>CAP理论，简而言之便是：数据系统必须在<strong>一致性</strong>、<strong>可用性</strong>、<strong>分区容忍性</strong>的三角关系之中有所权衡，任何系统没有办法同时满足三种特性。</p>
+<p>所以使用<strong>线性化</strong>的一致性自然会需要在<strong>可用性上做一些妥协</strong>， 在单Leader多Follower机制之下，需要满足线性化一致性的写入和读取的客户端必须连接到Leader。如果Leader产生中断，仍然可以读取Follower的数据，但此时就无法保证线性化的要求了。</p>
+<p>​许多分布式数据库也是如此：它们是为了提高性能而选择了牺牲线性一致性，而不是为了容错。线性一致的速度很慢——这始终是事实，而不仅仅是网络故障期间。</p>
+<h1 id="顺序"><a href="#顺序" class="headerlink" title="顺序"></a>顺序</h1><h2 id="顺序与因果关系"><a href="#顺序与因果关系" class="headerlink" title="顺序与因果关系"></a>顺序与因果关系</h2><p>顺序有助于保证因果关系。</p>
+<p>因果顺序不是全序。</p>
+<p>可线性化强于因果一致性。</p>
+<h3 id="线性一致性"><a href="#线性一致性" class="headerlink" title="线性一致性"></a>线性一致性</h3><p>在线性一致的系统中，操作是全序的：如果系统表现的就好像只有一个数据副本，并且所有操作都是原子性的，这意味着对任何两个操作，我们总是能判定哪个操作先发生。</p>
+<h3 id="因果性"><a href="#因果性" class="headerlink" title="因果性"></a>因果性</h3><p>我们说过，如果两个操作都没有在彼此之前发生，那么这两个操作是并发的（参阅“Happens-Before”的关系和并发）。换句话说，如果两个事件是因果相关的（一个发生在另一个事件之前），则它们之间是有序的，但如果它们是并发的，则它们之间的顺序是无法比较的。这意味着因果关系定义了一个偏序，而不是一个全序：一些操作相互之间是有顺序的，但有些则是无法比较的。</p>
+<p>那么因果顺序和线性一致性之间的关系是什么？答案是线性一致性隐含着（implies）因果关系：任何线性一致的系统都能正确保持因果性。</p>
+<p>在许多情况下，看上去需要线性一致性的系统，实际上需要的只是因果一致性，因果一致性可以更高效地实现。</p>
+<h2 id="序列号排序"><a href="#序列号排序" class="headerlink" title="序列号排序"></a>序列号排序</h2><p>我们可以使用序列号（sequence nunber）或时间戳（timestamp）来排序事件。时间戳不一定来自时钟（或物理时钟，存在许多问题，如 “不可靠时钟” 中所述）。它可以来自一个逻辑时钟（logical clock），这是一个用来生成标识操作的数字序列的算法，典型实现是使用一个每次操作自增的计数器。</p>
+<p>这些序列号生成器不能正确地捕获跨节点的操作顺序。</p>
+<h3 id="Lamport时间戳"><a href="#Lamport时间戳" class="headerlink" title="Lamport时间戳"></a>Lamport时间戳</h3><p>每个节点都有一个唯一标识符，和一个保存自己执行操作数量的计数器。 兰伯特时间戳就是两者的简单组合：（计数器，节点ID）$(counter, node ID)$。两个节点有时可能具有相同的计数器值，但通过在时间戳中包含节点ID，每个时间戳都是唯一的。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/Lamport时间戳提供了与因果关系一致的总排序.png">
+<p>兰伯特时间戳与物理时间时钟没有任何关系，但是它提供了一个全序：<strong>如果你有两个时间戳，则计数器值大者是更大的时间戳。如果计数器值相同，则节点ID越大的，时间戳越大。</strong></p>
+<h4 id="光有时间戳排序还不够"><a href="#光有时间戳排序还不够" class="headerlink" title="光有时间戳排序还不够"></a>光有时间戳排序还不够</h4><p>只有在所有的操作都被收集之后，操作的全序才会出现。如果另一个节点已经产生了一些操作，但你还不知道那些操作是什么，那就无法构造所有操作最终的全序关系：来自另一个节点的未知操作可能需要被插入到全序中的不同位置。</p>
+<p>​总之：为了实诸如如用户名上的唯一约束这种东西，仅有操作的全序是不够的，你还需要知道这个<strong>全序何时会尘埃落定</strong>。如果你有一个创建用户名的操作，并且确定在全序中，没有任何其他节点可以在你的操作之前插入对同一用户名的声称，那么你就可以安全地宣告操作执行成功。</p>
+<h2 id="全序广播"><a href="#全序广播" class="headerlink" title="全序广播"></a>全序广播</h2><p>单主复制通过选择一个节点作为主库来确定操作的全序，并在主库的单个CPU核上对所有操作进行排序。</p>
+<p>接下来的挑战是，如果吞吐量超出单个主库的处理能力，这种情况下如何扩展系统；以及，如果主库失效（“处理节点宕机”），如何处理故障切换。</p>
+<p>全序广播要满足两个安全属性：</p>
+<ol>
+<li>可靠交付（reliable delivery）</li>
+</ol>
+<p>​ 没有消息丢失：如果消息被传递到一个节点，它将被传递到所有节点。</p>
+<ol start="2">
+<li>全序交付（totally ordered delivery）*</li>
+</ol>
+<p>​ 消息以相同的顺序传递给每个节点。</p>
+<p>正确的全序广播算法必须始终保证可靠性和有序性，<strong>即使节点或网络出现故障</strong>。（Retry等）</p>
+<h3 id="通过全序广播实现线性化一致性"><a href="#通过全序广播实现线性化一致性" class="headerlink" title="通过全序广播实现线性化一致性"></a>通过全序广播实现线性化一致性</h3><p>全序广播是异步的：消息被保证以固定的顺序可靠地传送，但是<strong>不能保证消息何时被送达</strong>（所以一个接收者可能落后于其他接收者）。相比之下，线性一致性是新鲜性的保证：读取一定能看见最新的写入值。</p>
+<p>你可以通过将全序广播当成仅追加日志的方式来实现这种线性一致的CAS操作：</p>
+<ol>
+<li>在日志中追加一条消息，试探性地指明你要声明的用户名。</li>
+<li>读日志，并等待你所附加的信息被回送。</li>
+<li>检查是否有任何消息声称目标用户名的所有权。如果这些消息中的第一条就你自己的消息，那么你就成功了：你可以提交声称的用户名（也许是通过向日志追加另一条消息）并向客户端确认。如果所需用户名的第一条消息来自其他用户，则中止操作。</li>
+</ol>
+<p>所有节点同意一个写请求到底是提交成功还是中止。可以保证线性化写入。</p>
+<p>上述步骤在<strong>读取时不能保证线性</strong>。因为消息传递的延迟性，所以读操作的结果可能是过时的。</p>
+<p>当然这里可以通过返回最新日志消息的位置，通过查询位置，等待所有条目需要读取的条目被写入，再进行读操作，便能够达到读操作的线性一致性。（在ZooKeeper中通过sync()操作实现），或者可以通过强制读取Leader节点，显然Leader节点上的数据一定是最新的结果。</p>
+<h1 id="分布式事务与共识"><a href="#分布式事务与共识" class="headerlink" title="分布式事务与共识"></a>分布式事务与共识</h1><p>需要集群节点一致性的场景举例：</p>
+<ol>
+<li>主节点选举</li>
+<li>原子事务提交</li>
+</ol>
+<h2 id="原子提交与两阶段提交"><a href="#原子提交与两阶段提交" class="headerlink" title="原子提交与两阶段提交"></a>原子提交与两阶段提交</h2><p>提交事务的结果有可能通过事后执行另一个补偿事务来取消，即<strong>补偿事务</strong>。但从数据库的角度来看，这是一个单独的事务，因此任何关于跨事务正确性的保证都是应用层负责。</p>
+<h3 id="两阶段提交"><a href="#两阶段提交" class="headerlink" title="两阶段提交"></a>两阶段提交</h3><p>两阶段提交（two-phase commit）是一种用于实现跨多个节点的原子事务提交的算法，即确保所有节点提交或所有节点中止。 它是分布式数据库中的经典算法。 2PC在某些数据库内部使用，也以XA事务的形式对应用可用（例如Java Transaction API支持）或以SOAP Web服务的WS-AtomicTransaction 形式提供给应用。</p>
+<img src="/2019/08/18/DDIA-9-一致性与共识/两阶段提交（2PC）的成功执行.png">
+<p>新增组建<strong>协调者</strong>。协调者通常在请求事务的相同应用进程中以库的形式实现（例如，嵌入在Java EE容器中），但也可以是单独的进程或服务。</p>
+<p><strong>参与者不能单方面放弃</strong>，必须等待协调者决定</p>
+<p><strong>协调者崩溃</strong>，那么参与者不知道接下来如何行动。</p>
+<p>可以完成2PC的唯一方法是等待协调者恢复。这就是为什么协调者必须在向参与者发送提交或中止请求之前，将其提交或中止决定写入磁盘上的事务日志。</p>
+<h4 id="三阶段提交"><a href="#三阶段提交" class="headerlink" title="三阶段提交"></a>三阶段提交</h4><p>前提：假定网络延迟有界，节点响应时间有界。无界情况下不能保证原子性。</p>
+<h2 id="实践中的分布式事务"><a href="#实践中的分布式事务" class="headerlink" title="实践中的分布式事务"></a>实践中的分布式事务</h2><p>许多云服务由于其导致的运维问题，而选择不实现分布式事务。</p>
+<p>异构分布式事务的原子提交协议。不同于分布式数据库内部的事务。</p>
+<h3 id="XA事务"><a href="#XA事务" class="headerlink" title="XA事务"></a>XA事务</h3><p>X/Open XA（<strong>扩展架构（eXtended Architecture）</strong>的缩写）是跨异构技术实现两阶段提交的标准。它于1991年推出并得到了广泛的实现：许多传统关系数据库（包括PostgreSQL，MySQL，DB2，SQL Server和Oracle）和消息代理（包括ActiveMQ，HornetQ，MSMQ和IBM MQ） 都支持XA。</p>
+<p>​XA不是一个网络协议——它只是一个用来与事务协调者连接的C API。其他语言也有这种API的绑定；例如在Java EE应用的世界中，XA事务是使用Java事务API（JTA, Java Transaction API）实现的，而许多使用Java数据库连接（JDBC, Java Database Connectivity）的数据库驱动，以及许多使用Java消息服务（JMS）API的消息代理都支持Java事务API（JTA）。</p>
+<p>数据库服务器不能直接联系协调者，因为所有通信都必须通过客户端库。</p>
+<h4 id="停顿时间仍持有锁"><a href="#停顿时间仍持有锁" class="headerlink" title="停顿时间仍持有锁"></a>停顿时间仍持有锁</h4><p>如果协调者已经崩溃，需要20分钟才能重启，那么这些锁将会被持有20分钟。如果协调者的日志由于某种原因彻底丢失，这些锁将被永久持有 —— 或至少在管理员手动解决该情况之前。</p>
+<h4 id="从协调者故障中恢复"><a href="#从协调者故障中恢复" class="headerlink" title="从协调者故障中恢复"></a>从协调者故障中恢复</h4><p>许多XA的实现都有一个叫做启发式决策（heuristic decistions）的紧急逃生舱口：允许参与者单方面决定放弃或提交一个存疑事务，而无需协调者做出最终决定。要清楚的是，这里启发式是<strong>可能破坏原子性（probably breaking atomicity）</strong>的委婉说法，因为它违背了两阶段提交的系统承诺。因此，启发式决策只是为了逃出灾难性的情况而准备的，而不是为了日常使用的。</p>
+<h3 id="分布式事务的限制"><a href="#分布式事务的限制" class="headerlink" title="分布式事务的限制"></a>分布式事务的限制</h3><p>运维问题：</p>
+<ol>
+<li>如果协调者没有复制，而是只在单台机器上运行，那么它是整个系统的<strong>失效单点</strong>（因为它的失效会导致其他应用服务器阻塞在存疑事务持有的锁上）。令人惊讶的是，许多协调者实现默认情况下并不是高可用的，或者只有基本的复制支持。</li>
+<li>许多服务器端应用都是使用无状态模式开发的（受HTTP的青睐），所有持久状态都存储在数据库中，因此具有应用服务器可随意按需添加删除的优点。但是，当协调者成为应用服务器的一部分时，它会<strong>改变部署的性质</strong>。突然间，<strong>协调者的日志成为持久系统状态的关键部分</strong>—— 与数据库本身一样重要，因为协调者日志是为了在崩溃后恢复存疑事务所必需的。这样的应用服务器不再是无状态的了。</li>
+<li>由于XA需要兼容各种数据系统，因此它必须是<strong>所有系统的最低标准</strong>。例如，它不能检测不同系统间的死锁（因为这将需要一个标准协议来让系统交换每个事务正在等待的锁的信息），而且它无法与SSI 协同工作，因为这需要一个跨系统定位冲突的协议。</li>
+<li>对于数据库内部的分布式事务（不是XA），限制没有这么大，例如，分布式版本的SSI 是可能的。然而仍然存在问题：2PC成功提交一个事务需要所有参与者的响应。因此，如果系统的任何部分损坏，事务也会失败。因此，分布式事务又有<strong>扩大失效（amplifying failures）</strong>的趋势，这又与我们构建容错系统的目标背道而驰。</li>
+</ol>
+<h2 id="支持容错共识"><a href="#支持容错共识" class="headerlink" title="支持容错共识"></a>支持容错共识</h2><p>共识算法必须满足：</p>
+<ol>
+<li>一致同意（Uniform agreement）</li>
+</ol>
+<p>​ 没有两个节点的决定不同。</p>
+<ol start="2">
+<li>完整性（Integrity）</li>
+</ol>
+<p>​ 没有节点决定两次。</p>
+<ol start="3">
+<li>有效性（Validity）</li>
+</ol>
+<p>​ 如果一个节点决定了值 v ，则 v 由某个节点所提议。</p>
+<ol start="4">
+<li>终止（Termination） 由所有未崩溃的节点来最终决定值。</li>
+</ol>
+<p><strong>一致同意</strong>和<strong>完整性</strong>属性定义了共识的核心思想：所有人都决定了相同的结果，一旦决定了，你就不能改变主意。</p>
+<p><strong>有效性</strong>属性主要是为了排除无意义的解决方案：例如，无论提议了什么值，你都可以有一个始终决定值为null的算法。</p>
+<p>摒弃容错性：可以指定一个节点成为Leader，由Leader节点做出所有的决定。但是，如果Leader节点失效，则系统陷入瘫痪。两阶段提交协议之中的协调器就是一个Leader，一旦协调器失效了，系统无法进行工作。而更好的协商一致性算法要求，即使某些节点失效了，系统仍然能够正常工作。当然，如果所有节点都崩溃了，并且没有一个节点正在运行，那么任何算法都不可能鸡血运行，所以说算法可以容忍的故障数量是有限的：事实上，可以证明任何协商一致算法至少需要大多数节点正常运行，来确保协商一致。</p>
+<h3 id="共识算法"><a href="#共识算法" class="headerlink" title="共识算法"></a>共识算法</h3><p>在分布式系统之中存在许多协商一致性算法算法如：Paxos，Raft，Zab等等。本篇之中，不会涉及到不同算法的全部细节，会通过他们来了解一些高级思想。</p>
+<p>这里的一致性算法符合全序广播的特性，全序广播需要以相同的顺序向所有节点精确地传递一次消息。在每一轮的协商之中，每个节点都可以提出下一个要发送的消息，然后由协商达成一致，并在系统之中传递的下一条消息。所有节点共同决定以相同的顺序传递相同的消息，且消息不重复，消息不会被破坏，也不会凭空产生。（这里忽略拜占庭问题，如果需要引入拜占庭容错，需要采用类似于区块链之中的Pow算法）</p>
+<h3 id="主从复制与共识"><a href="#主从复制与共识" class="headerlink" title="主从复制与共识"></a>主从复制与共识</h3><p>要选出一个领导者，我们首先需要一个领导者。要解决共识问题，我们首先需要解决共识问题。我们如何跳出这个先有鸡还是先有蛋的问题？</p>
+<h3 id="epoch-number与法定人数（Quorum）"><a href="#epoch-number与法定人数（Quorum）" class="headerlink" title="epoch number与法定人数（Quorum）"></a>epoch number与法定人数（Quorum）</h3><p>迄今为止所讨论的所有共识协议，在内部都以某种形式使用一个领导者，但它们并不能保证领导者是独一无二的。相反，它们可以做出更弱的保证：协议定义了一个时代编号（epoch number）（在Paxos中称为投票编号（ballot number），视图戳复制中的视图编号（view number），以及Raft中的任期号码（term number）），<strong>并确保在每个世代中，领导者都是唯一的</strong>。</p>
+<p>​在任何领导者被允许决定任何事情之前，必须先检查是否存在其他带有更高时代编号的领导者，它们可能会做出相互冲突的决定。</p>
+<p>因此，我们有两轮投票：<br>第一次是为了选出一位领导者，<br>第二次是对领导者的提议进行表决。</p>
+<p>关键的洞察在于，<strong>这两次投票的法定人群必须相互重叠</strong>（overlap）：如果一个提案的表决通过，则至少得有一个参与投票的节点也必须参加过最近的领导者选举。</p>
+<h3 id="共识的局限性"><a href="#共识的局限性" class="headerlink" title="共识的局限性"></a>共识的局限性</h3><ol>
+<li>性能</li>
+<li>复杂</li>
+</ol>
+<p>节点在做出决定之前对提议进行投票的过程是一种同步复制。<br>共识系统总是需要严格多数来运转。<br>​共识系统通常依靠超时来检测失效的节点。<br>有时共识算法对网络问题特别敏感。</p>
+<h2 id="成员与协调服务"><a href="#成员与协调服务" class="headerlink" title="成员与协调服务"></a>成员与协调服务</h2><p>如何使用ZooKeeper这样的服务？</p>
+<p>作为应用开发人员，你很少需要直接使用ZooKeeper，因为它实际上不适合当成通用数据库来用。更有可能的是，你会通过其他项目间接依赖它，例如HBase，Hadoop YARN，OpenStack Nova和Kafka都依赖ZooKeeper在后台运行。这些项目从它那里得到了什么？</p>
+<p>ZooKeeper与etcd的特点：</p>
+<ol>
+<li>不用保存大量数据</li>
+<li>数据库复制中，每条消息代表的是数据库写请求</li>
+</ol>
+<p>ZooKeeper模仿了Google的Chubby锁服务，不仅实现了全序广播（因此也实现了共识），而且还构建了一组有趣的其他特性，这些特性在构建分布式系统时变得特别有用：</p>
+<ol>
+<li>线性一致性的原子操作<br> 使用原子CAS操作可以实现锁</li>
+<li>操作的全序排序<br> 一个单调递增的事务ID（zxid）和版本号（cversion）</li>
+<li>失效检测<br> 心跳链接</li>
+<li>变更通知<br> 通过订阅通知，客户端不用再通过频繁轮询的方式来找出变更。</li>
+</ol>
+<p>场景1:<br>    节点任务分配。主节点选举。分区资源（数据库，消息，文件，actor）分配。<br>场景2:<br>    服务发现。查找需要服务的IP地址。<br>场景3:<br>    成员服务。查看成员是否Live。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/27/DDIA-8-分布式系统的挑战/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -2184,352 +2566,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Roger Guo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Roger Guo's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/" itemprop="url">DDIA-1-可靠可扩展可维护的应用系统</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-20T19:35:16+08:00">
-                2019-04-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="数据密集型应用的模块"><a href="#数据密集型应用的模块" class="headerlink" title="数据密集型应用的模块"></a>数据密集型应用的模块</h1><p>当今许多应用大多是数据数据密集（data-intensive）而不是计算密集型（compute-intensive）的。所以CPU的处理能力往往不是应用程序的瓶颈。关键在于数据的量、数据的复杂度以及数据的快速多变性。</p>
-<p>应用往往包含以下模块：</p>
-<ol>
-<li>数据库：用于存储数据</li>
-<li>高速缓存：缓存复杂或者操作代价昂贵的结果，加快下一次访问</li>
-<li>索引：用户可以按照关键字搜索数据并支持各种过滤</li>
-<li>流式处理：持续发送消息到另一个进程，处理采用异步方式</li>
-<li>批处理：定期处理大量积累的数据</li>
-</ol>
-<h2 id="数据系统的架构"><a href="#数据系统的架构" class="headerlink" title="数据系统的架构"></a>数据系统的架构</h2><img src="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/一个可能的组合使用多个组件的数据系统架构.png" title="一个数据架构系统，包含了不同的组件">
-<h1 id="核心设计目标"><a href="#核心设计目标" class="headerlink" title="核心设计目标"></a>核心设计目标</h1><h2 id="可靠性"><a href="#可靠性" class="headerlink" title="可靠性"></a>可靠性</h2><p>出现意外情况，比如硬件、软件故障、人为失误等，系统可以继续正常运转，至少确保功能正确。</p>
-<h3 id="硬件故障"><a href="#硬件故障" class="headerlink" title="硬件故障"></a>硬件故障</h3><p>比较容易出现的，硬盘崩溃，内存故障，电网停电。</p>
-<p>第一反应是为硬件冗余来减少系统故障率。例如磁盘RAID，服务器双电源，甚至热插拔CPU，数据中心添加备用电源、发电机。</p>
-<p>这样当一个组件发生故障时，冗余组件可以快速接管，之后运维人员可以修复或者更换坏掉的组件。</p>
-<p>直到最近，采用硬件冗余方案对于大多数应用场景还是足够的，它让单机完全失效的概率降到最低。只要可以把备份迅速恢复到新的机器上，故障的停机时间在大多数应用中并不是灾难性的。</p>
-<p>现在，通过软件容错的方式来容易多机失效成为新的手段，或者成为硬件容错方案的有力补充。例如滚动升级。</p>
-<h3 id="软件错误"><a href="#软件错误" class="headerlink" title="软件错误"></a>软件错误</h3><p>这类故障更难预料。各个节点直接是由软件关联的，可能会导致更多的系统故障。</p>
-<p>例如，</p>
-<ol>
-<li>由于软件错误，导致特定的输入引发应用的崩溃。例如Linux内核bug，在2012年6月30的闰秒时候触发，导致很多应用程序被挂掉。</li>
-<li>失控的进程把系统的资源耗尽，导致这些共享资源不能被释放。</li>
-<li>系统的Dependency出了问题，返回值异常。</li>
-<li>组件中的小故障触发另一个组件中的故障，进而触发更多的故障。</li>
-</ol>
-<p>没有快速的解决方法。只能仔细考虑很多细节。</p>
-<ol>
-<li>检查系统的假设条件和系统之间的交互</li>
-<li>进行全面的测试</li>
-<li>进程隔离，</li>
-<li>允许进程崩溃后自动重启</li>
-<li>反复评估、监控并分析生产环境中的行为表现。</li>
-</ol>
-<p>例如消息队列中，输出消息的数量应等于输入消息的数量。如果发现不一致，则立即告警。</p>
-<h3 id="人为失误"><a href="#人为失误" class="headerlink" title="人为失误"></a>人为失误</h3><p>人无法做到万无一失。运维人员的配置错误可能是系统下线的第一大原因。</p>
-<p>要保证系统可靠，如何减少人为错误对它的影响？</p>
-<ol>
-<li>用最小出错的方式来设计系统。让做错事更难。</li>
-<li>想办法分离最容易出错的地方，容易引发故障的接口。使用Sandbox隔离真正的生产和测试环境。</li>
-<li>充分的测试。单元测试，集成测试，手动测试。边界条件的考虑。</li>
-<li>当出现人为失误时，有快速回滚或者回复的机制。滚动发布新代码。</li>
-<li>监控子系统需要详细和清晰。</li>
-<li>推行管理流程和相关培训。</li>
-</ol>
-<h2 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h2><p>随着规模的增长，例如数据量、流量和复杂性，系统应该可以用合理的方式进行应对，满足这种增长。</p>
-<p>当应用负载增加的时候，比如用户从1w到100w，从100w到1000w，应用程序如何应对增长的负载。</p>
-<p>相关参数：Web服务的QPS，数据库的写入比例，DAU，缓存命中率。有时候平均值很重要，有时候短时间内的峰值会成为系统瓶颈。</p>
-<p>Twitter的Fan-out结构，对数据量提出了挑战。当一个人发Tweet时候，怎么处理Timeline这个请求。根据粉丝的数量，区别处理。</p>
-<h3 id="如何描述性能"><a href="#如何描述性能" class="headerlink" title="如何描述性能"></a>如何描述性能</h3><p>系统负载增加后，会发生什么，两种思考方式</p>
-<ol>
-<li>系统资源不变（CPU，内存，带宽），系统的性能会发生什么变化？</li>
-<li>如果要保持性能不变，需要增加多少资源？</li>
-</ol>
-<p>不同类型的系统关心的性能指标不同</p>
-<ol>
-<li>批处理系统通常关心<strong>吞吐量（throughput）</strong>，例如Hadoop，每秒可以处理多少条数据或者完成一个作业总共需要多少时间。</li>
-<li>Online系统中，更看重服务的<strong>响应时间（response time）</strong>，即客户端从发出请求到得到回复的总时间。</li>
-</ol>
-<img src="/2019/04/20/DDIA-1-可靠可扩展可维护的应用系统/响应时间.png" title="展示了一个服务100次请求响应时间的均值与百分位数、中位数">
-<p>对于响应时间，如下图，有一些很长的，算异常请求，可能是由于数据大很多。但也有可能是其他因素造成的，例如上下文切换、进程调度、网络丢包、TCP重传、垃圾回收STW，缺页中断、磁盘IO。</p>
-<p>最好使用百分位数，中位数（50%）来评估系统的响应时间。</p>
-<p>采用较高的响应时间百分位数很重要，因为直接影响用户的总体服务体验。例如亚马逊采用99.9百分位来定义服务响应时间。优化99.9%的目标可能成本很高。能不能带来收益很关键。</p>
-<p>​排队延迟（queueing delay）通常占了高百分位点处响应时间的很大一部分。由于服务器只能并行处理少量的事务（如受其CPU核数的限制），所以只要有少量缓慢的请求就能阻碍后续请求的处理，这种效应有时被称为头部阻塞（head-of-line blocking）</p>
-<h3 id="应对负载增加"><a href="#应对负载增加" class="headerlink" title="应对负载增加"></a>应对负载增加</h3><p>垂直扩展和水平扩展。</p>
-<p>好的系统有弹性特征，可以自动检测负载的变化，来自动添加更多的计算资源。</p>
-<p>可扩展架构通常都是从通用模块逐步构建出来的。</p>
-<h2 id="可维护性"><a href="#可维护性" class="headerlink" title="可维护性"></a>可维护性</h2><p>项目会随着时间的推移，项目会需要新的人员参与到开发和运维工作中，来满足系统的稳定和新场景的适应。系统应该高效的变化。</p>
-<p>​软件的大部分开销并不在最初的开发阶段，而是在持续的维护阶段，包括修复漏洞、保持系统正常运行、调查失效、适配新的平台、为新的场景进行修改、偿还技术债、添加新的功能等等。</p>
-<p>为此，我们将特别关注软件系统的三个设计原则：</p>
-<h3 id="可操作性（Operability）"><a href="#可操作性（Operability）" class="headerlink" title="可操作性（Operability）"></a>可操作性（Operability）</h3><p>​    便于运维团队保持系统平稳运行。<br>良好的可操作性意味着更轻松的日常工作，进而运维团队能专注于高价值的事情。数据系统可以通过各种方式使日常任务更轻松：</p>
-<h3 id="简单性（Simplicity）"><a href="#简单性（Simplicity）" class="headerlink" title="简单性（Simplicity）"></a>简单性（Simplicity）</h3><p>​    从系统中消除尽可能多的复杂度（complexity），使新工程师也能轻松理解系统。（注意这和用户接口的简单性不一样。）<br>   <strong>复杂度（complexity）</strong>有各种可能的症状，例如：状态空间激增、模块间紧密耦合、纠结的依赖关系、不一致的命名和术语、解决性能问题的Hack、需要绕开的特例等等，</p>
-<h3 id="可演化性（evolability）"><a href="#可演化性（evolability）" class="headerlink" title="可演化性（evolability）"></a>可演化性（evolability）</h3><p>​    使工程师在未来能轻松地对系统进行更改，当需求变化时为新应用场景做适配。也称为可扩展性（extensibility），可修改性（modifiability）或可塑性（plasticity）。<br>    组织流程方面，敏捷开发，TDD，重构。<br>    修改数据系统并使其适应不断变化需求的容易程度，是与简单性和抽象性密切相关的：简单易懂的系统通常比复杂系统更容易修改</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/13/文明之光-近代音乐发展/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Roger Guo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Roger Guo's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/04/13/文明之光-近代音乐发展/" itemprop="url">文明之光-近代音乐发展</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-13T17:19:18+08:00">
-                2019-04-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>透过古典音乐的发展历程，可以感受到近代人文主义的兴起和发展，以及时代的变迁。</p>
-<h1 id="巴洛克音乐"><a href="#巴洛克音乐" class="headerlink" title="巴洛克音乐"></a>巴洛克音乐</h1><h2 id="形成时期"><a href="#形成时期" class="headerlink" title="形成时期"></a>形成时期</h2><p>早起音乐与宗教有关。后来人们富裕之后，音乐的宗教气息逐渐减少，世俗的元素开始增加。欧洲音乐第二次走向世俗是发生在文艺复兴时期，而其中产生质变是在18世纪初的巴洛克时期。因此巴洛克音乐是所有古典音乐的基础。</p>
-<h2 id="什么是巴洛克"><a href="#什么是巴洛克" class="headerlink" title="什么是巴洛克"></a>什么是巴洛克</h2><p>源于西班牙语Barocco，引申的意思是充满细节。主要是指文艺复兴后期，豪华的建筑和精致的装饰风格。后来被用到了绘画和音乐中，也是类似的意思。巴洛克音乐华丽精致，加入了大量的修饰性音符。巴洛克时期的影响力最大的音乐家是巴赫。</p>
-<img src="/2019/04/13/文明之光-近代音乐发展/barocco.png" title="巴洛克建筑的立柱">
-<h2 id="巴赫（1685-1750）"><a href="#巴赫（1685-1750）" class="headerlink" title="巴赫（1685-1750）"></a>巴赫（1685-1750）</h2><iframe width="100%" height="400px" src="//player.bilibili.com/player.html?aid=5990334&cid=9724899&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<p>出身音乐世家。音乐天才。小时候因为父母趋势的早，被养在哥哥家。由于家庭负担问题15岁就要自己去挣钱养活自己。在教会表演，王公贵族的乐队里担任管风琴师。</p>
-<p>下了很多苦功夫学习，21岁成为德意志地区有名的乐器师，担任城市乐团首席音乐总监。1717年在柯腾宫廷担任首席乐队长，在此期间创作了《勃兰登堡协奏曲》，创作水平到了炉火纯青的地步。</p>
-<p>巴赫在音乐上的贡献非常高。</p>
-<p><strong>在音乐之道上</strong>，有些人认为他比之后的贝多芬莫扎特地位还要高，原因就是在于他奠定了古典音乐的基础。巴赫教会了后人如何使用音符构建出音乐作品。<br>另一个贡献，帮音乐从宗教走向世俗。把严肃的沉重的宗教曲目，变化成美妙的优雅的表演。<br>巴赫确立了德意志地区在几百年之后中古典音乐的地位。巴赫之前，意大利比较厉害。巴赫是第一个把南欧丰富新颖的音乐表现形式容易单一呆板的德意志音乐的。</p>
-<p><strong>在音乐之术上</strong>，有声乐和器乐两个方面。<br>声乐方面，巴赫的声乐作品中，康塔塔的数量占比很高。在巴赫的康塔塔中，首尾都是宗教的赞歌，中段是围绕主题的独唱咏叹调、重唱和合唱构成。这样的结构非常合理，既能表现宗教音乐的神圣，又带有民间艺术的美感。<br>在器乐曲上，巴赫是我们今天经常听到的奏鸣曲和协奏曲的先驱。协奏曲诞生于意大利。巴赫整天沉醉与各种乐器的组合实验。从此有了一种乐器为主，其他乐器为辅的协奏曲。配器有弦乐、羽管键琴、双簧管、小号、圆号、低音奥维尔，等等。最著名的就是《勃兰登堡协奏曲》。巴赫之后的音乐家，莫扎特、贝多芬等人在他的基础上不断完善协奏曲的创作技巧。</p>
-<p>巴赫时代并不具备将创作的音乐普及全欧洲的条件。因此在他去世几十年后就被人们遗忘了。巴赫作品的重新发现和认识，要感谢浪漫主义时期的<strong>门德尔松</strong>（1809-1847）。门德尔松整理和出版了巴尔德音乐，在巴赫去世百年之后，人们才重新认识到这位奠定了现代音乐基础的作曲家的伟大。</p>
-<p>巴赫一生作品之多，质量之高，让后世音乐家难以望其项背。作品包括几百首康塔塔，大量协奏曲，五部弥撒，大量的赋格。</p>
-<h1 id="古典主义音乐"><a href="#古典主义音乐" class="headerlink" title="古典主义音乐"></a>古典主义音乐</h1><p>古典主义是指欧洲18世纪末19世纪初的文化和艺术思潮。那时正是资产阶级取代贵族统治欧洲的时期，音乐和艺术都是姨资产阶级追求的自由和人性解放为背景创作的。讲究理性、秩序、和谐。</p>
-<h2 id="海顿"><a href="#海顿" class="headerlink" title="海顿"></a>海顿</h2><p>海顿、莫扎特和贝多芬。生于奥地利的海顿不仅是古典主义时期第一位重要的作曲家，也是<strong>交响乐之父</strong>。海顿不仅确立了交响乐的形式，而且一生创作了108首交响乐，超过莫扎特，贝多芬、舒伯特、舒曼、门德尔松、柴可夫斯基、马勒等人的创作总和。</p>
-<p>海顿最大的贡献在于确定了交响乐的形式，即由四个乐章组成，分别是快板-慢板-诙谐曲或者小步舞曲-快板。直到今天大部分交响乐依然沿用这个传统。</p>
-<h2 id="莫扎特"><a href="#莫扎特" class="headerlink" title="莫扎特"></a>莫扎特</h2><p>神童、天才。六岁就在维也纳宫廷为特蕾莎女王表演钢琴。莫扎特音乐轻柔曼妙，充满了阳光。可能不再年轻、有一些闲暇并且积累了一些人生经历时，才会发现莫扎特很适合自己。</p>
-<iframe width="100%" height="400px" src="//player.bilibili.com/player.html?aid=7779069&cid=12755148&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<h2 id="贝多芬"><a href="#贝多芬" class="headerlink" title="贝多芬"></a>贝多芬</h2><img src="/2019/04/13/文明之光-近代音乐发展/2019-04-13-21-12-59.png" title="贝多芬的肖像，收藏于贝多芬波恩故居，手中作品是《庄严弥撒曲》">
-<p>乐圣。罗曼罗兰说贝多芬时人类历史上最伟大的英雄。1770年生于波恩。爷爷是宫廷乐队长，父亲是男高音。拜师奈弗，在两年后成为乐队的管风琴师并发布了三首奏鸣曲。</p>
-<p>波恩大公弗朗兹十分欣赏年轻的贝多芬，成了他早起的保护人。介绍他去维也纳拜师莫扎特。不过由于莫扎特当时在忙于创作，没有成功。后来贝多芬回到波恩遇到了海顿，波恩建议他到维也纳学习。贝多芬1792年第二次到维也纳，并在那里度过了他一生的大部分时间。</p>
-<p>接受了法国启蒙运动平等自由博爱的思想。成为自由主义者。贝多芬一生追求人性的解放，他的作品一直体现出一种向上的理想主义倾向。《第二交响曲》，形成自己的风格，英雄主义倾向很明显。两年后《第三（英雄）交响曲》，本来想献给拿破仑，最后听说拿破仑成帝了，起的把拿破仑名字划掉。</p>
-<p>英雄交响曲分为四个乐章。第一乐章为快板，描写了法国大革命的情景，场面宏大。第二乐章，《葬礼进行曲》，描写英雄牺牲，人民为他送葬。第三乐章为快节奏诙谐曲。第四乐章为快板，奔放和柔美交替，越来越强烈，直到最后一个壮丽的高潮。</p>
-<p>贝多芬有两段重要的爱情，最后都没有变成婚姻。第一段中写下了《月光奏鸣曲》，这段感情深深的伤害了贝多芬，甚至想到自杀。第二段特蕾莎，刻骨铭心，完成《第四交响曲》，《热情奏鸣曲》，《致爱丽丝》。</p>
-<p>贝多芬30岁后耳聋越来越严重，把自己和命运抗争的心情写在《第五交响曲》，东亚又称为《命运交响曲》。恩格斯评价，如果你没听过这部壮丽的作品的话，那么可以说你一生什么作品都没听过。</p>
-<p>《第六交响曲》，打破了四个乐章的限制，并且给每个乐章起了标题，在该曲中，用乐器模仿自然的声音。</p>
-<p>最后的理想是想把《欢乐颂》的文字通过合唱的形式加到交响乐中，创作了被称为《合唱》的《第九交响曲》。1824年5月7日在维也纳首演，结束后整个音乐厅爆发出雷鸣般的掌声，可是贝多芬已经听不到了。女高音牵着贝多芬转过身来后，贝多芬激动的昏了过去。当时热烈的场面如同暴动，观众给予了五次掌声。而对国王也只有三次。</p>
-<p>小说《约翰·克里斯朵夫》，前一半是以贝多芬为原型写的。</p>
-<iframe width="100%" height="400px" src="//player.bilibili.com/player.html?aid=7844540&cid=12871747&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<h1 id="浪漫主义音乐"><a href="#浪漫主义音乐" class="headerlink" title="浪漫主义音乐"></a>浪漫主义音乐</h1><p>拿破仑战争之后，欧洲进入平稳。浪漫主义音乐家更注重感情和音乐本身的外在表现，而不看重形式和结构。</p>
-<h2 id="舒伯特"><a href="#舒伯特" class="headerlink" title="舒伯特"></a>舒伯特</h2><p>600首歌曲，10部交响曲，22部钢琴奏鸣曲和大量的其他作品。</p>
-<h2 id="门德尔松"><a href="#门德尔松" class="headerlink" title="门德尔松"></a>门德尔松</h2><p>《仲夏夜之梦》等作品。收集整理了从巴赫到舒曼等著名音乐家的大量作品，对欧洲音乐的传承贡献很大。</p>
-<h2 id="肖邦"><a href="#肖邦" class="headerlink" title="肖邦"></a>肖邦</h2><p>1810年出生于波兰。六岁开始学钢琴，8岁登台演出，被认为是继莫扎特贝多芬后的又一位神童。<br>《A大调军队波兰舞曲》和《降A大调英雄波兰舞曲》最有阳刚之气。<br>在法国生活了半辈子，一直眷恋故乡波兰。一生创作很多钢琴曲。作品四类，一类波兰的民族音乐，二类是法国的沙龙音乐，包括圆舞曲、即兴曲、夜曲；三类是炫技类作品；四类是表述内心情感作品。</p>
-<h1 id="民族主义音乐"><a href="#民族主义音乐" class="headerlink" title="民族主义音乐"></a>民族主义音乐</h1><p>19世纪末，欧洲人的国家意识加强，浪漫主义音乐渐渐演变成民族主义音乐。成就最高的是俄罗斯的作曲家。</p>
-<h2 id="柴可夫斯基"><a href="#柴可夫斯基" class="headerlink" title="柴可夫斯基"></a>柴可夫斯基</h2><p>出身于俄罗斯贵族家庭，父亲从小要求他学习法律，从事相关法律工作。但是他并不喜欢，22岁后考入圣彼得堡音乐学院学习音乐创作。1876年写出了《天鹅湖》芭蕾舞剧。梅克夫人与柴可夫斯基精神上交往了13年并在经济上支持他，并为他排忧解难。成为专职作曲家。但从未谋面。《1812序曲》纪念俄罗斯人在1812年打败拿破仑。1893年创作出了最重要的作品《第六（悲怆）交响曲》写尽了自己的一生酸甜苦辣。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2580,7 +2616,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
